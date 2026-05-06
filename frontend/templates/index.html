@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Karmart Live Stream Booking</title>
+
+    <!-- Tailwind (DEV via CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <!-- FullCalendar v6 (bundle includes common plugins) -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+
+    <style>
+      /* Keep event content tight on mobile */
+      .fc .fc-daygrid-event,
+      .fc .fc-list-event-title {
+        white-space: normal;
+      }
+    </style>
+  </head>
+
+  <body class="bg-slate-50 text-slate-900">
+    <div
+      class="min-h-screen"
+      x-data="bookingApp()"
+      x-init="init()"
+    >
+      <header class="border-b bg-white">
+        <div class="mx-auto max-w-6xl px-4 py-4 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="h-10 w-10 rounded-xl bg-slate-900 text-white grid place-items-center font-semibold">
+              K
+            </div>
+            <div>
+              <div class="text-lg font-semibold leading-tight">Live Stream Booking</div>
+              <div class="text-xs text-slate-500">Calendar scheduling (Host / MKT / Admin)</div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button
+              class="rounded-lg border bg-white px-3 py-2 text-sm hover:bg-slate-50"
+              type="button"
+              @click="refresh()"
+            >
+              Refresh
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main class="mx-auto max-w-6xl px-4 py-6">
+        <div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div class="text-sm text-slate-600">
+            <span class="font-medium text-slate-900">Tip:</span>
+            On mobile the calendar switches to <span class="font-mono">listWeek</span>. Desktop uses <span class="font-mono">dayGridMonth</span>.
+          </div>
+
+          <div class="text-sm">
+            <template x-if="error">
+              <div class="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-red-700" x-text="error"></div>
+            </template>
+          </div>
+        </div>
+
+        <div class="rounded-xl border bg-white p-3 shadow-sm">
+          <div id="calendar"></div>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      function bookingApp() {
+        return {
+          calendar: null,
+          error: "",
+
+          isMobile() {
+            return window.matchMedia("(max-width: 640px)").matches;
+          },
+
+          initialView() {
+            return this.isMobile() ? "listWeek" : "dayGridMonth";
+          },
+
+          async init() {
+            const el = document.getElementById("calendar");
+            if (!el) return;
+
+            this.calendar = new FullCalendar.Calendar(el, {
+              height: "auto",
+              initialView: this.initialView(),
+              headerToolbar: {
+                left: "prev,next today",
+                center: "title",
+                right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek",
+              },
+              nowIndicator: true,
+              navLinks: true,
+              dayMaxEvents: true,
+
+              // Fetch events from Django (session cookie)
+              events: async (info, success, failure) => {
+                try {
+                  this.error = "";
+                  const params = new URLSearchParams({
+                    start: info.startStr,
+                    end: info.endStr,
+                  });
+                  const res = await fetch(`/api/schedules/?${params.toString()}`, {
+                    credentials: "same-origin",
+                    headers: { "Accept": "application/json" },
+                  });
+
+                  if (res.status === 401 || res.status === 403) {
+                    throw new Error("Not authenticated. Please log in to the backend admin/session.");
+                  }
+                  if (!res.ok) {
+                    throw new Error(`Events API failed: HTTP ${res.status}`);
+                  }
+
+                  const data = await res.json();
+                  success(data);
+                } catch (e) {
+                  this.error = e && e.message ? e.message : "Failed to load events.";
+                  failure(e);
+                }
+              },
+
+              // Custom event rendering with circular icon
+              eventContent: (arg) => {
+                const icon = arg.event.extendedProps && arg.event.extendedProps.icon
+                  ? String(arg.event.extendedProps.icon)
+                  : "";
+
+                const hostName = arg.event.extendedProps && arg.event.extendedProps.hostName
+                  ? String(arg.event.extendedProps.hostName)
+                  : "";
+
+                const wrap = document.createElement("div");
+                wrap.className = "flex items-center gap-2 min-w-0";
+
+                const avatar = document.createElement("div");
+                avatar.className = "h-5 w-5 shrink-0 rounded-full bg-slate-200 overflow-hidden border border-white/60";
+
+                if (icon) {
+                  const img = document.createElement("img");
+                  img.src = icon;
+                  img.alt = hostName || "Host";
+                  img.className = "h-full w-full object-cover";
+                  img.loading = "lazy";
+                  avatar.appendChild(img);
+                }
+
+                const title = document.createElement("div");
+                title.className = "min-w-0 truncate";
+                title.textContent = arg.event.title || "";
+
+                wrap.appendChild(avatar);
+                wrap.appendChild(title);
+
+                return { domNodes: [wrap] };
+              },
+            });
+
+            this.calendar.render();
+
+            // Responsive view switching
+            const mq = window.matchMedia("(max-width: 640px)");
+            const onChange = () => {
+              const desired = this.initialView();
+              if (this.calendar && this.calendar.view && this.calendar.view.type !== desired) {
+                this.calendar.changeView(desired);
+              }
+            };
+            if (mq.addEventListener) mq.addEventListener("change", onChange);
+            else mq.addListener(onChange);
+          },
+
+          refresh() {
+            if (this.calendar) this.calendar.refetchEvents();
+          },
+        };
+      }
+    </script>
+  </body>
+</html>
+

@@ -1,0 +1,35 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    env_file:
+      - ./.env
+    environment:
+      DJANGO_SETTINGS_MODULE: core.settings
+      PYTHONUNBUFFERED: "1"
+    volumes:
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    expose:
+      - "8000"
+    command: >
+      sh -c "python manage.py migrate
+      && python manage.py collectstatic --noinput
+      && gunicorn core.wsgi:application --bind 0.0.0.0:8000 --workers 2 --threads 1 --timeout 60 --max-requests 500 --max-requests-jitter 50 --access-logfile - --error-logfile -"
+
+  nginx:
+    build:
+      context: ./nginx
+    depends_on:
+      - backend
+    ports:
+      - "8011:80"
+    volumes:
+      - static_volume:/var/www/static:ro
+      - media_volume:/var/www/media:ro
+      - ./frontend:/var/www/frontend:ro
+
+volumes:
+  static_volume:
+  media_volume:
+

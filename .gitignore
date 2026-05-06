@@ -1,0 +1,37 @@
+.env
+.env.*
+!.env.example
+
+# Python / Django
+__pycache__/
+*.py[cod]
+*.pyd
+*.so
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Django local artifacts
+backend/db.sqlite3
+backend/*.sqlite3
+backend/staticfiles/
+backend/media/
+
+# Logs
+*.log
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Node / frontend build artifacts (even if using CDN in dev)
+node_modules/
+dist/
+
+# Docker
+*.pid
