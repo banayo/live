@@ -36,40 +36,40 @@ def live_schedule_feed(request):
     range_start = _to_aware_dt(request.GET.get("start"))
     range_end = _to_aware_dt(request.GET.get("end"))
 
-    qs = LiveSchedule.objects.select_related("host")
+    qs = LiveSchedule.objects.select_related("user", "brand", "channel")
 
-    # Role filtering (phase A: no Brand model yet)
     if getattr(user, "is_admin_role", False):
         pass  # all schedules
     elif getattr(user, "is_mkt", False):
-        pass  # MKT sees all (read-only handled by frontend)
+        qs = qs.filter(mkts=user)
     else:
-        qs = qs.filter(host_id=user.id)
+        qs = qs.filter(user_id=user.id)
 
     # Overlap filter: event intersects requested range.
     if range_start and range_end:
-        qs = qs.filter(start__lt=range_end, end__gt=range_start)
+        qs = qs.filter(start_time__lt=range_end, end_time__gt=range_start)
     elif range_start:
-        qs = qs.filter(end__gt=range_start)
+        qs = qs.filter(end_time__gt=range_start)
     elif range_end:
-        qs = qs.filter(start__lt=range_end)
+        qs = qs.filter(start_time__lt=range_end)
 
     # Keep payload small: only build what FullCalendar needs.
     events = []
     for s in qs.only(
         "id",
         "title",
-        "start",
-        "end",
-        "all_day",
-        "host__id",
-        "host__username",
-        "host__first_name",
-        "host__last_name",
-        "host__profile_image",
-        "host__role",
+        "start_time",
+        "end_time",
+        "is_cancelled",
+        "is_verified",
+        "user__id",
+        "user__username",
+        "user__first_name",
+        "user__last_name",
+        "user__profile_image",
+        "user__role",
     ):
-        host = s.host
+        host = s.user
         host_name = (
             (f"{host.first_name} {host.last_name}".strip())
             or host.get_username()
@@ -92,14 +92,17 @@ def live_schedule_feed(request):
             {
                 "id": str(s.id),
                 "title": s.title,
-                "start": s.start.isoformat(),
-                "end": s.end.isoformat(),
-                "allDay": s.all_day,
+                "start": s.start_time.isoformat(),
+                "end": s.end_time.isoformat(),
+                "allDay": False,
                 "editable": is_editable,
+                "classNames": ["is-cancelled"] if s.is_cancelled else [],
                 "extendedProps": {
                     "hostId": host.id,
                     "hostName": host_name,
                     "icon": icon_url,
+                    "isVerified": s.is_verified,
+                    "isCancelled": s.is_cancelled,
                 },
             }
         )
