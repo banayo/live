@@ -8,7 +8,8 @@ from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.views.decorators.http import require_GET
 
-from .models import LiveSchedule
+from ..models import LiveSchedule
+from ..services.roles import is_backoffice_admin
 
 
 def _to_aware_dt(value: str | None) -> datetime | None:
@@ -33,19 +34,22 @@ def live_schedule_feed(request):
       - end: ISO datetime (range end)
     """
     user = request.user
+    profile = getattr(user, "profile", None)
+    profile_role = getattr(profile, "role", "user")
     range_start = _to_aware_dt(request.GET.get("start"))
     range_end = _to_aware_dt(request.GET.get("end"))
 
-    qs = LiveSchedule.objects.select_related("user", "brand", "channel")
+    qs = LiveSchedule.objects.select_related("user", "user__profile")
+    is_admin = is_backoffice_admin(user)
 
-    if getattr(user, "is_admin_role", False):
-        pass  # all schedules
-    elif getattr(user, "is_mkt", False):
-        qs = qs.filter(mkts=user)
+    if is_admin:
+        pass
+    elif profile_role == "brand":
+        brand_id = getattr(profile, "brand_id", None)
+        qs = qs.filter(brand_id=brand_id) if brand_id else qs.none()
     else:
         qs = qs.filter(user_id=user.id)
 
-    # Overlap filter: event intersects requested range.
     if range_start and range_end:
         qs = qs.filter(start_time__lt=range_end, end_time__gt=range_start)
     elif range_start:
@@ -53,7 +57,6 @@ def live_schedule_feed(request):
     elif range_end:
         qs = qs.filter(start_time__lt=range_end)
 
-    # Keep payload small: only build what FullCalendar needs.
     events = []
     for s in qs.only(
         "id",
@@ -62,12 +65,13 @@ def live_schedule_feed(request):
         "end_time",
         "is_cancelled",
         "is_verified",
+        "user_id",
         "user__id",
         "user__username",
         "user__first_name",
         "user__last_name",
-        "user__profile_image",
-        "user__role",
+        "user__profile__profile_image",
+        "user__profile__photo_url",
     ):
         host = s.user
         host_name = (
@@ -78,14 +82,17 @@ def live_schedule_feed(request):
 
         icon_url = ""
         try:
-            if host.profile_image:
-                icon_url = host.profile_image.url
+            host_profile = getattr(host, "profile", None)
+            if host_profile and host_profile.profile_image:
+                icon_url = host_profile.profile_image.url
+            elif host_profile:
+                icon_url = host_profile.photo_url or ""
         except Exception:
             icon_url = ""
 
         is_editable = bool(
-            getattr(user, "is_admin_role", False)
-            or (not getattr(user, "is_mkt", False) and host.id == user.id)
+            is_admin
+            or (profile_role != "brand" and host.id == user.id)
         )
 
         events.append(
@@ -108,4 +115,3 @@ def live_schedule_feed(request):
         )
 
     return JsonResponse(events, safe=False)
-

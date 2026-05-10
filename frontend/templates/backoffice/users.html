@@ -1,0 +1,747 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#fce4ec" />
+    <title>จัดการผู้ใช้งาน | Stitch Live Booking</title>
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Prompt:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --stitch-surface: #f9f9f9;
+        --stitch-surface-container-lowest: #ffffff;
+        --stitch-surface-container-low: #f3f3f3;
+        --stitch-surface-container: #eeeeee;
+        --stitch-surface-container-high: #e8e8e8;
+        --stitch-on-surface: #1a1c1c;
+        --stitch-on-surface-variant: #4d4447;
+        --stitch-outline-variant: #d0c3c7;
+        --stitch-primary: #6b5a60;
+        --stitch-primary-fixed: #f4dce4;
+        --stitch-primary-container: #fce4ec;
+        --stitch-on-primary-container: #76646b;
+        --stitch-secondary-container: #d3e2ed;
+        --stitch-on-secondary-container: #56656e;
+        --stitch-tertiary-container: #e0ede1;
+        --stitch-on-tertiary-container: #606c62;
+        --stitch-error-container: #ffdad6;
+        --stitch-on-error-container: #93000a;
+      }
+
+      .material-symbols-outlined {
+        font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+      }
+
+      .soft-shadow {
+        box-shadow: 0 20px 40px -15px rgba(107, 90, 96, 0.08);
+      }
+
+      .side-shadow {
+        box-shadow: 20px 0 40px -15px rgba(107, 90, 96, 0.05);
+      }
+
+      .pink-gradient {
+        background: linear-gradient(135deg, #fce4ec 0%, #f4dce4 100%);
+      }
+    </style>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              heading: ["Prompt", "ui-sans-serif", "system-ui"],
+              body: ["Kanit", "ui-sans-serif", "system-ui"],
+            },
+            spacing: {
+              xs: "4px",
+              sm: "8px",
+              md: "16px",
+              lg: "24px",
+              xl: "32px",
+              xxl: "48px",
+              gutter: "16px",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+
+  <body class="min-h-screen bg-[color:var(--stitch-surface)] font-body text-[color:var(--stitch-on-surface)]">
+    <div x-data="userManagement()" x-init="init()">
+      <div
+        class="pointer-events-none fixed left-1/2 top-lg z-[60] w-full max-w-md -translate-x-1/2 px-lg"
+        x-show="toast.show"
+        x-transition.opacity.duration.150ms
+        style="display: none"
+      >
+        <div
+          class="pointer-events-auto flex items-start justify-between gap-md rounded-3xl border bg-white px-md py-md soft-shadow"
+          :class="toast.tone === 'ok' ? 'border-[color:var(--stitch-tertiary-container)]' : 'border-[color:var(--stitch-error-container)]'"
+        >
+          <div class="min-w-0">
+            <p class="text-sm font-bold text-[color:var(--stitch-primary)]" x-text="toast.tone === 'ok' ? 'สำเร็จ' : 'เกิดข้อผิดพลาด'"></p>
+            <p class="mt-xs text-sm text-[color:var(--stitch-on-surface-variant)]" x-text="toast.message"></p>
+          </div>
+          <button
+            class="grid h-9 w-9 place-items-center rounded-full bg-[color:var(--stitch-surface-container-low)] transition hover:bg-[color:var(--stitch-primary-container)] active:scale-95"
+            type="button"
+            @click="toast.show = false"
+          >
+            <span class="material-symbols-outlined text-sm">close</span>
+          </button>
+        </div>
+      </div>
+      <aside class="fixed left-0 top-0 z-50 hidden h-screen w-64 flex-col gap-xl rounded-r-3xl bg-[color:var(--stitch-surface-container-lowest)] p-lg side-shadow lg:flex">
+        <div class="flex items-center gap-md">
+          <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-[color:var(--stitch-primary-container)]">
+            <span class="material-symbols-outlined text-[color:var(--stitch-primary)]" style="font-variation-settings: 'FILL' 1">hub</span>
+          </div>
+          <div>
+            <h1 class="font-heading text-xl font-bold text-[color:var(--stitch-primary)]">Live Ops</h1>
+            <p class="text-[10px] font-bold uppercase tracking-wider text-[color:var(--stitch-on-surface-variant)]">Backoffice Center</p>
+          </div>
+        </div>
+
+        <nav class="flex flex-grow flex-col gap-sm">
+          <a class="flex items-center gap-md rounded-full px-lg py-md text-[color:var(--stitch-on-surface-variant)] transition hover:translate-x-1 hover:bg-[color:var(--stitch-surface-container-high)]" href="/backoffice/dashboard">
+            <span class="material-symbols-outlined">dashboard</span>
+            <span class="text-xs font-bold uppercase tracking-wider">Dashboard</span>
+          </a>
+          <a class="flex items-center gap-md rounded-full bg-[color:var(--stitch-primary-container)] px-lg py-md text-[color:var(--stitch-on-primary-container)] shadow-sm" href="/backoffice/users">
+            <span class="material-symbols-outlined">group</span>
+            <span class="text-xs font-bold uppercase tracking-wider">Users</span>
+          </a>
+          <a class="flex items-center gap-md rounded-full px-lg py-md text-[color:var(--stitch-on-surface-variant)] transition hover:translate-x-1 hover:bg-[color:var(--stitch-surface-container-high)]" href="#">
+            <span class="material-symbols-outlined">verified_user</span>
+            <span class="text-xs font-bold uppercase tracking-wider">Verification</span>
+          </a>
+          <a class="flex items-center gap-md rounded-full px-lg py-md text-[color:var(--stitch-on-surface-variant)] transition hover:translate-x-1 hover:bg-[color:var(--stitch-surface-container-high)]" href="#">
+            <span class="material-symbols-outlined">calendar_today</span>
+            <span class="text-xs font-bold uppercase tracking-wider">Calendar</span>
+          </a>
+          <a class="flex items-center gap-md rounded-full px-lg py-md text-[color:var(--stitch-on-surface-variant)] transition hover:translate-x-1 hover:bg-[color:var(--stitch-surface-container-high)]" href="#">
+            <span class="material-symbols-outlined">stars</span>
+            <span class="text-xs font-bold uppercase tracking-wider">Brands</span>
+          </a>
+        </nav>
+
+        <div class="mt-auto rounded-3xl bg-[color:var(--stitch-primary-fixed)]/50 p-md">
+          <p class="text-[11px] font-bold uppercase tracking-widest text-[color:var(--stitch-on-primary-container)]">Role Source</p>
+          <p class="mt-xs text-sm text-[color:var(--stitch-on-surface-variant)]">ใช้ `Profile.role` เป็นตัวกำหนดสิทธิ์เท่านั้น</p>
+        </div>
+      </aside>
+
+      <main class="min-h-screen lg:ml-64">
+        <header class="sticky top-0 z-40 flex w-full items-center justify-between gap-lg bg-[color:var(--stitch-surface)] px-lg py-md shadow-[0_20px_40px_-15px_rgba(107,90,96,0.08)]">
+          <div class="relative w-full max-w-xl">
+            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[color:var(--stitch-on-surface-variant)]">search</span>
+            <input
+              class="w-full rounded-full border-none bg-[color:var(--stitch-surface-container-low)] py-2.5 pl-12 pr-6 text-sm transition focus:ring-2 focus:ring-[color:var(--stitch-primary-container)]"
+              placeholder="ค้นหาชื่อ อีเมล เบอร์โทร หรือแบรนด์..."
+              type="text"
+              x-model.debounce.200ms="query"
+            />
+          </div>
+        </header>
+
+        <div class="space-y-xl p-lg">
+          <section class="flex flex-col justify-between gap-md xl:flex-row xl:items-end">
+            <div>
+              <p class="mb-xs inline-flex rounded-full bg-[color:var(--stitch-primary-container)] px-md py-1 text-xs font-bold uppercase tracking-wider text-[color:var(--stitch-on-primary-container)]">
+                User Management
+              </p>
+              <h2 class="font-heading text-3xl font-semibold tracking-tight text-[color:var(--stitch-primary)]">จัดการผู้ใช้งาน</h2>
+              <p class="mt-sm max-w-3xl text-sm leading-relaxed text-[color:var(--stitch-on-surface-variant)]">
+                ตรวจสอบบัญชีใหม่ เปลี่ยน role และผูกผู้ใช้งานกับแบรนด์ โดยใช้ `Profile.role` และ `Profile.brand` เป็นแหล่งข้อมูลหลัก
+              </p>
+            </div>
+            <div class="flex flex-wrap gap-sm">
+              <button class="inline-flex items-center gap-xs rounded-full bg-[color:var(--stitch-primary-container)] px-md py-sm text-sm font-bold text-[color:var(--stitch-primary)] transition hover:opacity-90 active:scale-95" type="button">
+                <span class="material-symbols-outlined text-sm">download</span>
+                Export
+              </button>
+              <button class="inline-flex items-center gap-xs rounded-full bg-[color:var(--stitch-primary)] px-md py-sm text-sm font-bold text-white shadow-lg transition hover:opacity-95 active:scale-95" type="button" @click="openCreate()">
+                <span class="material-symbols-outlined text-sm">person_add</span>
+                เพิ่มผู้ใช้
+              </button>
+            </div>
+          </section>
+
+          <section class="grid gap-gutter md:grid-cols-2 xl:grid-cols-4">
+            <template x-for="metric in metrics()" :key="metric.label">
+              <article class="rounded-3xl bg-[color:var(--stitch-surface-container-lowest)] p-lg soft-shadow">
+                <div class="mb-lg flex items-start justify-between gap-md">
+                  <div class="grid h-12 w-12 place-items-center rounded-2xl" :class="metric.bg">
+                    <span class="material-symbols-outlined" :class="metric.color" x-text="metric.icon"></span>
+                  </div>
+                  <span class="rounded-full bg-[color:var(--stitch-surface-container-low)] px-sm py-1 text-[11px] font-bold text-[color:var(--stitch-on-surface-variant)]" x-text="metric.hint"></span>
+                </div>
+                <p class="mb-xs text-xs font-bold uppercase tracking-wider text-[color:var(--stitch-on-surface-variant)]" x-text="metric.label"></p>
+                <h3 class="font-heading text-3xl font-semibold tracking-tight text-[color:var(--stitch-primary)]" x-text="metric.value"></h3>
+              </article>
+            </template>
+          </section>
+
+          <section class="rounded-3xl bg-[color:var(--stitch-surface-container-lowest)] p-md soft-shadow">
+            <div class="flex flex-col gap-md border-b border-[color:var(--stitch-outline-variant)]/20 pb-md xl:flex-row xl:items-center xl:justify-between">
+              <div class="flex flex-wrap gap-sm">
+                <template x-for="filter in filters" :key="filter">
+                  <button
+                    class="rounded-full px-md py-sm text-sm font-bold transition active:scale-95"
+                    :class="activeFilter === filter ? 'bg-[color:var(--stitch-primary)] text-white shadow-lg' : 'bg-[color:var(--stitch-surface-container-low)] text-[color:var(--stitch-on-surface-variant)] hover:bg-[color:var(--stitch-primary-container)]'"
+                    type="button"
+                    @click="activeFilter = filter"
+                    x-text="filterLabel(filter)"
+                  ></button>
+                </template>
+              </div>
+
+              <div class="flex flex-wrap gap-sm">
+                <select class="rounded-full border-none bg-[color:var(--stitch-surface-container-low)] px-md py-sm text-sm focus:ring-2 focus:ring-[color:var(--stitch-primary-container)]" x-model="brandFilter">
+                  <option value="">ทุกแบรนด์</option>
+                  <template x-for="brand in brands" :key="brand.id">
+                    <option :value="brand.id" x-text="brand.name"></option>
+                  </template>
+                </select>
+                <select class="rounded-full border-none bg-[color:var(--stitch-surface-container-low)] px-md py-sm text-sm focus:ring-2 focus:ring-[color:var(--stitch-primary-container)]" x-model="sortBy">
+                  <option value="newest">ล่าสุด</option>
+                  <option value="name">เรียงตามชื่อ</option>
+                  <option value="pending">รอตรวจสอบก่อน</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full min-w-[1040px] text-left text-sm">
+                <thead class="text-xs font-bold uppercase tracking-wider text-[color:var(--stitch-on-surface-variant)]">
+                  <tr>
+                    <th class="px-lg py-md">ผู้ใช้งาน</th>
+                    <th class="px-lg py-md">ติดต่อ</th>
+                    <th class="px-lg py-md">Role</th>
+                    <th class="px-lg py-md">Brand</th>
+                    <th class="px-lg py-md">LINE</th>
+                    <th class="px-lg py-md">Status</th>
+                    <th class="px-lg py-md text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-[color:var(--stitch-outline-variant)]/20">
+                  <template x-for="user in filteredUsers()" :key="user.id">
+                    <tr class="transition hover:bg-[color:var(--stitch-primary-container)]/20">
+                      <td class="px-lg py-md">
+                        <div class="flex items-center gap-md">
+                          <div class="relative grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-full bg-[color:var(--stitch-primary-container)] font-heading text-sm font-semibold text-[color:var(--stitch-primary)]">
+                            <img
+                              loading="lazy"
+                              decoding="async"
+                              referrerpolicy="no-referrer"
+                              class="absolute inset-0 h-full w-full object-cover"
+                              :alt="''"
+                              x-show="user.avatarUrl"
+                              :src="user.avatarUrl || ''"
+                            />
+                            <span class="relative z-[1]" x-show="!user.avatarUrl" x-text="user.initial"></span>
+                          </div>
+                          <div>
+                            <p class="font-bold" x-text="user.name"></p>
+                            <p class="text-xs text-[color:var(--stitch-on-surface-variant)]" x-text="'@' + user.username"></p>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="px-lg py-md">
+                        <p class="font-medium" x-text="user.email"></p>
+                        <p class="text-xs text-[color:var(--stitch-on-surface-variant)]" x-text="user.phone"></p>
+                      </td>
+                      <td class="px-lg py-md">
+                        <span class="rounded-full px-sm py-1 text-xs font-bold" :class="roleClass(user.role)" x-text="roleLabel(user.role)"></span>
+                      </td>
+                      <td class="px-lg py-md" x-text="user.brandName || '-'"></td>
+                      <td class="px-lg py-md">
+                        <span class="rounded-full px-sm py-1 text-xs font-bold" :class="user.lineConnected ? 'bg-[color:var(--stitch-tertiary-container)] text-[color:var(--stitch-on-tertiary-container)]' : 'bg-[color:var(--stitch-surface-container-low)] text-[color:var(--stitch-on-surface-variant)]'" x-text="user.lineConnected ? 'Connected' : 'Not linked'"></span>
+                      </td>
+                      <td class="px-lg py-md">
+                        <span class="rounded-full px-sm py-1 text-xs font-bold" :class="user.verified ? 'bg-[color:var(--stitch-tertiary-container)] text-[color:var(--stitch-on-tertiary-container)]' : 'bg-amber-100 text-amber-800'" x-text="user.verified ? 'ตรวจสอบแล้ว' : 'รอตรวจสอบ'"></span>
+                      </td>
+                      <td class="px-lg py-md">
+                        <div class="flex justify-end gap-sm">
+                          <button class="rounded-full bg-[color:var(--stitch-surface-container-low)] px-md py-2 text-xs font-bold text-[color:var(--stitch-on-surface-variant)] transition hover:bg-[color:var(--stitch-secondary-container)] active:scale-95" type="button" @click="openPreview(user)">View</button>
+                          <button class="rounded-full bg-[color:var(--stitch-primary-container)] px-md py-2 text-xs font-bold text-[color:var(--stitch-primary)] transition hover:opacity-90 active:scale-95" type="button" @click="openEdit(user)">Edit</button>
+                        </div>
+                      </td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="flex flex-col gap-sm border-t border-[color:var(--stitch-outline-variant)]/20 px-md py-md text-sm text-[color:var(--stitch-on-surface-variant)] sm:flex-row sm:items-center sm:justify-between">
+              <span x-text="`แสดง ${filteredUsers().length} จาก ${users.length} รายการ`"></span>
+              <div class="flex gap-sm">
+                <button class="rounded-full bg-[color:var(--stitch-surface-container-low)] px-md py-sm font-bold transition hover:bg-[color:var(--stitch-primary-container)]" type="button">ก่อนหน้า</button>
+                <button class="rounded-full bg-[color:var(--stitch-primary)] px-md py-sm font-bold text-white transition active:scale-95" type="button">1</button>
+                <button class="rounded-full bg-[color:var(--stitch-surface-container-low)] px-md py-sm font-bold transition hover:bg-[color:var(--stitch-primary-container)]" type="button">ถัดไป</button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <div
+        class="fixed inset-0 z-50 flex items-center justify-center bg-[#1a1c1c]/30 p-lg"
+        x-show="modalOpen"
+        x-transition.opacity.duration.150ms
+        style="display: none"
+      >
+        <div class="w-full max-w-xl max-h-[88vh] overflow-hidden rounded-3xl bg-white p-lg soft-shadow" @click.outside="closeModal()" x-transition.scale.origin.center.duration.150ms>
+          <div class="mb-lg flex items-start justify-between gap-md">
+            <div class="flex min-w-0 flex-1 items-start gap-md">
+              <div class="relative grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-2xl bg-[color:var(--stitch-primary-container)] font-heading text-lg font-semibold text-[color:var(--stitch-primary)]">
+                <img
+                  loading="lazy"
+                  decoding="async"
+                  referrerpolicy="no-referrer"
+                  class="absolute inset-0 h-full w-full object-cover"
+                  x-show="modalAvatarUrl()"
+                  :src="modalAvatarUrl() || ''"
+                  alt=""
+                />
+                <span class="relative z-[1]" x-show="!modalAvatarUrl()" x-text="draftInitial()"></span>
+              </div>
+              <div class="min-w-0 flex-1">
+                <p class="text-xs font-bold uppercase tracking-wider text-[color:var(--stitch-on-surface-variant)]" x-text="modalMode === 'preview' ? 'User Detail' : 'Profile Control'"></p>
+                <h3 class="mt-xs font-heading text-2xl font-semibold text-[color:var(--stitch-primary)]" x-text="selectedUser?.name || 'ผู้ใช้งาน'"></h3>
+                <p class="mt-xs truncate text-xs text-[color:var(--stitch-on-surface-variant)]" x-show="draft.photoUrl || selectedUser?.avatarUrl">
+                  <span class="font-bold">โปรไฟล์: </span>
+                  <span class="truncate" x-text="modalPhotoLabel()"></span>
+                </p>
+              </div>
+            </div>
+            <button class="grid h-10 w-10 place-items-center rounded-full bg-[color:var(--stitch-surface-container-low)] transition hover:bg-[color:var(--stitch-primary-container)] active:scale-95" type="button" @click="closeModal()">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </div>
+
+          <div class="max-h-[calc(88vh-140px)] space-y-md overflow-y-auto pr-1" x-show="selectedUser">
+            <div class="rounded-3xl bg-[color:var(--stitch-surface-container-low)] p-md">
+              <p class="text-sm text-[color:var(--stitch-on-surface-variant)]">บันทึกฟิลด์โปรไฟล์ลงใน `Profile` (รูปจาก LINE เก็บช่อง URL — ถ้ามีการอัปโหลดไฟล์แล้ว ระบบใช้ทางไฟล์ก่อนตาม API)</p>
+            </div>
+
+            <label class="block">
+              <span class="mb-xs block text-sm font-bold text-[color:var(--stitch-primary)]">เบอร์โทร</span>
+              <input
+                class="w-full rounded-full border-none bg-[color:var(--stitch-surface-container-low)] px-md py-md text-sm focus:ring-2 focus:ring-[color:var(--stitch-primary-container)]"
+                type="tel"
+                placeholder="089-xxx-xxxx"
+                x-model="draft.phone"
+                maxlength="15"
+                :disabled="modalMode === 'preview'"
+              />
+            </label>
+
+            <label class="block">
+              <span class="mb-xs block text-sm font-bold text-[color:var(--stitch-primary)]">KOF</span>
+              <input
+                class="w-full rounded-full border-none bg-[color:var(--stitch-surface-container-low)] px-md py-md text-sm focus:ring-2 focus:ring-[color:var(--stitch-primary-container)]"
+                type="text"
+                x-model="draft.kof"
+                maxlength="50"
+                :disabled="modalMode === 'preview'"
+              />
+            </label>
+
+            <div class="grid gap-md md:grid-cols-2">
+              <label class="block md:col-span-2">
+                <span class="mb-xs block text-sm font-bold text-[color:var(--stitch-primary)]">ธนาคาร</span>
+                <input
+                  class="w-full rounded-full border-none bg-[color:var(--stitch-surface-container-low)] px-md py-md text-sm focus:ring-2 focus:ring-[color:var(--stitch-primary-container)]"
+                  type="text"
+                  x-model="draft.bankName"
+                  maxlength="100"
+                  :disabled="modalMode === 'preview'"
+                />
+              </label>
+              <label class="block md:col-span-2">
+                <span class="mb-xs block text-sm font-bold text-[color:var(--stitch-primary)]">เลขที่บัญชีธนาคาร</span>
+                <input
+                  class="w-full rounded-full border-none bg-[color:var(--stitch-surface-container-low)] px-md py-md text-sm focus:ring-2 focus:ring-[color:var(--stitch-primary-container)]"
+                  type="text"
+                  inputmode="numeric"
+                  autocomplete="off"
+                  x-model="draft.bankAccount"
+                  maxlength="30"
+                  :disabled="modalMode === 'preview'"
+                />
+              </label>
+            </div>
+
+            <label class="block">
+              <span class="mb-xs block text-sm font-bold text-[color:var(--stitch-primary)]">โปรไฟล์ (URL)</span>
+              <input
+                class="w-full rounded-full border-none bg-[color:var(--stitch-surface-container-low)] px-md py-md text-sm focus:ring-2 focus:ring-[color:var(--stitch-primary-container)]"
+                type="url"
+                placeholder="https://…"
+                x-model="draft.photoUrl"
+                :disabled="modalMode === 'preview'"
+              />
+            </label>
+
+            <label class="block">
+              <span class="mb-xs block text-sm font-bold text-[color:var(--stitch-primary)]">อัปโหลดรูปโปรไฟล์</span>
+              <input
+                class="w-full rounded-full border-none bg-[color:var(--stitch-surface-container-low)] px-md py-md text-sm file:mr-4 file:rounded-full file:border-0 file:bg-[color:var(--stitch-primary-container)] file:px-4 file:py-2 file:text-sm file:font-bold file:text-[color:var(--stitch-primary)] focus:ring-2 focus:ring-[color:var(--stitch-primary-container)]"
+                type="file"
+                accept="image/*"
+                @change="onProfileImageChange($event)"
+                :disabled="modalMode === 'preview'"
+              />
+              <p class="mt-xs text-xs text-[color:var(--stitch-on-surface-variant)]" x-show="draft.profileImageFile">
+                เลือกไฟล์: <span class="font-bold" x-text="draft.profileImageFile?.name || ''"></span>
+              </p>
+            </label>
+
+            <label class="block">
+              <span class="mb-xs block text-sm font-bold text-[color:var(--stitch-primary)]">Role</span>
+              <select class="w-full rounded-full border-none bg-[color:var(--stitch-surface-container-low)] px-md py-md focus:ring-2 focus:ring-[color:var(--stitch-primary-container)]" x-model="draft.role" :disabled="modalMode === 'preview'">
+                <option value="user">User</option>
+                <option value="brand">Brand</option>
+                <option value="admin">Admin</option>
+              </select>
+            </label>
+
+            <label class="block">
+              <span class="mb-xs block text-sm font-bold text-[color:var(--stitch-primary)]">Brand</span>
+              <select class="w-full rounded-full border-none bg-[color:var(--stitch-surface-container-low)] px-md py-md focus:ring-2 focus:ring-[color:var(--stitch-primary-container)]" x-model="draft.brandId" :disabled="modalMode === 'preview'">
+                <option value="">ไม่ผูกแบรนด์</option>
+                <template x-for="brand in brands" :key="brand.id">
+                  <option :value="brand.id" x-text="brand.name"></option>
+                </template>
+              </select>
+            </label>
+
+            <label class="flex items-center justify-between gap-md rounded-3xl bg-[color:var(--stitch-primary-container)]/50 p-md">
+              <span>
+                <span class="block text-sm font-bold text-[color:var(--stitch-primary)]">Verified</span>
+                <span class="text-xs text-[color:var(--stitch-on-surface-variant)]">อนุมัติให้เข้าสู่ระบบหลังบ้านหรือ dashboard ได้</span>
+              </span>
+              <input class="h-6 w-6 rounded-full border-none text-[color:var(--stitch-primary)] focus:ring-[color:var(--stitch-primary-container)]" type="checkbox" x-model="draft.verified" :disabled="modalMode === 'preview'" />
+            </label>
+          </div>
+
+          <div class="mt-lg flex justify-end gap-sm">
+            <button class="rounded-full bg-[color:var(--stitch-surface-container-low)] px-lg py-md text-sm font-bold transition hover:bg-[color:var(--stitch-surface-container)] active:scale-95" type="button" @click="closeModal()">ปิด</button>
+            <button class="rounded-full bg-[color:var(--stitch-primary)] px-lg py-md text-sm font-bold text-white shadow-lg transition hover:opacity-95 active:scale-95 disabled:opacity-60" type="button" x-show="modalMode !== 'preview'" @click="saveDraft()" :disabled="saving" x-text="saving ? 'กำลังบันทึก...' : 'บันทึก'"></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function userManagement() {
+        return {
+          query: "",
+          activeFilter: "all",
+          brandFilter: "",
+          sortBy: "newest",
+          modalOpen: false,
+          modalMode: "edit",
+          selectedUser: null,
+          draft: {
+            role: "user",
+            brandId: "",
+            verified: false,
+            phone: "",
+            kof: "",
+            bankName: "",
+            bankAccount: "",
+            photoUrl: "",
+            profileImageFile: null,
+            profileImagePreviewUrl: "",
+          },
+          filters: ["all", "pending", "verified", "admin", "brand", "user"],
+          brands: [],
+          users: [],
+          loading: false,
+          saving: false,
+          toast: { show: false, tone: "ok", message: "" },
+
+          async init() {
+            await this.refresh();
+          },
+
+          async refresh() {
+            this.loading = true;
+            try {
+              const res = await fetch("/api/backoffice/users/", { credentials: "include" });
+              if (!res.ok) {
+                if (res.status === 401) window.location.href = "/login";
+                return;
+              }
+              const data = await res.json();
+              this.brands = Array.isArray(data.brands) ? data.brands.filter((b) => b && b.is_active).map((b) => ({ id: b.id, name: b.name })) : [];
+              this.users = Array.isArray(data.users) ? data.users.map((u) => this.normalizeUser(u)) : [];
+            } catch (e) {
+              this.showToast("error", "โหลดข้อมูลไม่สำเร็จ");
+            } finally {
+              this.loading = false;
+            }
+          },
+
+          normalizeUser(u) {
+            const name = String(u?.name || "").trim();
+            const username = String(u?.username || "").trim();
+            const initial = (name || username || "?").trim().slice(0, 1);
+            const avatarRaw = typeof u?.avatar_url === "string" ? u.avatar_url.trim() : "";
+            const photoRaw = typeof u?.photo_url === "string" ? u.photo_url.trim() : "";
+            return {
+              id: Number(u?.id || 0),
+              initial,
+              username,
+              name: name || username || "User",
+              email: String(u?.email || ""),
+              phone: String(u?.phone_number || ""),
+              kof: String(u?.kof || ""),
+              bankName: String(u?.bank_name || ""),
+              bankAccount: String(u?.bank_account_number || ""),
+              photoUrl: String(u?.photo_url || ""),
+              avatarUrl: avatarRaw || photoRaw || null,
+              role: String(u?.role || "user"),
+              brandId: u?.brand?.id ?? null,
+              brandName: u?.brand?.name ?? "",
+              lineConnected: Boolean(u?.line_connected),
+              verified: Boolean(u?.is_verified),
+              createdAt: String(u?.created_at || ""),
+            };
+          },
+
+          draftInitial() {
+            const u = this.selectedUser;
+            if (!u) return "?";
+            return String(u.initial || "").trim().slice(0, 1) || "?";
+          },
+
+          modalAvatarUrl() {
+            const u = this.selectedUser;
+            if (!u) return "";
+            const preview = typeof this.draft?.profileImagePreviewUrl === "string" ? this.draft.profileImagePreviewUrl.trim() : "";
+            if (preview) return preview;
+            const trimmed = typeof this.draft?.photoUrl === "string" ? this.draft.photoUrl.trim() : "";
+            if (trimmed) return trimmed;
+            return String(u.avatarUrl || "").trim();
+          },
+
+          modalPhotoLabel() {
+            const trimmed = typeof this.draft?.photoUrl === "string" ? this.draft.photoUrl.trim() : "";
+            if (trimmed) return trimmed;
+            return String(this.selectedUser?.avatarUrl || "").trim();
+          },
+
+          hydrateDraft(user) {
+            return {
+              role: user.role,
+              brandId: user.brandId === null || user.brandId === undefined ? "" : String(user.brandId),
+              verified: Boolean(user.verified),
+              phone: user.phone ?? "",
+              kof: user.kof ?? "",
+              bankName: user.bankName ?? "",
+              bankAccount: user.bankAccount ?? "",
+              photoUrl: user.photoUrl ?? "",
+              profileImageFile: null,
+              profileImagePreviewUrl: "",
+            };
+          },
+
+          onProfileImageChange(e) {
+            const file = e?.target?.files?.[0] || null;
+            if (!file) {
+              this.draft.profileImageFile = null;
+              if (this.draft.profileImagePreviewUrl) URL.revokeObjectURL(this.draft.profileImagePreviewUrl);
+              this.draft.profileImagePreviewUrl = "";
+              return;
+            }
+            this.draft.profileImageFile = file;
+            if (this.draft.profileImagePreviewUrl) URL.revokeObjectURL(this.draft.profileImagePreviewUrl);
+            this.draft.profileImagePreviewUrl = URL.createObjectURL(file);
+          },
+
+          brandPayloadId() {
+            const v = this.draft?.brandId;
+            if (v === "" || v === null || v === undefined) return "";
+            const n = Number(v);
+            return Number.isFinite(n) ? n : "";
+          },
+
+          metrics() {
+            return [
+              { label: "Total Users", value: this.users.length, icon: "group", hint: "All", bg: "bg-[color:var(--stitch-primary-container)]", color: "text-[color:var(--stitch-primary)]" },
+              { label: "Pending", value: this.users.filter((u) => !u.verified).length, icon: "pending_actions", hint: "Review", bg: "bg-amber-100", color: "text-amber-800" },
+              { label: "Brand Accounts", value: this.users.filter((u) => u.role === "brand").length, icon: "stars", hint: "Scoped", bg: "bg-[color:var(--stitch-secondary-container)]", color: "text-[color:var(--stitch-on-secondary-container)]" },
+              { label: "Verified", value: this.users.filter((u) => u.verified).length, icon: "verified_user", hint: "Active", bg: "bg-[color:var(--stitch-tertiary-container)]", color: "text-[color:var(--stitch-on-tertiary-container)]" },
+            ];
+          },
+
+          filteredUsers() {
+            const q = this.query.trim().toLowerCase();
+            let rows = this.users.filter((user) => {
+              const matchesQuery =
+                !q ||
+                [user.name, user.username, user.email, user.phone, user.brandName, user.kof, user.bankAccount, user.bankName]
+                  .join(" ")
+                  .toLowerCase()
+                  .includes(q);
+              const matchesBrand = !this.brandFilter || String(user.brandId || "") === String(this.brandFilter);
+              const matchesFilter =
+                this.activeFilter === "all" ||
+                (this.activeFilter === "pending" && !user.verified) ||
+                (this.activeFilter === "verified" && user.verified) ||
+                user.role === this.activeFilter;
+              return matchesQuery && matchesBrand && matchesFilter;
+            });
+
+            if (this.sortBy === "name") rows = rows.sort((a, b) => a.name.localeCompare(b.name, "th"));
+            if (this.sortBy === "pending") rows = rows.sort((a, b) => Number(a.verified) - Number(b.verified));
+            return rows;
+          },
+
+          filterLabel(filter) {
+            return {
+              all: "ทั้งหมด",
+              pending: "รอตรวจสอบ",
+              verified: "ตรวจสอบแล้ว",
+              admin: "Admin",
+              brand: "Brand",
+              user: "User",
+            }[filter];
+          },
+
+          roleLabel(role) {
+            return { admin: "Admin", brand: "Brand", user: "User" }[role] || role;
+          },
+
+          roleClass(role) {
+            return {
+              admin: "bg-[color:var(--stitch-primary-container)] text-[color:var(--stitch-primary)]",
+              brand: "bg-[color:var(--stitch-secondary-container)] text-[color:var(--stitch-on-secondary-container)]",
+              user: "bg-[color:var(--stitch-surface-container-low)] text-[color:var(--stitch-on-surface-variant)]",
+            }[role];
+          },
+
+          openCreate() {
+            this.selectedUser = { name: "ผู้ใช้ใหม่", initial: "?" };
+            this.draft = {
+              role: "user",
+              brandId: "",
+              verified: false,
+              phone: "",
+              kof: "",
+              bankName: "",
+              bankAccount: "",
+              photoUrl: "",
+            };
+            this.modalMode = "create";
+            this.modalOpen = true;
+          },
+
+          openPreview(user) {
+            this.selectedUser = user;
+            this.draft = this.hydrateDraft(user);
+            this.modalMode = "preview";
+            this.modalOpen = true;
+          },
+
+          openEdit(user) {
+            this.selectedUser = user;
+            this.draft = this.hydrateDraft(user);
+            this.modalMode = "edit";
+            this.modalOpen = true;
+          },
+
+          async saveDraft() {
+            if (!this.selectedUser || this.modalMode !== "edit") {
+              this.closeModal();
+              return;
+            }
+            this.saving = true;
+            try {
+              const hasFile = Boolean(this.draft?.profileImageFile);
+              let res;
+              if (hasFile) {
+                const fd = new FormData();
+                fd.append("role", String(this.draft.role || ""));
+                fd.append("is_verified", String(Boolean(this.draft.verified)));
+                const brandId = this.brandPayloadId();
+                fd.append("brand_id", brandId === "" ? "" : String(brandId));
+                fd.append("phone_number", String(this.draft.phone ?? ""));
+                fd.append("kof", String(this.draft.kof ?? ""));
+                fd.append("bank_account_number", String(this.draft.bankAccount ?? ""));
+                fd.append("bank_name", String(this.draft.bankName ?? ""));
+                fd.append("photo_url", String(this.draft.photoUrl ?? "").trim());
+                fd.append("profile_image", this.draft.profileImageFile);
+                res = await fetch(`/api/backoffice/users/${this.selectedUser.id}/`, {
+                  method: "POST",
+                  credentials: "include",
+                  body: fd,
+                });
+              } else {
+                const payload = {
+                  role: this.draft.role,
+                  is_verified: Boolean(this.draft.verified),
+                  brand_id: this.brandPayloadId(),
+                  phone_number: this.draft.phone ?? "",
+                  kof: this.draft.kof ?? "",
+                  bank_account_number: this.draft.bankAccount ?? "",
+                  bank_name: this.draft.bankName ?? "",
+                  photo_url: String(this.draft.photoUrl ?? "").trim(),
+                };
+                res = await fetch(`/api/backoffice/users/${this.selectedUser.id}/`, {
+                  method: "POST",
+                  credentials: "include",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(payload),
+                });
+              }
+              if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                const msg = String(data?.message || "บันทึกไม่สำเร็จ");
+                this.showToast("error", msg);
+                return;
+              }
+              this.showToast("ok", "บันทึกเรียบร้อย");
+              await this.refresh();
+              this.closeModal();
+            } catch (e) {
+              this.showToast("error", "บันทึกไม่สำเร็จ");
+            } finally {
+              this.saving = false;
+            }
+          },
+
+          closeModal() {
+            this.modalOpen = false;
+            this.selectedUser = null;
+          },
+
+          showToast(tone, message) {
+            this.toast = { show: true, tone, message };
+            window.clearTimeout(this._toastTimer);
+            this._toastTimer = window.setTimeout(() => (this.toast.show = false), 2500);
+          },
+        };
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#fce4ec" />
+    <title>Backoffice Dashboard | Stitch Live Booking</title>
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Prompt:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --stitch-surface: #f9f9f9;
+        --stitch-surface-container-lowest: #ffffff;
+        --stitch-surface-container-low: #f3f3f3;
+        --stitch-surface-container: #eeeeee;
+        --stitch-surface-container-high: #e8e8e8;
+        --stitch-on-surface: #1a1c1c;
+        --stitch-on-surface-variant: #4d4447;
+        --stitch-outline: #7f7478;
+        --stitch-outline-variant: #d0c3c7;
+        --stitch-primary: #6b5a60;
+        --stitch-primary-fixed: #f4dce4;
+        --stitch-primary-container: #fce4ec;
+        --stitch-on-primary: #ffffff;
+        --stitch-on-primary-container: #76646b;
+        --stitch-secondary-container: #d3e2ed;
+        --stitch-on-secondary-container: #56656e;
+        --stitch-tertiary: #556158;
+        --stitch-tertiary-container: #e0ede1;
+        --stitch-on-tertiary-container: #606c62;
+        --stitch-error: #ba1a1a;
+        --stitch-error-container: #ffdad6;
+        --stitch-on-error-container: #93000a;
+      }
+
+      .material-symbols-outlined {
+        font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+      }
+
+      .soft-shadow {
+        box-shadow: 0 20px 40px -15px rgba(107, 90, 96, 0.08);
+      }
+
+      .side-shadow {
+        box-shadow: 20px 0 40px -15px rgba(107, 90, 96, 0.05);
+      }
+
+      .pink-gradient {
+        background: linear-gradient(135deg, #fce4ec 0%, #f4dce4 100%);
+      }
+    </style>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              heading: ["Prompt", "ui-sans-serif", "system-ui"],
+              body: ["Kanit", "ui-sans-serif", "system-ui"],
+            },
+            spacing: {
+              "container-margin": "20px",
+              xs: "4px",
+              sm: "8px",
+              md: "16px",
+              lg: "24px",
+              xl: "32px",
+              xxl: "48px",
+              gutter: "16px",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+
+  <body class="min-h-screen bg-[color:var(--stitch-surface)] font-body text-[color:var(--stitch-on-surface)]">
+    <div x-data="backofficeDashboard()" x-init="init()">
+      <!-- Sidebar -->
+      <aside class="fixed left-0 top-0 z-50 hidden h-screen w-64 flex-col gap-xl rounded-r-3xl bg-[color:var(--stitch-surface-container-lowest)] p-lg side-shadow lg:flex">
+        <div class="flex items-center gap-md">
+          <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-[color:var(--stitch-primary-container)]">
+            <span class="material-symbols-outlined text-[color:var(--stitch-primary)]" style="font-variation-settings: 'FILL' 1">hub</span>
+          </div>
+          <div>
+            <h1 class="font-heading text-xl font-bold text-[color:var(--stitch-primary)]">Live Ops</h1>
+            <p class="text-[10px] font-bold uppercase tracking-wider text-[color:var(--stitch-on-surface-variant)]">Backoffice Center</p>
+          </div>
+        </div>
+
+        <nav class="flex flex-grow flex-col gap-sm">
+          <a class="flex items-center gap-md rounded-full bg-[color:var(--stitch-primary-container)] px-lg py-md text-[color:var(--stitch-on-primary-container)] shadow-sm" href="/backoffice/dashboard">
+            <span class="material-symbols-outlined">dashboard</span>
+            <span class="text-xs font-bold uppercase tracking-wider">Dashboard</span>
+          </a>
+          <a class="flex items-center gap-md rounded-full px-lg py-md text-[color:var(--stitch-on-surface-variant)] transition hover:translate-x-1 hover:bg-[color:var(--stitch-surface-container-high)]" href="#">
+            <span class="material-symbols-outlined">verified_user</span>
+            <span class="text-xs font-bold uppercase tracking-wider">Verification</span>
+          </a>
+          <a class="flex items-center gap-md rounded-full px-lg py-md text-[color:var(--stitch-on-surface-variant)] transition hover:translate-x-1 hover:bg-[color:var(--stitch-surface-container-high)]" href="#">
+            <span class="material-symbols-outlined">calendar_today</span>
+            <span class="text-xs font-bold uppercase tracking-wider">Calendar</span>
+          </a>
+          <a class="flex items-center gap-md rounded-full px-lg py-md text-[color:var(--stitch-on-surface-variant)] transition hover:translate-x-1 hover:bg-[color:var(--stitch-surface-container-high)]" href="#">
+            <span class="material-symbols-outlined">stars</span>
+            <span class="text-xs font-bold uppercase tracking-wider">Brands</span>
+          </a>
+          <a class="flex items-center gap-md rounded-full px-lg py-md text-[color:var(--stitch-on-surface-variant)] transition hover:translate-x-1 hover:bg-[color:var(--stitch-surface-container-high)]" href="/backoffice/users">
+            <span class="material-symbols-outlined">group</span>
+            <span class="text-xs font-bold uppercase tracking-wider">Users</span>
+          </a>
+        </nav>
+
+        <div class="mt-auto flex flex-col gap-sm rounded-3xl bg-[color:var(--stitch-primary-fixed)]/50 p-md">
+          <p class="text-[11px] font-bold uppercase tracking-widest text-[color:var(--stitch-on-primary-container)]">System Status</p>
+          <div class="flex items-center gap-sm">
+            <span class="h-2 w-2 rounded-full bg-[color:var(--stitch-tertiary)]"></span>
+            <span class="text-sm font-medium">All Nodes Active</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Content -->
+      <main class="min-h-screen lg:ml-64">
+        <!-- Top bar -->
+        <header class="sticky top-0 z-40 flex w-full items-center justify-between gap-lg bg-[color:var(--stitch-surface)] px-lg py-md shadow-[0_20px_40px_-15px_rgba(107,90,96,0.08)]">
+          <div class="flex min-w-0 flex-1 items-center gap-lg">
+            <div class="relative hidden w-full max-w-md sm:block">
+              <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[color:var(--stitch-on-surface-variant)]">search</span>
+              <input
+                class="w-full rounded-full border-none bg-[color:var(--stitch-surface-container-low)] py-2.5 pl-12 pr-6 text-sm transition focus:ring-2 focus:ring-[color:var(--stitch-primary-container)]"
+                placeholder="Search users, lives, brands..."
+                type="text"
+                x-model.debounce.200ms="query"
+              />
+            </div>
+            <div class="hidden cursor-pointer items-center gap-sm rounded-full bg-[color:var(--stitch-surface-container-low)] px-md py-2 transition hover:bg-[color:var(--stitch-primary-container)]/60 md:flex">
+              <span class="material-symbols-outlined text-sm text-[color:var(--stitch-on-surface-variant)]">calendar_month</span>
+              <span class="text-sm font-medium">This Week</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-md">
+            <button class="flex h-10 w-10 items-center justify-center rounded-full text-[color:var(--stitch-on-surface-variant)] transition hover:bg-[color:var(--stitch-primary-container)]/60 active:scale-95" type="button">
+              <span class="material-symbols-outlined">notifications</span>
+            </button>
+            <div class="flex items-center gap-sm rounded-full bg-[color:var(--stitch-surface-container-lowest)] py-1 pl-1 pr-md soft-shadow">
+              <div class="grid h-9 w-9 place-items-center rounded-full bg-[color:var(--stitch-primary-container)] font-heading font-semibold text-[color:var(--stitch-primary)]">A</div>
+              <div class="hidden sm:block">
+                <p class="text-sm font-bold">Backoffice</p>
+                <p class="text-[11px] text-[color:var(--stitch-on-surface-variant)]">Admin</p>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <div class="space-y-xl p-lg">
+          <section class="flex flex-col justify-between gap-md sm:flex-row sm:items-end">
+            <div>
+              <p class="mb-xs inline-flex rounded-full bg-[color:var(--stitch-primary-container)] px-md py-1 text-xs font-bold uppercase tracking-wider text-[color:var(--stitch-on-primary-container)]">
+                Live Booking System
+              </p>
+              <h2 class="font-heading text-3xl font-semibold tracking-tight text-[color:var(--stitch-primary)]">Backoffice Dashboard</h2>
+              <p class="mt-sm max-w-2xl text-sm leading-relaxed text-[color:var(--stitch-on-surface-variant)]">
+                ตรวจสอบผู้สมัคร ตารางไลฟ์ และรายการที่รออนุมัติจากระบบเดียว
+              </p>
+            </div>
+          </section>
+
+          <!-- KPI cards -->
+          <section class="grid gap-gutter md:grid-cols-2 xl:grid-cols-4">
+            <template x-for="metric in filteredMetrics()" :key="metric.label">
+              <div class="pink-gradient rounded-3xl p-lg soft-shadow">
+                <div class="mb-lg flex items-start justify-between gap-md">
+                  <div class="grid h-12 w-12 place-items-center rounded-2xl bg-[color:var(--stitch-surface-container-lowest)]">
+                    <span class="material-symbols-outlined text-[color:var(--stitch-primary)]" x-text="metric.icon"></span>
+                  </div>
+                  <span class="rounded-full bg-white/75 px-sm py-1 text-[11px] font-bold text-[color:var(--stitch-primary)]" x-text="metric.trend"></span>
+                </div>
+                <p class="mb-xs text-xs font-bold uppercase tracking-wider text-[color:var(--stitch-on-primary-container)]" x-text="metric.label"></p>
+                <h3 class="font-heading text-3xl font-semibold tracking-tight text-[color:var(--stitch-primary)]" x-text="metric.value"></h3>
+              </div>
+            </template>
+          </section>
+
+          <section class="grid gap-lg xl:grid-cols-12">
+            <!-- Calendar preview -->
+            <div class="rounded-3xl bg-[color:var(--stitch-surface-container-lowest)] p-lg soft-shadow xl:col-span-8">
+              <div class="mb-lg flex items-center justify-between gap-md">
+                <div>
+                  <h3 class="font-heading text-xl font-semibold text-[color:var(--stitch-primary)]">Operations Calendar</h3>
+                  <p class="text-sm text-[color:var(--stitch-on-surface-variant)]">ภาพรวมตารางไลฟ์และสถานะการอนุมัติ</p>
+                </div>
+                <button class="rounded-full bg-[color:var(--stitch-surface-container-low)] px-md py-sm text-sm font-bold text-[color:var(--stitch-on-secondary-container)] transition hover:bg-[color:var(--stitch-secondary-container)]" type="button">
+                  This Month
+                </button>
+              </div>
+
+              <div class="grid grid-cols-7 overflow-hidden rounded-3xl border border-[color:var(--stitch-outline-variant)]/30 bg-white">
+                <template x-for="day in calendarDays" :key="day.day">
+                  <div class="aspect-square border-b border-r border-[color:var(--stitch-outline-variant)]/20 p-2" :class="day.active ? 'bg-[color:var(--stitch-primary-container)]/40' : ''">
+                    <span class="text-sm font-bold" x-text="day.day"></span>
+                    <div class="mt-2 flex flex-col gap-1">
+                      <template x-for="dot in day.dots" :key="dot">
+                        <div class="h-2 rounded-full" :class="dot"></div>
+                      </template>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </div>
+
+            <!-- Action center -->
+            <div class="flex flex-col gap-lg xl:col-span-4">
+              <div class="flex items-center justify-between">
+                <h3 class="font-heading text-xl font-semibold text-[color:var(--stitch-primary)]">Action Center</h3>
+                <span class="rounded-full bg-[color:var(--stitch-error-container)] px-sm py-1 text-[10px] font-bold text-[color:var(--stitch-on-error-container)]">
+                  3 Urgent
+                </span>
+              </div>
+
+              <template x-for="item in pendingActions" :key="item.title">
+                <article class="flex flex-col gap-md rounded-3xl bg-[color:var(--stitch-surface-container-lowest)] p-md soft-shadow" :class="item.dim ? 'opacity-75' : ''">
+                  <div class="flex items-start gap-md">
+                    <div class="grid h-12 w-12 shrink-0 place-items-center rounded-2xl" :class="item.iconBg">
+                      <span class="material-symbols-outlined" :class="item.iconColor" x-text="item.icon"></span>
+                    </div>
+                    <div class="min-w-0">
+                      <h4 class="truncate text-sm font-bold" x-text="item.title"></h4>
+                      <p class="text-[12px] text-[color:var(--stitch-on-surface-variant)]" x-text="item.subtitle"></p>
+                    </div>
+                  </div>
+                  <div class="flex gap-sm">
+                    <button class="flex-1 rounded-full border border-[color:var(--stitch-outline-variant)] px-sm py-2 text-[12px] font-bold transition hover:bg-[color:var(--stitch-surface-container)]" type="button">
+                      View Evidence
+                    </button>
+                    <button class="flex-1 rounded-full bg-[color:var(--stitch-primary)] px-sm py-2 text-[12px] font-bold text-white transition active:scale-95 hover:shadow-lg" type="button">
+                      Approve
+                    </button>
+                  </div>
+                </article>
+              </template>
+            </div>
+          </section>
+
+          <!-- Leaderboard -->
+          <section class="overflow-hidden rounded-3xl bg-[color:var(--stitch-surface-container-lowest)] soft-shadow">
+            <div class="flex items-center justify-between border-b border-[color:var(--stitch-outline-variant)]/20 p-lg">
+              <div>
+                <h3 class="font-heading text-xl font-semibold text-[color:var(--stitch-primary)]">Performance Leaderboard</h3>
+                <p class="text-sm text-[color:var(--stitch-on-surface-variant)]">อันดับ Host และยอดขายจาก session ล่าสุด</p>
+              </div>
+              <button class="hidden items-center gap-xs rounded-full bg-[color:var(--stitch-primary-container)] px-md py-sm text-sm font-bold text-[color:var(--stitch-primary)] sm:flex" type="button">
+                Export Report <span class="material-symbols-outlined text-sm">download</span>
+              </button>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full min-w-[820px] text-left text-sm">
+                <thead class="bg-[color:var(--stitch-surface-container-low)] text-xs font-bold uppercase tracking-wider text-[color:var(--stitch-on-surface-variant)]">
+                  <tr>
+                    <th class="px-lg py-md">Rank</th>
+                    <th class="px-lg py-md">Channel Host</th>
+                    <th class="px-lg py-md">Brand</th>
+                    <th class="px-lg py-md">Live Duration</th>
+                    <th class="px-lg py-md">Verify Rate</th>
+                    <th class="px-lg py-md">Revenue</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-[color:var(--stitch-outline-variant)]/20">
+                  <template x-for="row in leaderboard" :key="row.rank">
+                    <tr class="transition hover:bg-[color:var(--stitch-primary-container)]/20">
+                      <td class="px-lg py-md">
+                        <span class="flex h-8 w-8 items-center justify-center rounded-full bg-[color:var(--stitch-primary-fixed)] font-bold text-[color:var(--stitch-primary)]" x-text="row.rank"></span>
+                      </td>
+                      <td class="px-lg py-md">
+                        <div class="flex items-center gap-md">
+                          <div class="grid h-10 w-10 place-items-center overflow-hidden rounded-full bg-[color:var(--stitch-surface-container)] font-bold text-[color:var(--stitch-primary)]" x-text="row.initial"></div>
+                          <span class="font-bold" x-text="row.host"></span>
+                        </div>
+                      </td>
+                      <td class="px-lg py-md" x-text="row.brand"></td>
+                      <td class="px-lg py-md" x-text="row.duration"></td>
+                      <td class="px-lg py-md font-bold text-[color:var(--stitch-tertiary)]" x-text="row.rate"></td>
+                      <td class="px-lg py-md font-bold text-[color:var(--stitch-primary)]" x-text="row.revenue"></td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <button class="fixed bottom-lg right-lg z-50 flex h-14 w-14 items-center justify-center rounded-2xl bg-[color:var(--stitch-primary)] text-white shadow-xl transition hover:scale-105 active:scale-95" type="button">
+        <span class="material-symbols-outlined text-[32px]">add</span>
+      </button>
+    </div>
+
+    <script>
+      function backofficeDashboard() {
+        return {
+          query: "",
+          metrics: [
+            { label: "Total Sales", value: "฿412K", icon: "payments", trend: "+12%" },
+            { label: "Pending Users", value: "18", icon: "verified_user", trend: "Review" },
+            { label: "Live Sessions", value: "42", icon: "broadcast_on_home", trend: "Week" },
+            { label: "Brands", value: "12", icon: "stars", trend: "Active" },
+          ],
+          calendarDays: Array.from({ length: 35 }, (_, index) => {
+            const day = index + 1;
+            return {
+              day,
+              active: day === 17,
+              dots: day % 5 === 0
+                ? ["bg-[color:var(--stitch-primary-fixed)]", "bg-[color:var(--stitch-secondary-container)]"]
+                : day % 3 === 0
+                  ? ["bg-[color:var(--stitch-tertiary-container)]"]
+                  : [],
+            };
+          }),
+          pendingActions: [
+            {
+              title: "Luxe Glow Beauty Live",
+              subtitle: "Shopee • Host: Maya J.",
+              icon: "shop",
+              iconBg: "bg-[color:var(--stitch-secondary-container)]",
+              iconColor: "text-[color:var(--stitch-on-secondary-container)]",
+              dim: false,
+            },
+            {
+              title: "Tech Gadgets Unboxing",
+              subtitle: "TikTok • Host: Leo K.",
+              icon: "devices",
+              iconBg: "bg-[color:var(--stitch-primary-container)]",
+              iconColor: "text-[color:var(--stitch-primary)]",
+              dim: false,
+            },
+            {
+              title: "Summer Fashion Haul",
+              subtitle: "Lazada • Host: Sarah T.",
+              icon: "shopping_bag",
+              iconBg: "bg-[color:var(--stitch-tertiary-container)]",
+              iconColor: "text-[color:var(--stitch-on-tertiary-container)]",
+              dim: true,
+            },
+          ],
+          leaderboard: [
+            { rank: "01", initial: "M", host: "Maya J. Cosmetics", brand: "L'Oréal Paris", duration: "04h 22m", rate: "98.2%", revenue: "฿124,500" },
+            { rank: "02", initial: "L", host: "Leo's Tech Den", brand: "Samsung", duration: "02h 45m", rate: "94.5%", revenue: "฿98,200" },
+            { rank: "03", initial: "S", host: "Sarah Style Hub", brand: "Zara Home", duration: "05h 10m", rate: "91.8%", revenue: "฿81,405" },
+            { rank: "04", initial: "D", host: "Daily Grocery Live", brand: "Nestle", duration: "01h 55m", rate: "89.4%", revenue: "฿56,600" },
+          ],
+
+          init() {},
+
+          filteredMetrics() {
+            if (!this.query.trim()) return this.metrics;
+            const q = this.query.trim().toLowerCase();
+            return this.metrics.filter((m) => m.label.toLowerCase().includes(q));
+          },
+        };
+      }
+    </script>
+  </body>
+</html>

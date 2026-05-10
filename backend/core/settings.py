@@ -14,6 +14,24 @@ DEBUG = os.getenv("DJANGO_DEBUG", "0") == "1"
 
 ALLOWED_HOSTS = [h.strip() for h in os.getenv("DJANGO_ALLOWED_HOSTS", "*").split(",") if h.strip()]
 
+# Behind nginx/on non-default ports, Django validates POST Origin/Referer against this list (admin login included).
+_origins_csv = os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS", "").strip()
+if _origins_csv:
+    CSRF_TRUSTED_ORIGINS = [
+        u.strip()
+        for u in _origins_csv.split(",")
+        if u.strip()
+    ]
+else:
+    CSRF_TRUSTED_ORIGINS = [
+        "http://localhost:8011",
+        "http://127.0.0.1:8011",
+    ]
+
+# Trust X-Forwarded-* from reverse proxy when present.
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",

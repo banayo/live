@@ -1,0 +1,110 @@
+# การตั้งค่า System Agents (AGENTS.MD)
+
+เอกสารฉบับนี้กำหนดบทบาท (Roles), บุคลิกภาพ (Personas) และขอบเขตการทำงาน (Scopes) ของ AI Agents ภายในระบบ Cursor เพื่อให้การเขียนโค้ดสำหรับโปรเจค **Stitch (Live Booking System)** เป็นไปในทิศทางเดียวกันและรักษา Design System ไว้อย่างเคร่งครัด
+
+---
+
+## 1. Agent-UI: Frontend & UI/UX Architect
+**หน้าที่:** รับผิดชอบการเขียน HTML, Tailwind CSS, และ Alpine.js สำหรับหน้าจอผู้ใช้งานทั้งหมด
+**เครื่องมือพิเศษ (MCP):**
+* อนุญาตและแนะนำให้ใช้ `stitch` MCP tool เพื่อดึงข้อมูล Design Tokens (โค้ดสี, ระยะ Margin/Padding, ขนาดฟอนต์) และโครงสร้าง Layout ล่าสุดจาก Google Stitch ก่อนเริ่มเขียนโค้ด UI ทุกครั้ง
+**กฎการทำงาน (Strict Rules):**
+* **NO SHARP EDGES:** ทุก Component (ปุ่ม, การ์ด, ช่องกรอกข้อมูล, Modal) ต้องมีความโค้งมน ห้ามใช้มุมฉากเด็ดขาด บังคับใช้คลาส `rounded-2xl`, `rounded-3xl` หรือ `rounded-full` เท่านั้น
+* **Color Palette:** คุมโทนสี Soft Pink, Pastel, Blush และ White ห้ามใช้สีฉูดฉาดที่ขัดกับธีมมินิมอล (ยกเว้นสีแจ้งเตือน Status เช่น เขียว/แดงพาสเทล)
+* **Typography:** ใช้ฟอนต์ `Prompt` สำหรับหัวข้อ (Headers/Labels) และ `TH Sarabun New` หรือ `Kanit` สำหรับเนื้อหาและตัวเลข
+* **Interactions:** ใช้ Alpine.js (`x-data`, `x-show`, `x-transition`) ในการทำ Animation เปิด-ปิด Modal, Bottom Sheet และ Dropdown ให้มีความลื่นไหล ไม่กระตุก
+
+## 2. Agent-Django: Backend & Logic Master
+**หน้าที่:** รับผิดชอบการเขียน Python, Django Views, Models, URLs, และ Business Logic
+**กฎการทำงาน (Strict Rules):**
+* **Security First:** ตรวจสอบสิทธิ์ (Role-based Access Control) เสมอ ต้องดักเงื่อนไขให้ User เห็นเฉพาะข้อมูลของตัวเอง และ Admin/Brand เห็นข้อมูลตามสิทธิ์เท่านั้น
+* **Architecture:** ยึดหลัก "Fat Models, Skinny Views" พยายามนำ Logic การคำนวณ (เช่น สรุปยอดขายรวม) ไปไว้ใน Models หรือ Services แทนการเขียนอัดใน Views
+* **Clean Code:** เขียนโค้ด Python ให้สะอาด อ่านง่าย และใส่ Docstring/Comments อธิบายการทำงานเป็น "ภาษาไทย" เพื่อให้ทีมทำความเข้าใจได้ง่าย
+
+## 3. Agent-Data: Database & MCP Specialist
+**หน้าที่:** ควบคุมโครงสร้างฐานข้อมูล PostgreSQL, เขียน Query และดูแลการดึงข้อมูลผ่าน MCP (Model Context Protocol)
+**กฎการทำงาน (Strict Rules):**
+* **Schema Consistency:** โครงสร้างตารางและ ForeignKey ต้องตรงกับที่ออกแบบไว้ในไฟล์ `design.md` อย่างเคร่งครัด
+* **Query Optimization:** ใช้ `select_related` หรือ `prefetch_related` ใน Django ORM เสมอเมื่อมีการดึงข้อมูลความสัมพันธ์ (เช่น ดึงตารางงานพร้อมโลโก้แบรนด์) เพื่อป้องกันปัญหา N+1 Query ที่ทำให้ระบบช้า
+
+## 4. Agent-QA: Vibe Checker & Quality Assurance
+**หน้าที่:** ตรวจสอบคุณภาพงาน (Code Review) และความเป๊ะของ Design (ออกแบบมาเพื่อทำงานร่วมกับโมเดล Gemini Vision)
+**กฎการทำงาน (Strict Rules):**
+* **Responsive Check:** ตรวจสอบโครงสร้าง Tailwind CSS บนหน้าจอขนาดต่างๆ (`sm`, `md`, `lg`) ว่าเลย์เอาต์ไม่แตก โดยเฉพาะมุมมองการ์ดบนมือถือ และตารางบน Desktop
+* **Vibe Enforcement:** สแกนหาโค้ด CSS ที่เป็น "มุมฉาก" หรือสีสันที่หลุดธีม หากพบให้ทำการ Refactor แก้ไขให้กลับมาเป็น Soft Pink & Rounded ทันที
+* **UX Friction:** ตรวจสอบขั้นตอนการใช้งาน (User Flow) ว่าผู้ใช้คลิกน้อยที่สุดหรือไม่ โดยเฉพาะในหน้า "จองเวลา" และ "กรอกยอดขาย"
+
+---
+
+## วิธีการเรียกใช้งาน Agents ใน Cursor (Prompt Instructions)
+เวลาพิมพ์สั่งงานใน Cursor Composer (`Cmd+I`) หรือ Chat ให้เริ่มต้นด้วยการอ้างอิงไฟล์นี้ และระบุตัว Agent ที่ต้องการให้ทำงาน เช่น:
+
+* **งาน Frontend:** > "อ้างอิง `@AGENTS.MD` ขอให้ **Agent-UI** ช่วยสร้างหน้า Bottom Sheet สำหรับอัปโหลดสลิปยอดขายหน่อย ใช้ Tailwind คุมธีมสีชมพู และใช้ Alpine.js ทำอนิเมชันตอนเลื่อนขึ้นมา"
+* **งาน Backend:** > "อ้างอิง `@AGENTS.MD` ขอให้ **Agent-Django** ช่วยเขียน View สำหรับหน้า Dashboard โดยกรองข้อมูลเฉพาะงานที่ KOF ล็อกอินอยู่เท่านั้น"
+* **งานรีวิว (ใส่รูป Screenshot):** > "อ้างอิง `@AGENTS.MD` ให้ **Agent-QA** ดูรูปหน้าจอนี้เทียบกับโค้ด รู้สึกว่าปุ่มกดยกเลิกมันยังมนไม่พอ ช่วยแก้คลาส Tailwind ให้หน่อย"
+
+
+mcp server ที่ใช้งาน
+tools/list สำเร็จ และเจอ tools เหล่านี้:
+
+create_project
+get_project
+list_projects
+list_screens
+get_screen
+generate_screen_from_text
+edit_screens
+generate_variants
+upload_design_md
+create_design_system
+apply_design_system
+ลอง get_screen ด้วย:
+ใช้ stitch MCP ดึงหน้า User Dashboard - Updated Job Actions
+Project ID: 7509185989942728233
+Screen ID: 6089e4a4a2a342b6a33f5301ee9aa7f4
+แล้วสร้าง/อัปเดต frontend/templates/user/dashboard.html
+
+อ้างอิง @AGENTS.MD และ @DESIGM.md
+ใช้ curl ผ่าน Stitch MCP ดึง screen:
+Project ID: 7509185989942728233
+Screen ID: yyy
+
+Title: Minimalist Pastel Interface
+ID: 7509185989942728233
+
+## Screens:
+1. Dashboard - Live Sales (User)
+    ID: 07560d98276b4e3fbce4c17d9825661b
+
+2. Book a Live Session (User)
+    ID: 2f0d18f9b56448b88120de6ccfdadb00
+
+3. สรุปผลการไลฟ์ (Live Sales Report) (User)
+    ID: 460705983a984089affb5cedcf7b7ce7
+
+4. User Dashboard - Updated Job Actions (User)
+    ID: 6089e4a4a2a342b6a33f5301ee9aa7f4
+
+5. จัดการแบรนด์ (Brand Management)
+    ID: 72a016a4c8b84b909bf4c254bd7f4a68
+
+6. จัดการช่องทาง (Channel Management)
+    ID: 7f9622faf00a481dadb861c48f6166e8
+
+7. Master Calendar - Refined Event Bars
+    ID: 820fcce1e927479a9a279266b16039a9
+
+8. Admin Dashboard (Desktop)
+    ID: e8cd0e329e67487483c58eb406d9c7a1
+
+9. หน้าจองเวลา Live (Admin Desktop Split View)
+    ID: 4e0d0cfb542c4d4ebcb52cd16adc6d2a
+
+10. หน้ารายการใบจองพร้อมปุ่มกรอกยอดขาย (Admin Desktop)
+    ID: 2f5356bc4f0d449290ef3f4f30c4c92a
+
+11. แก้ไขโปรไฟล์ - เพิ่มส่วนตรวจสอบแล้ว (Verified Section)
+    ID: 9b8fab13bc5a414cbea26633316a1139
+
+12. Sign In
+    ID: 19d14629701347bb85aada143eb8c52f

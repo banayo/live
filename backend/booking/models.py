@@ -7,26 +7,9 @@ from django.dispatch import receiver
 
 
 class User(AbstractUser):
-    class Role(models.TextChoices):
-        HOST = "host", "Host"
-        MKT = "mkt", "Marketing"
-        ADMIN = "admin", "Admin"
+    pass
 
-    role = models.CharField(
-        max_length=10,
-        choices=Role.choices,
-        default=Role.HOST,
-        db_index=True,
-    )
-    profile_image = models.FileField(upload_to="profiles/%Y/%m/", blank=True, null=True)
 
-    @property
-    def is_mkt(self) -> bool:
-        return self.role == self.Role.MKT
-
-    @property
-    def is_admin_role(self) -> bool:
-        return self.role == self.Role.ADMIN or self.is_superuser
 
 
 class Brand(models.Model):
@@ -65,7 +48,6 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     role = models.CharField(max_length=10, choices=(
         ('admin', 'Admin'),
-        ('mkt', 'Marketing'),
         ('brand', 'Brand'),
         ('user', 'User'),
     ), default='user')
@@ -81,6 +63,7 @@ class Profile(models.Model):
     bank_name = models.CharField(max_length=100, blank=True, null=True)
     
     # เมื่อล็อกอินผ่าน LINE เราสามารถดึงรูปโปรไฟล์จาก LINE มาเก็บที่ฟิลด์นี้ได้เลยอัตโนมัติ
+    profile_image = models.FileField(upload_to="profiles/%Y/%m/", blank=True, null=True, verbose_name="รูปโปรไฟล์ (ไฟล์)")
     photo_url = models.URLField(max_length=500, blank=True, null=True, verbose_name="รูปโปรไฟล์ (URL)")
     
     is_verified = models.BooleanField(default=False, verbose_name="ตรวจสอบตัวตนแล้ว")
@@ -103,7 +86,6 @@ def save_user_profile(sender, instance, **kwargs):
 class LiveSchedule(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='live_schedules', verbose_name="ผู้ไลฟ์")
     edited_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='edited_schedules', verbose_name="ผู้แก้ไขล่าสุด")
-    mkts = models.ManyToManyField(User, blank=True, related_name='managed_schedules', verbose_name="MKT ผู้ดูแล")
     
     title = models.CharField(max_length=200, verbose_name="หัวข้อ Live")
     brand = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True, related_name='live_schedules', verbose_name="แบรนด์")

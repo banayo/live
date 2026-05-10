@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#fce4ec" />
+    <title>Sign In | Stitch Live Booking</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Prompt:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --stitch-surface: #f9f9f9;
+        --stitch-on-surface: #1a1c1c;
+        --stitch-outline-variant: #d0c3c7;
+        --stitch-primary: #6b5a60;
+        --stitch-on-primary: #ffffff;
+        --stitch-primary-container: #fce4ec;
+        --stitch-on-primary-container: #76646b;
+        --stitch-secondary-container: #d3e2ed;
+        --stitch-tertiary-container: #e0ede1;
+      }
+    </style>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              heading: ["Prompt", "ui-sans-serif", "system-ui"],
+              body: ["Kanit", "ui-sans-serif", "system-ui"],
+            },
+            boxShadow: {
+              ambient: "0 30px 80px rgba(107, 90, 96, 0.12)",
+            },
+          },
+        },
+      };
+
+      async function applyStitchTokens() {
+        try {
+          const res = await fetch("/api/stitch/tokens/", {
+            method: "GET",
+            credentials: "same-origin",
+            headers: { Accept: "application/json" },
+          });
+          if (!res.ok) return;
+          const tokens = await res.json();
+          const colors = tokens && tokens.colors ? tokens.colors : {};
+
+          const map = {
+            surface: "--stitch-surface",
+            onSurface: "--stitch-on-surface",
+            outlineVariant: "--stitch-outline-variant",
+            primary: "--stitch-primary",
+            onPrimary: "--stitch-on-primary",
+            primaryContainer: "--stitch-primary-container",
+            onPrimaryContainer: "--stitch-on-primary-container",
+            secondaryContainer: "--stitch-secondary-container",
+            tertiaryContainer: "--stitch-tertiary-container",
+          };
+
+          for (const [key, cssVar] of Object.entries(map)) {
+            const val = colors[key];
+            if (typeof val === "string" && val.trim()) {
+              document.documentElement.style.setProperty(cssVar, val.trim());
+            }
+          }
+        } catch (_) {
+          // ignore
+        }
+      }
+    </script>
+  </head>
+
+  <body class="bg-[color:var(--stitch-surface)] text-[color:var(--stitch-on-surface)] min-h-screen flex flex-col font-body">
+    <main class="relative flex-grow flex items-center justify-center px-5 py-12 overflow-hidden" x-data="signInPage()" x-init="init()">
+      <div class="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+        <div class="absolute -top-[10%] -left-[10%] w-[55%] h-[55%] rounded-full blur-[100px] opacity-80" style="background: color-mix(in srgb, var(--stitch-primary-container) 35%, transparent)"></div>
+        <div class="absolute -bottom-[10%] -right-[10%] w-[55%] h-[55%] rounded-full blur-[100px] opacity-70" style="background: color-mix(in srgb, var(--stitch-secondary-container) 35%, transparent)"></div>
+      </div>
+
+      <section class="w-full max-w-[420px]">
+        <div class="text-center mb-8">
+          <h1 class="font-heading text-3xl font-semibold tracking-tight" style="color: var(--stitch-primary)">Karmarts Live</h1>
+          <p class="mt-2 text-sm" style="color: var(--stitch-on-primary-container)">Welcome back to your serene space.</p>
+        </div>
+
+        <div class="rounded-3xl bg-white/90 p-6 shadow-ambient backdrop-blur" style="border: 1px solid color-mix(in srgb, var(--stitch-outline-variant) 65%, transparent)">
+          <div class="text-center">
+            <h2 class="font-heading text-2xl font-semibold">Sign In</h2>
+            <p class="mt-1 text-sm" style="color: var(--stitch-on-primary-container)">เข้าสู่ระบบเพื่อจัดการตารางไลฟ์</p>
+          </div>
+
+          <template x-if="error">
+            <div
+              class="mt-5 rounded-3xl border px-4 py-3 text-sm"
+              :class="isPendingVerification ? 'border-amber-200 bg-amber-50 text-amber-800' : 'border-red-200 bg-red-50 text-red-700'"
+              x-text="error"
+              role="alert"
+              aria-live="polite"
+              x-transition.opacity.duration.150ms
+            ></div>
+          </template>
+
+          <form class="mt-6 space-y-6" @submit.prevent="submit()">
+            <div class="space-y-3">
+              <div class="relative">
+                <input
+                  class="w-full h-14 px-5 rounded-full border-none bg-[color:var(--stitch-surface)]/70 text-sm placeholder:text-[color:var(--stitch-on-primary-container)]/60 outline-none focus:ring-2 transition-all duration-200"
+                  :class="ready ? 'focus:ring-[color:var(--stitch-primary)]/35' : 'focus:ring-slate-300/40'"
+                  placeholder="Username"
+                  type="text"
+                  autocomplete="username"
+                  x-model.trim="username"
+                />
+              </div>
+              <div class="relative">
+                <input
+                  class="w-full h-14 px-5 pr-16 rounded-full border-none bg-[color:var(--stitch-surface)]/70 text-sm placeholder:text-[color:var(--stitch-on-primary-container)]/60 outline-none focus:ring-2 transition-all duration-200"
+                  :class="ready ? 'focus:ring-[color:var(--stitch-primary)]/35' : 'focus:ring-slate-300/40'"
+                  placeholder="Password"
+                  :type="showPassword ? 'text' : 'password'"
+                  autocomplete="current-password"
+                  x-model="password"
+                />
+                <button
+                  type="button"
+                  class="absolute right-2 top-1/2 -translate-y-1/2 rounded-full px-3 py-2 text-xs font-heading font-semibold transition focus:outline-none focus:ring-4"
+                  :class="ready ? 'text-[color:var(--stitch-primary)] focus:ring-[color:var(--stitch-primary-container)]/70 hover:bg-[color:var(--stitch-primary-container)]/60' : 'text-slate-700 hover:bg-slate-100 focus:ring-slate-100'"
+                  @click="showPassword = !showPassword"
+                  x-text="showPassword ? 'ซ่อน' : 'แสดง'"
+                ></button>
+              </div>
+
+              <div class="flex items-center justify-between gap-3 px-2">
+                <label class="inline-flex items-center gap-2 text-xs select-none" style="color: var(--stitch-on-primary-container)">
+                  <input
+                    type="checkbox"
+                    class="h-4 w-4 rounded-full border focus:ring-4"
+                    :class="ready ? 'border-[color:var(--stitch-outline-variant)] text-[color:var(--stitch-primary)] focus:ring-[color:var(--stitch-primary-container)]/70' : 'border-slate-300 text-slate-900 focus:ring-slate-100'"
+                    x-model="remember"
+                  />
+                  <span class="font-heading font-medium">จำฉันไว้</span>
+                </label>
+
+                <a
+                  class="rounded-full px-3 py-2 text-xs font-heading font-semibold transition focus:outline-none focus:ring-4"
+                  href="/admin/password_reset/"
+                  :class="ready ? 'text-[color:var(--stitch-primary)] hover:bg-[color:var(--stitch-primary-container)]/60 focus:ring-[color:var(--stitch-primary-container)]/70' : 'text-slate-700 hover:bg-slate-100 focus:ring-slate-100'"
+                  >ลืมรหัสผ่าน</a
+                >
+              </div>
+            </div>
+
+            <button
+              class="w-full h-14 rounded-full shadow-sm active:scale-[0.99] transition-all duration-200 font-heading font-semibold focus:outline-none focus:ring-4 disabled:cursor-not-allowed disabled:opacity-70"
+              type="submit"
+              :disabled="loading"
+              :class="ready ? 'bg-[color:var(--stitch-primary)] text-[color:var(--stitch-on-primary)] focus:ring-[color:var(--stitch-primary-container)]/70 hover:opacity-95' : 'bg-slate-900 text-white focus:ring-slate-200 hover:opacity-95'"
+            >
+              <span x-text="loading ? 'กำลังเข้าสู่ระบบ...' : 'Sign In'"></span>
+            </button>
+          </form>
+
+          <div class="mt-7 flex items-center gap-4">
+            <div class="h-px flex-grow" style="background: var(--stitch-outline-variant)"></div>
+            <span class="text-xs font-heading font-semibold tracking-widest" style="color: var(--stitch-on-primary-container)">OR</span>
+            <div class="h-px flex-grow" style="background: var(--stitch-outline-variant)"></div>
+          </div>
+
+          <div class="mt-6 space-y-3">
+            <button
+              type="button"
+              class="w-full h-14 rounded-full active:scale-[0.99] transition-all duration-200 font-heading font-semibold shadow-sm focus:outline-none focus:ring-4"
+              style="background: var(--stitch-tertiary-container); color: var(--stitch-on-tertiary-container)"
+              :class="ready ? 'focus:ring-[color:var(--stitch-tertiary-container)]/60' : 'focus:ring-slate-100'"
+              @click="lineLogin()"
+            >
+              Login with LINE
+            </button>
+          </div>
+        </div>
+
+        <div class="mt-7 text-center">
+          <p class="text-sm" style="color: var(--stitch-on-primary-container)">
+            ยังไม่มีบัญชี?
+            <a
+              href="/register"
+              class="ml-1 rounded-full px-3 py-1.5 font-heading text-sm font-semibold transition focus:outline-none focus:ring-4"
+              :class="ready ? 'text-[color:var(--stitch-primary)] hover:bg-[color:var(--stitch-primary-container)]/60 focus:ring-[color:var(--stitch-primary-container)]/70' : 'text-slate-700 hover:bg-slate-100 focus:ring-slate-100'"
+              >สมัครสมาชิก</a
+            >
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      function signInPage() {
+        return {
+          username: "",
+          password: "",
+          loading: false,
+          error: "",
+          isPendingVerification: false,
+          showPassword: false,
+          ready: false,
+          remember: true,
+          async lineLogin() {
+            window.location.href = "/api/auth/line/authorize/";
+          },
+
+          async init() {
+            await applyStitchTokens();
+            this.ready = true;
+
+            const params = new URLSearchParams(window.location.search || "");
+            const err = String(params.get("error") || "");
+            if (err === "not_verified") {
+              this.isPendingVerification = true;
+              this.error = "รอการตรวจสอบจากแอดมิน";
+            } else if (err === "line_denied") {
+              this.isPendingVerification = false;
+              this.error = "ยกเลิกการเข้าสู่ระบบผ่าน LINE";
+            } else if (err === "line_not_configured") {
+              this.isPendingVerification = false;
+              this.error = "ยังไม่ได้ตั้งค่า LINE Login ในระบบ";
+            } else if (err) {
+              this.isPendingVerification = false;
+              this.error = "เข้าสู่ระบบผ่าน LINE ไม่สำเร็จ กรุณาลองใหม่";
+            }
+          },
+
+          async submit() {
+            if (this.loading) return;
+            this.error = "";
+            this.isPendingVerification = false;
+            this.loading = true;
+
+            try {
+              const res = await fetch("/api/auth/login/", {
+                method: "POST",
+                credentials: "same-origin",
+                headers: { "Content-Type": "application/json", Accept: "application/json" },
+                body: JSON.stringify({ username: this.username, password: this.password }),
+              });
+
+              if (!res.ok) {
+                let data = null;
+                try {
+                  data = await res.json();
+                } catch (_) {
+                  data = null;
+                }
+                const code = data && data.error ? String(data.error) : "";
+                if (res.status === 401) this.error = "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง";
+                else if (code === "missing_credentials") this.error = "กรุณากรอก Username และ Password";
+                else if (code === "not_verified") {
+                  this.isPendingVerification = true;
+                  this.error = "รอการตรวจสอบจากแอดมิน";
+                }
+                else this.error = "เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง";
+                return;
+              }
+
+              let data = {};
+              try {
+                data = await res.json();
+              } catch (_) {
+                data = {};
+              }
+              window.location.href = data.redirect_url || "/dashboard";
+            } catch (e) {
+              this.error = "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาลองใหม่";
+            } finally {
+              this.loading = false;
+            }
+          },
+        };
+      }
+    </script>
+  </body>
+</html>
+

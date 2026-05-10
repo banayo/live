@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#fce4ec" />
+    <title>Register | Stitch Live Booking</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Prompt:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --stitch-surface: #f9f9f9;
+        --stitch-on-surface: #1a1c1c;
+        --stitch-on-surface-variant: #4d4447;
+        --stitch-outline-variant: #d0c3c7;
+        --stitch-primary: #6b5a60;
+        --stitch-on-primary: #ffffff;
+        --stitch-primary-container: #fce4ec;
+        --stitch-on-primary-container: #76646b;
+        --stitch-secondary-container: #d3e2ed;
+        --stitch-tertiary-container: #e0ede1;
+      }
+    </style>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              heading: ["Prompt", "ui-sans-serif", "system-ui"],
+              body: ["Kanit", "ui-sans-serif", "system-ui"],
+            },
+            boxShadow: {
+              ambient: "0 30px 80px rgba(107, 90, 96, 0.12)",
+              soft: "0 20px 48px rgba(107, 90, 96, 0.08)",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+
+  <body class="min-h-screen bg-[color:var(--stitch-surface)] text-[color:var(--stitch-on-surface)] font-body">
+    <main
+      class="relative min-h-screen overflow-hidden px-5 py-8 sm:py-12"
+      x-data="registerPage()"
+    >
+      <div class="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+        <div
+          class="absolute -top-28 -left-20 h-80 w-80 rounded-full blur-[100px] opacity-80"
+          style="background: color-mix(in srgb, var(--stitch-primary-container) 42%, transparent)"
+        ></div>
+        <div
+          class="absolute -bottom-28 -right-20 h-80 w-80 rounded-full blur-[100px] opacity-70"
+          style="background: color-mix(in srgb, var(--stitch-secondary-container) 42%, transparent)"
+        ></div>
+      </div>
+
+      <section class="mx-auto flex min-h-[calc(100vh-64px)] w-full max-w-5xl flex-col justify-center gap-6 lg:grid lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+        <div class="rounded-3xl p-6 sm:p-8" style="background: color-mix(in srgb, var(--stitch-primary-container) 48%, white)">
+          <div>
+            <h1 class="font-heading text-3xl font-semibold tracking-tight sm:text-4xl" style="color: var(--stitch-primary)">
+              สมัครสมาชิก
+            </h1>
+            <p class="mt-4 max-w-sm text-sm leading-7" style="color: var(--stitch-on-primary-container)">
+              กรอกข้อมูลพื้นฐานเพื่อให้ทีมแอดมินตรวจสอบบัญชี หลังอนุมัติแล้วจึงเข้าใช้งานระบบ Live Booking ได้
+            </p>
+          </div>
+
+          <div class="mt-8 grid gap-3">
+            <div class="rounded-3xl px-4 py-3 text-sm" style="background: rgba(255,255,255,0.65); color: var(--stitch-on-primary-container)">
+              ใช้เพียงชื่อ เบอร์โทร อีเมล และรูปโปรไฟล์
+            </div>
+            <div class="rounded-3xl px-4 py-3 text-sm" style="background: var(--stitch-tertiary-container); color: var(--stitch-on-primary-container)">
+              บัญชีใหม่จะรอแอดมินกดตรวจสอบก่อนเข้าใช้งาน
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-3xl bg-white/90 p-5 shadow-ambient backdrop-blur sm:p-7" style="border: 1px solid color-mix(in srgb, var(--stitch-outline-variant) 60%, transparent)">
+          <div class="mb-6 text-center">
+            <h2 class="font-heading text-2xl font-semibold">ข้อมูลสมัครสมาชิก</h2>
+            <p class="mt-2 text-sm" style="color: var(--stitch-on-primary-container)">
+              โปรดตรวจสอบข้อมูลให้ถูกต้องก่อนส่งคำขอ
+            </p>
+          </div>
+
+          <form class="space-y-5" @submit.prevent="submit($event)">
+            <div class="flex flex-col items-center">
+              <label
+                for="profile_image"
+                class="group relative grid h-32 w-32 cursor-pointer place-items-center overflow-hidden rounded-full text-center shadow-soft transition hover:scale-[1.01] focus-within:ring-4"
+                style="background: var(--stitch-primary-container); color: var(--stitch-primary)"
+              >
+                <template x-if="imagePreview">
+                  <img :src="imagePreview" alt="รูปโปรไฟล์ที่เลือก" class="h-full w-full object-cover" />
+                </template>
+                <template x-if="!imagePreview">
+                  <span class="px-4 text-sm font-heading font-semibold leading-5">เพิ่มรูปโปรไฟล์</span>
+                </template>
+                <span class="absolute inset-x-3 bottom-3 rounded-full bg-white/85 px-3 py-1 text-xs font-heading font-semibold opacity-0 shadow-sm transition group-hover:opacity-100">
+                  เปลี่ยนรูป
+                </span>
+                <input
+                  id="profile_image"
+                  name="profile_image"
+                  type="file"
+                  accept="image/*"
+                  class="sr-only"
+                  @change="previewImage($event)"
+                />
+              </label>
+              <p class="mt-3 text-xs" style="color: var(--stitch-on-primary-container)">รองรับ JPG, PNG หรือ WebP</p>
+            </div>
+
+            <div>
+              <label for="name" class="mb-2 block text-sm font-heading font-semibold">Name</label>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                autocomplete="name"
+                required
+                x-model.trim="form.name"
+                class="h-14 w-full rounded-full border-none bg-[color:var(--stitch-surface)] px-5 text-sm outline-none transition focus:ring-4"
+                style="color: var(--stitch-on-surface)"
+                placeholder="ชื่อ-นามสกุล"
+              />
+            </div>
+
+            <div>
+              <label for="phone_number" class="mb-2 block text-sm font-heading font-semibold">Phone Number</label>
+              <input
+                id="phone_number"
+                name="phone_number"
+                type="tel"
+                inputmode="tel"
+                autocomplete="tel"
+                required
+                x-model.trim="form.phone_number"
+                class="h-14 w-full rounded-full border-none bg-[color:var(--stitch-surface)] px-5 text-sm outline-none transition focus:ring-4"
+                style="color: var(--stitch-on-surface)"
+                placeholder="เบอร์โทรศัพท์"
+              />
+            </div>
+
+            <div>
+              <label for="email" class="mb-2 block text-sm font-heading font-semibold">Email</label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autocomplete="email"
+                required
+                x-model.trim="form.email"
+                class="h-14 w-full rounded-full border-none bg-[color:var(--stitch-surface)] px-5 text-sm outline-none transition focus:ring-4"
+                style="color: var(--stitch-on-surface)"
+                placeholder="example@email.com"
+              />
+            </div>
+
+            <template x-if="message">
+              <div
+                class="rounded-3xl px-4 py-3 text-sm"
+                x-text="message"
+                x-transition.opacity.duration.150ms
+                :style="status === 'error'
+                  ? 'background: #ffdad6; color: #93000a'
+                  : 'background: var(--stitch-tertiary-container); color: var(--stitch-on-primary-container)'"
+              ></div>
+            </template>
+
+            <button
+              type="submit"
+              class="h-14 w-full rounded-full font-heading font-semibold shadow-sm transition active:scale-[0.99] focus:outline-none focus:ring-4"
+              style="background: var(--stitch-primary); color: var(--stitch-on-primary)"
+              :disabled="loading"
+              :class="loading ? 'cursor-not-allowed opacity-70' : ''"
+            >
+              <span x-text="loading ? 'กำลังส่งคำขอ...' : 'ส่งคำขอสมัครสมาชิก'"></span>
+            </button>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      function registerPage() {
+        return {
+          imagePreview: "",
+          message: "",
+          status: "",
+          loading: false,
+          form: {
+            name: "",
+            phone_number: "",
+            email: "",
+          },
+
+          previewImage(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) return;
+            if (this.imagePreview) URL.revokeObjectURL(this.imagePreview);
+            this.imagePreview = URL.createObjectURL(file);
+          },
+
+          async submit(event) {
+            if (this.loading) return;
+            this.loading = true;
+            this.message = "";
+            this.status = "";
+
+            try {
+              const payload = new FormData(event.target);
+              const res = await fetch("/api/auth/register/", {
+                method: "POST",
+                credentials: "same-origin",
+                headers: { Accept: "application/json" },
+                body: payload,
+              });
+
+              let data = {};
+              try {
+                data = await res.json();
+              } catch (_) {
+                data = {};
+              }
+
+              if (!res.ok) {
+                const code = data && data.error ? String(data.error) : "";
+                if (code === "missing_fields") this.message = "กรุณากรอกชื่อ เบอร์โทร และอีเมลให้ครบ";
+                else if (code === "email_exists") this.message = "อีเมลนี้ถูกสมัครไว้แล้ว กรุณาใช้อีเมลอื่น";
+                else if (code === "invalid_image") this.message = "กรุณาเลือกรูปภาพเท่านั้น";
+                else if (code === "image_too_large") this.message = "รูปภาพต้องมีขนาดไม่เกิน 5MB";
+                else this.message = "ส่งคำขอสมัครสมาชิกไม่สำเร็จ กรุณาลองใหม่";
+                this.status = "error";
+                return;
+              }
+
+              event.target.reset();
+              this.form.name = "";
+              this.form.phone_number = "";
+              this.form.email = "";
+              if (this.imagePreview) URL.revokeObjectURL(this.imagePreview);
+              this.imagePreview = "";
+              this.status = "success";
+              this.message = "ส่งคำขอสมัครสมาชิกแล้ว กรุณารอแอดมินตรวจสอบบัญชี";
+              window.location.href = "/login?error=not_verified";
+            } catch (e) {
+              this.status = "error";
+              this.message = "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาลองใหม่";
+            } finally {
+              this.loading = false;
+            }
+          },
+        };
+      }
+    </script>
+  </body>
+</html>
