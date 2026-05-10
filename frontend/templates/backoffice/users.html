@@ -241,7 +241,7 @@
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-[color:var(--stitch-outline-variant)]/20">
-                  <template x-for="user in filteredUsers()" :key="user.id">
+                  <template x-for="user in filteredUsers()" :key="`${user.id}:${user.avatarUrl || ''}`">
                     <tr class="transition hover:bg-[color:var(--stitch-primary-container)]/20">
                       <td class="px-lg py-md">
                         <div class="flex items-center gap-md">
@@ -249,11 +249,11 @@
                             <img
                               loading="lazy"
                               decoding="async"
-                              referrerpolicy="no-referrer"
                               class="absolute inset-0 h-full w-full object-cover"
                               :alt="''"
                               x-show="user.avatarUrl"
                               :src="user.avatarUrl || ''"
+                              :referrerpolicy="avatarImgReferrerPolicy(user.avatarUrl)"
                             />
                             <span class="relative z-[1]" x-show="!user.avatarUrl" x-text="user.initial"></span>
                           </div>
@@ -307,18 +307,18 @@
         x-transition.opacity.duration.150ms
         style="display: none"
       >
-        <div class="w-full max-w-xl max-h-[88vh] overflow-hidden rounded-3xl bg-white p-lg soft-shadow" @click.outside="closeModal()" x-transition.scale.origin.center.duration.150ms>
-          <div class="mb-lg flex items-start justify-between gap-md">
+        <div class="flex w-full max-w-xl max-h-[88vh] min-h-0 flex-col overflow-hidden rounded-3xl bg-white p-lg soft-shadow" @click.outside="closeModal()" x-transition.scale.origin.center.duration.150ms>
+          <div class="flex items-start justify-between gap-md pb-md">
             <div class="flex min-w-0 flex-1 items-start gap-md">
               <div class="relative grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-2xl bg-[color:var(--stitch-primary-container)] font-heading text-lg font-semibold text-[color:var(--stitch-primary)]">
                 <img
                   loading="lazy"
                   decoding="async"
-                  referrerpolicy="no-referrer"
                   class="absolute inset-0 h-full w-full object-cover"
                   x-show="modalAvatarUrl()"
                   :src="modalAvatarUrl() || ''"
                   alt=""
+                  :referrerpolicy="avatarImgReferrerPolicy(modalAvatarUrl())"
                 />
                 <span class="relative z-[1]" x-show="!modalAvatarUrl()" x-text="draftInitial()"></span>
               </div>
@@ -336,10 +336,28 @@
             </button>
           </div>
 
-          <div class="max-h-[calc(88vh-140px)] space-y-md overflow-y-auto pr-1" x-show="selectedUser">
-            <div class="rounded-3xl bg-[color:var(--stitch-surface-container-low)] p-md">
-              <p class="text-sm text-[color:var(--stitch-on-surface-variant)]">บันทึกฟิลด์โปรไฟล์ลงใน `Profile` (รูปจาก LINE เก็บช่อง URL — ถ้ามีการอัปโหลดไฟล์แล้ว ระบบใช้ทางไฟล์ก่อนตาม API)</p>
-            </div>
+          <div class="min-h-0 flex-1 space-y-md overflow-y-auto pr-1" x-show="selectedUser">
+            <label class="block">
+              <span class="mb-xs block text-sm font-bold text-[color:var(--stitch-primary)]">ชื่อ</span>
+              <input
+                class="w-full rounded-full border-none bg-[color:var(--stitch-surface-container-low)] px-md py-md text-sm focus:ring-2 focus:ring-[color:var(--stitch-primary-container)]"
+                type="text"
+                placeholder="ชื่อ-นามสกุล"
+                x-model="draft.name"
+                :disabled="modalMode === 'preview'"
+              />
+            </label>
+
+            <label class="block">
+              <span class="mb-xs block text-sm font-bold text-[color:var(--stitch-primary)]">อีเมล</span>
+              <input
+                class="w-full rounded-full border-none bg-[color:var(--stitch-surface-container-low)] px-md py-md text-sm focus:ring-2 focus:ring-[color:var(--stitch-primary-container)]"
+                type="email"
+                placeholder="name@example.com"
+                x-model="draft.email"
+                :disabled="modalMode === 'preview'"
+              />
+            </label>
 
             <label class="block">
               <span class="mb-xs block text-sm font-bold text-[color:var(--stitch-primary)]">เบอร์โทร</span>
@@ -442,7 +460,7 @@
             </label>
           </div>
 
-          <div class="mt-lg flex justify-end gap-sm">
+          <div class="-mx-lg sticky bottom-0 mt-md flex justify-end gap-sm border-t border-[color:var(--stitch-outline-variant)]/20 bg-white px-lg pt-md">
             <button class="rounded-full bg-[color:var(--stitch-surface-container-low)] px-lg py-md text-sm font-bold transition hover:bg-[color:var(--stitch-surface-container)] active:scale-95" type="button" @click="closeModal()">ปิด</button>
             <button class="rounded-full bg-[color:var(--stitch-primary)] px-lg py-md text-sm font-bold text-white shadow-lg transition hover:opacity-95 active:scale-95 disabled:opacity-60" type="button" x-show="modalMode !== 'preview'" @click="saveDraft()" :disabled="saving" x-text="saving ? 'กำลังบันทึก...' : 'บันทึก'"></button>
           </div>
@@ -464,6 +482,8 @@
             role: "user",
             brandId: "",
             verified: false,
+            name: "",
+            email: "",
             phone: "",
             kof: "",
             bankName: "",
@@ -550,11 +570,19 @@
             return String(this.selectedUser?.avatarUrl || "").trim();
           },
 
+          avatarImgReferrerPolicy(url) {
+            const s = String(url || "");
+            if (!s) return undefined;
+            return s.includes("line-scdn.net") || s.includes("profile.line-scdn") ? "no-referrer" : undefined;
+          },
+
           hydrateDraft(user) {
             return {
               role: user.role,
               brandId: user.brandId === null || user.brandId === undefined ? "" : String(user.brandId),
               verified: Boolean(user.verified),
+              name: user.name ?? "",
+              email: user.email ?? "",
               phone: user.phone ?? "",
               kof: user.kof ?? "",
               bankName: user.bankName ?? "",
@@ -651,6 +679,8 @@
               bankName: "",
               bankAccount: "",
               photoUrl: "",
+              profileImageFile: null,
+              profileImagePreviewUrl: "",
             };
             this.modalMode = "create";
             this.modalOpen = true;
@@ -685,6 +715,8 @@
                 fd.append("is_verified", String(Boolean(this.draft.verified)));
                 const brandId = this.brandPayloadId();
                 fd.append("brand_id", brandId === "" ? "" : String(brandId));
+                fd.append("name", String(this.draft.name ?? "").trim());
+                fd.append("email", String(this.draft.email ?? "").trim());
                 fd.append("phone_number", String(this.draft.phone ?? ""));
                 fd.append("kof", String(this.draft.kof ?? ""));
                 fd.append("bank_account_number", String(this.draft.bankAccount ?? ""));
@@ -701,6 +733,8 @@
                   role: this.draft.role,
                   is_verified: Boolean(this.draft.verified),
                   brand_id: this.brandPayloadId(),
+                  name: String(this.draft.name ?? "").trim(),
+                  email: String(this.draft.email ?? "").trim(),
                   phone_number: this.draft.phone ?? "",
                   kof: this.draft.kof ?? "",
                   bank_account_number: this.draft.bankAccount ?? "",
@@ -715,9 +749,20 @@
                 });
               }
               if (!res.ok) {
-                const data = await res.json().catch(() => ({}));
-                const msg = String(data?.message || "บันทึกไม่สำเร็จ");
-                this.showToast("error", msg);
+                const rawText = await res.text();
+                let parsed = {};
+                try {
+                  parsed = JSON.parse(rawText || "{}");
+                } catch (_) {
+                  parsed = {};
+                }
+                const bodyMsg = parsed && typeof parsed === "object" ? String(parsed.message || "").trim() : "";
+                const detail = rawText && !bodyMsg ? String(rawText).trim().slice(0, 200) : "";
+                const msg =
+                  bodyMsg ||
+                  detail ||
+                  (rawText.startsWith("{") ? "บันทึกไม่สำเร็จ" : "บันทึกไม่สำเร็จ (เซิร์ฟเวอร์ไม่ได้ตอบ JSON)");
+                this.showToast("error", `HTTP ${res.status} · ${msg}`);
                 return;
               }
               this.showToast("ok", "บันทึกเรียบร้อย");

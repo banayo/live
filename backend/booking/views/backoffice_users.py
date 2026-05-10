@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.db.models import Q
 from django.http import HttpRequest, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -30,13 +30,59 @@ def _get_request_json(request: HttpRequest) -> dict[str, Any] | None:
         return None
 
 
+def _normalize_optional_bool(value: Any) -> bool | None:
+    """Accept bool/int 0–1/strings from JSON or multipart; unknown → omit (None)."""
+    if value is None:
+        return None
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, int):
+        return True if value == 1 else False if value == 0 else None
+    s = str(value).strip().lower()
+    if s in {"true", "1", "yes", "on"}:
+        return True
+    if s in {"false", "0", "no", "off", ""}:
+        return False
+    return None
+
+
+def _normalize_optional_brand_id(value: Any) -> Any:
+    """Return int id, \"\" to clear brand, or None if key omitted / unknown."""
+    if value is None:
+        return None
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float) and value.is_integer():
+        return int(value)
+    if isinstance(value, str):
+        t = value.strip()
+        if t == "":
+            return ""
+        if t.isdigit():
+            return int(t)
+        return None
+    return None
+
+
+_MAX_PROFILE_IMAGE_BYTES = 5 * 1024 * 1024
+
+
 def _avatar_url(request: HttpRequest, profile: Profile | None) -> str:
     """Prefer uploaded file; otherwise external LINE avatar URL."""
     if profile is None:
         return ""
     try:
-        if getattr(profile.profile_image, "name", ""):
-            return request.build_absolute_uri(profile.profile_image.url)
+        f = getattr(profile, "profile_image", None)
+        name = str(getattr(f, "name", "") or "").strip()
+        if name:
+            try:
+                rel = str(f.url)
+            except ValueError:
+                rel = ""
+            if rel:
+                if rel.startswith(("http://", "https://")):
+                    return rel
+                return request.build_absolute_uri(rel)
     except Exception:
         pass
     u = str(getattr(profile, "photo_url", "") or "").strip()
@@ -129,26 +175,15 @@ def backoffice_user_update(request: HttpRequest, user_id: int) -> JsonResponse:
     role = None
     if _role_raw is not None:
         role = str(_role_raw).strip() or None
-    is_verified_raw = data.get("is_verified", None)
-    if isinstance(is_verified_raw, str) and is_multipart:
-        is_verified_raw = is_verified_raw.strip().lower()
-        if is_verified_raw in {"true", "1", "yes", "on"}:
-            is_verified_raw = True
-        elif is_verified_raw in {"false", "0", "no", "off", ""}:
-            is_verified_raw = False
-    is_verified = is_verified_raw
+    is_verified = _normalize_optional_bool(data.get("is_verified", None))
 
-    brand_id_raw = data.get("brand_id", None)
-    if isinstance(brand_id_raw, str) and is_multipart:
-        brand_id_raw = brand_id_raw.strip()
-        if brand_id_raw == "":
-            brand_id_raw = ""
-        else:
-            try:
-                brand_id_raw = int(brand_id_raw)
-            except Exception:
-                return _json_error("Invalid brand_id.", status=400, code="invalid_brand_id")
-    brand_id = brand_id_raw
+    brand_id = _normalize_optional_brand_id(data.get("brand_id", None))
+    if brand_id is None or isinstance(brand_id, (str, int)):
+        pass
+    else:
+        return _json_error("Invalid brand_id.", status=400, code="invalid_brand_id")
+    name = data.get("name", None)
+    email = data.get("email", None)
     phone_number = data.get("phone_number", None)
     kof = data.get("kof", None)
     bank_account_number = data.get("bank_account_number", None)
@@ -156,13 +191,16 @@ def backoffice_user_update(request: HttpRequest, user_id: int) -> JsonResponse:
     photo_url = data.get("photo_url", None)
     line_uid = data.get("line_uid", None)
     profile_image_file = request.FILES.get("profile_image") if is_multipart else None
+    if profile_image_file is not None:
+        content_type = str(getattr(profile_image_file, "content_type", "") or "")
+        if not content_type.startswith("image/"):
+            return _json_error("รูปโปรไฟล์ต้องเป็นไฟล์ภาพ", status=400, code="invalid_image")
+        if profile_image_file.size > _MAX_PROFILE_IMAGE_BYTES:
+            return _json_error("รูปโปรไฟล์ใหญ่เกินไป (สูงสุด 5MB)", status=400, code="image_too_large")
 
     allowed_roles = {"admin", "brand", "user"}
     if role is not None and role not in allowed_roles:
         return _json_error("Invalid role.", status=400, code="invalid_role")
-
-    if is_verified is not None and not isinstance(is_verified, bool):
-        return _json_error("Invalid is_verified.", status=400, code="invalid_verified")
 
     if brand_id is not None and brand_id != "" and not isinstance(brand_id, int):
         return _json_error("Invalid brand_id.", status=400, code="invalid_brand_id")
@@ -175,6 +213,10 @@ def backoffice_user_update(request: HttpRequest, user_id: int) -> JsonResponse:
 
     if phone_number is not None:
         phone_number = str(phone_number).strip()[:15]
+    if name is not None:
+        name = str(name).strip()[:150]
+    if email is not None:
+        email = str(email).strip().lower()[:254]
     if kof is not None:
         kof = str(kof).strip()[:50]
     if bank_account_number is not None:
@@ -201,49 +243,80 @@ def backoffice_user_update(request: HttpRequest, user_id: int) -> JsonResponse:
     with transaction.atomic():
         user = (
             User.objects.select_for_update()
-            .select_related("profile", "profile__brand")
             .filter(pk=user_id)
             .first()
         )
         if not user:
             return _json_error("User not found.", status=404, code="user_not_found")
 
-        profile = Profile.objects.select_for_update().get(user=user)
+        if email is not None:
+            if email and User.objects.exclude(pk=user_id).filter(email__iexact=email).exists():
+                return _json_error("อีเมลนี้ถูกใช้งานแล้ว", status=409, code="email_taken")
+
+        try:
+            profile = Profile.objects.select_for_update().get(user=user)
+        except Profile.DoesNotExist:
+            return _json_error("ไม่พบโปรไฟล์ของผู้ใช้คนนี้", status=404, code="missing_profile")
+
+        update_fields: list[str] = []
+        user_update_fields: list[str] = []
+
+        if name is not None:
+            # split to first_name / last_name for Django admin compatibility
+            parts = [p for p in name.split(" ") if p]
+            first_name = parts[0] if parts else ""
+            last_name = " ".join(parts[1:]) if len(parts) > 1 else ""
+            user.first_name = first_name[:150]
+            user.last_name = last_name[:150]
+            user_update_fields.extend(["first_name", "last_name"])
+
+        if email is not None:
+            user.email = email
+            user_update_fields.append("email")
 
         if role is not None:
             profile.role = role
+            update_fields.append("role")
         if is_verified is not None:
             profile.is_verified = bool(is_verified)
+            update_fields.append("is_verified")
         if brand_id is not None:
             profile.brand = brand_obj
+            update_fields.append("brand")
         if phone_number is not None:
             profile.phone_number = phone_number
+            update_fields.append("phone_number")
         if kof is not None:
             profile.kof = kof
+            update_fields.append("kof")
         if bank_account_number is not None:
             profile.bank_account_number = bank_account_number
+            update_fields.append("bank_account_number")
         if bank_name is not None:
             profile.bank_name = bank_name
+            update_fields.append("bank_name")
         if photo_url is not None:
             profile.photo_url = photo_url if photo_url else None
+            update_fields.append("photo_url")
         if line_uid is not None:
             profile.line_uid = line_uid_normalized
+            update_fields.append("line_uid")
         if profile_image_file is not None:
             profile.profile_image = profile_image_file
+            update_fields.append("profile_image")
 
-        update_fields = [
-            "role",
-            "is_verified",
-            "brand",
-            "phone_number",
-            "kof",
-            "bank_account_number",
-            "bank_name",
-            "photo_url",
-            "line_uid",
-            "profile_image",
-        ]
-        profile.save(update_fields=update_fields)
+        if update_fields:
+            try:
+                profile.save(update_fields=update_fields)
+            except IntegrityError:
+                return _json_error(
+                    "บันทึกไม่สำเร็จ (ข้อมูลชนกันในฐานข้อมูล)",
+                    status=409,
+                    code="integrity_error",
+                )
+
+        if user_update_fields:
+            user.save(update_fields=user_update_fields)
 
     return JsonResponse({"ok": True}, status=200)
 

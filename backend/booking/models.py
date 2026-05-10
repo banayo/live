@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -78,7 +79,14 @@ def create_user_profile(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
-    instance.profile.save()
+    # Partial User.save(update_fields=...) should not run a full Profile.save(),
+    # which can reload stale DB state and fight with explicit Profile updates (e.g. uploads).
+    if kwargs.get("update_fields") is not None:
+        return
+    try:
+        instance.profile.save()
+    except ObjectDoesNotExist:
+        return
 
 # ==========================================
 # 4. ตาราง LiveSchedule
