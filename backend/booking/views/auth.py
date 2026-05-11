@@ -9,6 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 
 from ..models import User
+from ..services.profile_avatar import resolve_profile_avatar_url
 from ..services.registration import create_pending_user
 from ..services.roles import is_backoffice_admin, redirect_url_for_user
 
@@ -50,6 +51,10 @@ def auth_me(request: HttpRequest) -> JsonResponse:
                 "is_verified": bool(getattr(profile, "is_verified", False)),
                 "line_uid": getattr(profile, "line_uid", None),
                 "role": profile_role,
+                "photo_url": str(getattr(profile, "photo_url", "") or "").strip()
+                if profile
+                else "",
+                "avatar_url": resolve_profile_avatar_url(request, profile),
             },
         }
     )

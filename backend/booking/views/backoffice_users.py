@@ -9,6 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 
 from ..models import Brand, Profile, User
+from ..services.profile_avatar import resolve_profile_avatar_url
 from ..services.roles import is_backoffice_admin
 
 
@@ -67,28 +68,6 @@ def _normalize_optional_brand_id(value: Any) -> Any:
 _MAX_PROFILE_IMAGE_BYTES = 5 * 1024 * 1024
 
 
-def _avatar_url(request: HttpRequest, profile: Profile | None) -> str:
-    """Prefer uploaded file; otherwise external LINE avatar URL."""
-    if profile is None:
-        return ""
-    try:
-        f = getattr(profile, "profile_image", None)
-        name = str(getattr(f, "name", "") or "").strip()
-        if name:
-            try:
-                rel = str(f.url)
-            except ValueError:
-                rel = ""
-            if rel:
-                if rel.startswith(("http://", "https://")):
-                    return rel
-                return request.build_absolute_uri(rel)
-    except Exception:
-        pass
-    u = str(getattr(profile, "photo_url", "") or "").strip()
-    return u
-
-
 @require_GET
 def backoffice_users_list(request: HttpRequest) -> JsonResponse:
     if not request.user.is_authenticated:
@@ -143,7 +122,7 @@ def backoffice_users_list(request: HttpRequest) -> JsonResponse:
                 "bank_name": getattr(profile, "bank_name", "") or "",
                 "line_uid": line_uid_raw or "",
                 "photo_url": str(photo_url_raw).strip() if photo_url_raw else "",
-                "avatar_url": _avatar_url(request, profile),
+                "avatar_url": resolve_profile_avatar_url(request, profile),
                 "role": getattr(profile, "role", "user") or "user",
                 "is_verified": bool(getattr(profile, "is_verified", False)),
                 "line_connected": bool(line_uid_raw),

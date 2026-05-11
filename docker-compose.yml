@@ -9,7 +9,8 @@ services:
       PYTHONUNBUFFERED: "1"
     volumes:
       - static_volume:/app/staticfiles
-      - media_volume:/app/media
+      # Bind mount so uploads are visible on the host and nginx serves the same files (avoids "orphan" named volumes).
+      - ./media:/app/media
     expose:
       - "8000"
     command: >
@@ -27,10 +28,9 @@ services:
       - "8011:80"
     volumes:
       - static_volume:/var/www/static:ro
-      - media_volume:/var/www/media:ro
+      - ./media:/var/www/media:ro
       - ./frontend:/var/www/frontend:ro
 
 volumes:
   static_volume:
-  media_volume:
 

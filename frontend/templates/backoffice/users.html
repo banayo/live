@@ -246,16 +246,18 @@
                       <td class="px-lg py-md">
                         <div class="flex items-center gap-md">
                           <div class="relative grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-full bg-[color:var(--stitch-primary-container)] font-heading text-sm font-semibold text-[color:var(--stitch-primary)]">
-                            <img
-                              loading="lazy"
-                              decoding="async"
-                              class="absolute inset-0 h-full w-full object-cover"
-                              :alt="''"
-                              x-show="user.avatarUrl"
-                              :src="user.avatarUrl || ''"
-                              :referrerpolicy="avatarImgReferrerPolicy(user.avatarUrl)"
-                            />
-                            <span class="relative z-[1]" x-show="!user.avatarUrl" x-text="user.initial"></span>
+                            <template x-if="avatarShowsImage(user)" :key="`av:${user.id}:${user.avatarUrl || ''}`">
+                              <img
+                                loading="eager"
+                                decoding="async"
+                                class="absolute inset-0 h-full w-full object-cover"
+                                alt=""
+                                :src="user.avatarUrl"
+                                :referrerpolicy="avatarImgReferrerPolicy(user.avatarUrl)"
+                                @error="markAvatarBroken(user.id, $event)"
+                              />
+                            </template>
+                            <span class="relative z-[1]" x-show="!avatarShowsImage(user)" x-text="user.initial"></span>
                           </div>
                           <div>
                             <p class="font-bold" x-text="user.name"></p>
@@ -311,16 +313,18 @@
           <div class="flex items-start justify-between gap-md pb-md">
             <div class="flex min-w-0 flex-1 items-start gap-md">
               <div class="relative grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-2xl bg-[color:var(--stitch-primary-container)] font-heading text-lg font-semibold text-[color:var(--stitch-primary)]">
-                <img
-                  loading="lazy"
-                  decoding="async"
-                  class="absolute inset-0 h-full w-full object-cover"
-                  x-show="modalAvatarUrl()"
-                  :src="modalAvatarUrl() || ''"
-                  alt=""
-                  :referrerpolicy="avatarImgReferrerPolicy(modalAvatarUrl())"
-                />
-                <span class="relative z-[1]" x-show="!modalAvatarUrl()" x-text="draftInitial()"></span>
+                <template x-if="modalAvatarUrl() && !modalAvatarBroken">
+                  <img
+                    loading="eager"
+                    decoding="async"
+                    class="absolute inset-0 h-full w-full object-cover"
+                    alt=""
+                    :src="modalAvatarUrl()"
+                    :referrerpolicy="avatarImgReferrerPolicy(modalAvatarUrl())"
+                    @error="onModalAvatarError($event)"
+                  />
+                </template>
+                <span class="relative z-[1]" x-show="!modalAvatarUrl() || modalAvatarBroken" x-text="draftInitial()"></span>
               </div>
               <div class="min-w-0 flex-1">
                 <p class="text-xs font-bold uppercase tracking-wider text-[color:var(--stitch-on-surface-variant)]" x-text="modalMode === 'preview' ? 'User Detail' : 'Profile Control'"></p>
@@ -495,6 +499,9 @@
           filters: ["all", "pending", "verified", "admin", "brand", "user"],
           brands: [],
           users: [],
+          /** userId -> true when avatar <img> fired error (404, blocked CDN, etc.) */
+          brokenAvatarByUserId: {},
+          modalAvatarBroken: false,
           loading: false,
           saving: false,
           toast: { show: false, tone: "ok", message: "" },
@@ -513,6 +520,7 @@
               }
               const data = await res.json();
               this.brands = Array.isArray(data.brands) ? data.brands.filter((b) => b && b.is_active).map((b) => ({ id: b.id, name: b.name })) : [];
+              this.brokenAvatarByUserId = {};
               this.users = Array.isArray(data.users) ? data.users.map((u) => this.normalizeUser(u)) : [];
             } catch (e) {
               this.showToast("error", "โหลดข้อมูลไม่สำเร็จ");
@@ -571,9 +579,53 @@
           },
 
           avatarImgReferrerPolicy(url) {
-            const s = String(url || "");
+            const s = String(url || "").trim();
             if (!s) return undefined;
-            return s.includes("line-scdn.net") || s.includes("profile.line-scdn") ? "no-referrer" : undefined;
+            try {
+              const host = new URL(s, window.location.origin).hostname.toLowerCase();
+              if (host.endsWith("line-scdn.net") || host.endsWith("line.me")) return "no-referrer";
+            } catch (_) {
+              if (s.includes("line-scdn.net") || s.includes("profile.line-scdn") || s.includes("line.me")) return "no-referrer";
+            }
+            return undefined;
+          },
+
+          markAvatarBroken(userId, event) {
+            const id = Number(userId);
+            if (!Number.isFinite(id) || id <= 0) return;
+            const el = event?.target;
+            if (!(el instanceof HTMLImageElement)) return;
+            const src = String(el.currentSrc || el.src || "").trim();
+            if (!src) return;
+            try {
+              const page = new URL(window.location.href).href;
+              if (new URL(src, window.location.origin).href === page) return;
+            } catch (_) {
+              /* non-HTTP src (e.g. blob:) — still a real load attempt */
+            }
+            this.brokenAvatarByUserId = { ...this.brokenAvatarByUserId, [id]: true };
+          },
+
+          onModalAvatarError(event) {
+            const el = event?.target;
+            if (!(el instanceof HTMLImageElement)) return;
+            const src = String(el.currentSrc || el.src || "").trim();
+            if (!src) return;
+            try {
+              const page = new URL(window.location.href).href;
+              if (new URL(src, window.location.origin).href === page) return;
+            } catch (_) {
+              /* blob: etc. */
+            }
+            this.modalAvatarBroken = true;
+          },
+
+          avatarShowsImage(user) {
+            const url = String(user?.avatarUrl || "").trim();
+            if (!url) return false;
+            const id = Number(user?.id || 0);
+            if (Number.isFinite(id) && id > 0 && this.brokenAvatarByUserId[id]) return false;
+            return true;
           },
 
           hydrateDraft(user) {
@@ -669,6 +721,7 @@
           },
 
           openCreate() {
+            this.modalAvatarBroken = false;
             this.selectedUser = { name: "ผู้ใช้ใหม่", initial: "?" };
             this.draft = {
               role: "user",
@@ -687,6 +740,7 @@
           },
 
           openPreview(user) {
+            this.modalAvatarBroken = false;
             this.selectedUser = user;
             this.draft = this.hydrateDraft(user);
             this.modalMode = "preview";
@@ -694,6 +748,7 @@
           },
 
           openEdit(user) {
+            this.modalAvatarBroken = false;
             this.selectedUser = user;
             this.draft = this.hydrateDraft(user);
             this.modalMode = "edit";
@@ -778,6 +833,7 @@
           closeModal() {
             this.modalOpen = false;
             this.selectedUser = null;
+            this.modalAvatarBroken = false;
           },
 
           showToast(tone, message) {

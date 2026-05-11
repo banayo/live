@@ -101,6 +101,16 @@ def line_callback(request: HttpRequest):
         if picture_url:
             profile.photo_url = picture_url
         profile.save()
+    else:
+        # Keep LINE profile picture URL fresh for avatar fallback (file image still wins in APIs).
+        profile_updates: list[str] = []
+        if picture_url and (profile.photo_url or "").strip() != picture_url:
+            profile.photo_url = picture_url
+            profile_updates.append("photo_url")
+        if display_name and profile.user.first_name != display_name[:150]:
+            User.objects.filter(pk=profile.user_id).update(first_name=display_name[:150])
+        if profile_updates:
+            profile.save(update_fields=profile_updates)
 
     if not profile.is_verified:
         return redirect("/login?error=not_verified")

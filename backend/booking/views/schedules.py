@@ -9,6 +9,7 @@ from django.utils.dateparse import parse_datetime
 from django.views.decorators.http import require_GET
 
 from ..models import LiveSchedule
+from ..services.profile_avatar import resolve_profile_avatar_url
 from ..services.roles import is_backoffice_admin
 
 
@@ -80,15 +81,8 @@ def live_schedule_feed(request):
             or "Host"
         )
 
-        icon_url = ""
-        try:
-            host_profile = getattr(host, "profile", None)
-            if host_profile and host_profile.profile_image:
-                icon_url = host_profile.profile_image.url
-            elif host_profile:
-                icon_url = host_profile.photo_url or ""
-        except Exception:
-            icon_url = ""
+        host_profile = getattr(host, "profile", None)
+        icon_url = resolve_profile_avatar_url(request, host_profile)
 
         is_editable = bool(
             is_admin
