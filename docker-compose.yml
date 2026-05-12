@@ -14,8 +14,7 @@ services:
     expose:
       - "8000"
     command: >
-      sh -c "python manage.py makemigrations booking --noinput
-      && python manage.py migrate
+      sh -c "python manage.py migrate
       && python manage.py collectstatic --noinput
       && gunicorn core.wsgi:application --bind 0.0.0.0:8000 --workers 2 --threads 1 --timeout 60 --max-requests 500 --max-requests-jitter 50 --access-logfile - --error-logfile -"
 
@@ -30,6 +29,9 @@ services:
       - static_volume:/var/www/static:ro
       - ./media:/var/www/media:ro
       - ./frontend:/var/www/frontend:ro
+      # Use repo config at runtime so new locations apply without rebuilding the image.
+      # After editing default.conf, reload nginx so workers pick it up: docker compose exec nginx nginx -s reload
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
 
 volumes:
   static_volume:

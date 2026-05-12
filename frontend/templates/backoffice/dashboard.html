@@ -61,6 +61,14 @@
       .pink-gradient {
         background: linear-gradient(135deg, #fce4ec 0%, #f4dce4 100%);
       }
+
+      .bo-nav-mobilescroll {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+      .bo-nav-mobilescroll::-webkit-scrollbar {
+        display: none;
+      }
     </style>
 
     <script>
@@ -96,31 +104,34 @@
             <span class="material-symbols-outlined text-[color:var(--stitch-primary)]" style="font-variation-settings: 'FILL' 1">hub</span>
           </div>
           <div>
-            <h1 class="font-heading text-xl font-bold text-[color:var(--stitch-primary)]">Live Ops</h1>
-            <p class="text-[10px] font-bold uppercase tracking-wider text-[color:var(--stitch-on-surface-variant)]">Backoffice Center</p>
+            <h1 class="font-heading text-xl font-bold text-[color:var(--stitch-primary)]">Kamrats live</h1>
           </div>
         </div>
 
-        <nav class="flex flex-grow flex-col gap-sm">
-          <a class="flex items-center gap-md rounded-full bg-[color:var(--stitch-primary-container)] px-lg py-md text-[color:var(--stitch-on-primary-container)] shadow-sm" href="/backoffice/dashboard">
-            <span class="material-symbols-outlined">dashboard</span>
-            <span class="text-xs font-bold uppercase tracking-wider">Dashboard</span>
+        <nav class="flex flex-grow flex-col gap-sm" aria-label="เมนูหลัก">
+          <a class="flex min-w-0 items-center gap-md rounded-full bg-[color:var(--stitch-primary-container)] px-lg py-md font-heading text-[0.8125rem] font-semibold tracking-wide text-[color:var(--stitch-on-primary-container)] shadow-[0_10px_28px_-12px_rgba(107,90,96,0.45)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--stitch-primary)]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--stitch-surface-container-lowest)]" href="/backoffice/dashboard" aria-current="page">
+            <span class="material-symbols-outlined shrink-0" style="font-variation-settings: 'FILL' 1">dashboard</span>
+            <span class="truncate">แดชบอร์ด</span>
           </a>
-          <a class="flex items-center gap-md rounded-full px-lg py-md text-[color:var(--stitch-on-surface-variant)] transition hover:translate-x-1 hover:bg-[color:var(--stitch-surface-container-high)]" href="#">
-            <span class="material-symbols-outlined">verified_user</span>
-            <span class="text-xs font-bold uppercase tracking-wider">Verification</span>
+          <a class="flex min-w-0 items-center gap-md rounded-full px-lg py-md font-heading text-[0.8125rem] font-semibold tracking-wide text-[color:var(--stitch-on-surface-variant)] transition duration-150 hover:translate-x-0.5 hover:bg-[color:var(--stitch-surface-container-high)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--stitch-primary-container)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--stitch-surface-container-lowest)]" href="/backoffice/users">
+            <span class="material-symbols-outlined shrink-0">group</span>
+            <span class="truncate">ผู้ใช้</span>
           </a>
-          <a class="flex items-center gap-md rounded-full px-lg py-md text-[color:var(--stitch-on-surface-variant)] transition hover:translate-x-1 hover:bg-[color:var(--stitch-surface-container-high)]" href="#">
-            <span class="material-symbols-outlined">calendar_today</span>
-            <span class="text-xs font-bold uppercase tracking-wider">Calendar</span>
+          <a class="flex min-w-0 items-center gap-md rounded-full px-lg py-md font-heading text-[0.8125rem] font-semibold tracking-wide text-[color:var(--stitch-on-surface-variant)] transition duration-150 hover:translate-x-0.5 hover:bg-[color:var(--stitch-surface-container-high)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--stitch-primary-container)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--stitch-surface-container-lowest)]" href="/backoffice/calendar">
+            <span class="material-symbols-outlined shrink-0">calendar_today</span>
+            <span class="truncate">ปฏิทิน</span>
           </a>
-          <a class="flex items-center gap-md rounded-full px-lg py-md text-[color:var(--stitch-on-surface-variant)] transition hover:translate-x-1 hover:bg-[color:var(--stitch-surface-container-high)]" href="#">
-            <span class="material-symbols-outlined">stars</span>
-            <span class="text-xs font-bold uppercase tracking-wider">Brands</span>
+          <a class="flex min-w-0 items-center gap-md rounded-full px-lg py-md font-heading text-[0.8125rem] font-semibold tracking-wide text-[color:var(--stitch-on-surface-variant)] transition duration-150 hover:translate-x-0.5 hover:bg-[color:var(--stitch-surface-container-high)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--stitch-primary-container)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--stitch-surface-container-lowest)]" href="/backoffice/bookings">
+            <span class="material-symbols-outlined shrink-0">receipt_long</span>
+            <span class="truncate">ใบจอง</span>
           </a>
-          <a class="flex items-center gap-md rounded-full px-lg py-md text-[color:var(--stitch-on-surface-variant)] transition hover:translate-x-1 hover:bg-[color:var(--stitch-surface-container-high)]" href="/backoffice/users">
-            <span class="material-symbols-outlined">group</span>
-            <span class="text-xs font-bold uppercase tracking-wider">Users</span>
+          <a class="flex min-w-0 items-center gap-md rounded-full px-lg py-md font-heading text-[0.8125rem] font-semibold tracking-wide text-[color:var(--stitch-on-surface-variant)] transition duration-150 hover:translate-x-0.5 hover:bg-[color:var(--stitch-surface-container-high)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--stitch-primary-container)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--stitch-surface-container-lowest)]" href="/backoffice/brands">
+            <span class="material-symbols-outlined shrink-0">stars</span>
+            <span class="truncate">แบรนด์</span>
+          </a>
+          <a class="flex min-w-0 items-center gap-md rounded-full px-lg py-md font-heading text-[0.8125rem] font-semibold tracking-wide text-[color:var(--stitch-on-surface-variant)] transition duration-150 hover:translate-x-0.5 hover:bg-[color:var(--stitch-surface-container-high)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--stitch-primary-container)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--stitch-surface-container-lowest)]" href="/backoffice/channels">
+            <span class="material-symbols-outlined shrink-0">podcasts</span>
+            <span class="truncate">ช่องทาง</span>
           </a>
         </nav>
 
@@ -135,6 +146,14 @@
 
       <!-- Content -->
       <main class="min-h-screen lg:ml-64">
+        <nav class="bo-nav-mobilescroll lg:hidden sticky top-0 z-[45] flex gap-xs overflow-x-auto border-b border-[color:var(--stitch-outline-variant)]/25 bg-[color:var(--stitch-surface)]/98 px-md py-sm backdrop-blur-md" aria-label="เมนูหลัก">
+          <a class="shrink-0 rounded-full bg-[color:var(--stitch-primary-container)] px-md py-2 font-heading text-[11px] font-semibold text-[color:var(--stitch-on-primary-container)] shadow-sm" href="/backoffice/dashboard" aria-current="page">แดชบอร์ด</a>
+          <a class="shrink-0 rounded-full bg-[color:var(--stitch-surface-container-low)] px-md py-2 font-heading text-[11px] font-semibold text-[color:var(--stitch-on-surface-variant)] transition hover:bg-[color:var(--stitch-surface-container-high)]" href="/backoffice/users">ผู้ใช้</a>
+          <a class="shrink-0 rounded-full bg-[color:var(--stitch-surface-container-low)] px-md py-2 font-heading text-[11px] font-semibold text-[color:var(--stitch-on-surface-variant)] transition hover:bg-[color:var(--stitch-surface-container-high)]" href="/backoffice/calendar">ปฏิทิน</a>
+          <a class="shrink-0 rounded-full bg-[color:var(--stitch-surface-container-low)] px-md py-2 font-heading text-[11px] font-semibold text-[color:var(--stitch-on-surface-variant)] transition hover:bg-[color:var(--stitch-surface-container-high)]" href="/backoffice/bookings">ใบจอง</a>
+          <a class="shrink-0 rounded-full bg-[color:var(--stitch-surface-container-low)] px-md py-2 font-heading text-[11px] font-semibold text-[color:var(--stitch-on-surface-variant)] transition hover:bg-[color:var(--stitch-surface-container-high)]" href="/backoffice/brands">แบรนด์</a>
+          <a class="shrink-0 rounded-full bg-[color:var(--stitch-surface-container-low)] px-md py-2 font-heading text-[11px] font-semibold text-[color:var(--stitch-on-surface-variant)] transition hover:bg-[color:var(--stitch-surface-container-high)]" href="/backoffice/channels">ช่องทาง</a>
+        </nav>
         <!-- Top bar -->
         <header class="sticky top-0 z-40 flex w-full items-center justify-between gap-lg bg-[color:var(--stitch-surface)] px-lg py-md shadow-[0_20px_40px_-15px_rgba(107,90,96,0.08)]">
           <div class="flex min-w-0 flex-1 items-center gap-lg">

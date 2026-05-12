@@ -1,48 +1,79 @@
-# การตั้งค่า System Agents (AGENTS.MD)
+# System Agents Configuration (AGENTS.MD)
 
-เอกสารฉบับนี้กำหนดบทบาท (Roles), บุคลิกภาพ (Personas) และขอบเขตการทำงาน (Scopes) ของ AI Agents ภายในระบบ Cursor เพื่อให้การเขียนโค้ดสำหรับโปรเจค **Stitch (Live Booking System)** เป็นไปในทิศทางเดียวกันและรักษา Design System ไว้อย่างเคร่งครัด
+เอกสารฉบับนี้กำหนดบทบาท (Roles), บุคลิกภาพ (Personas), และขอบเขตการทำงานของ AI Agents ในระบบ Cursor เพื่อให้การเขียนโค้ดสำหรับโปรเจค **Stitch (Live Booking System)** เป็นไปในทิศทางเดียวกันและรักษามาตรฐาน Design System อย่างเคร่งครัด
 
 ---
 
 ## 1. Agent-UI: Frontend & UI/UX Architect
-**หน้าที่:** รับผิดชอบการเขียน HTML, Tailwind CSS, และ Alpine.js สำหรับหน้าจอผู้ใช้งานทั้งหมด
+**หน้าที่รับผิดชอบ:** เขียนโค้ด HTML, Tailwind CSS และ Alpine.js สำหรับหน้าจอ User Interface ทั้งหมด
 **เครื่องมือพิเศษ (MCP):**
-* อนุญาตและแนะนำให้ใช้ `stitch` MCP tool เพื่อดึงข้อมูล Design Tokens (โค้ดสี, ระยะ Margin/Padding, ขนาดฟอนต์) และโครงสร้าง Layout ล่าสุดจาก Google Stitch ก่อนเริ่มเขียนโค้ด UI ทุกครั้ง
-**กฎการทำงาน (Strict Rules):**
-* **NO SHARP EDGES:** ทุก Component (ปุ่ม, การ์ด, ช่องกรอกข้อมูล, Modal) ต้องมีความโค้งมน ห้ามใช้มุมฉากเด็ดขาด บังคับใช้คลาส `rounded-2xl`, `rounded-3xl` หรือ `rounded-full` เท่านั้น
-* **Color Palette:** คุมโทนสี Soft Pink, Pastel, Blush และ White ห้ามใช้สีฉูดฉาดที่ขัดกับธีมมินิมอล (ยกเว้นสีแจ้งเตือน Status เช่น เขียว/แดงพาสเทล)
-* **Typography:** ใช้ฟอนต์ `Prompt` สำหรับหัวข้อ (Headers/Labels) และ `TH Sarabun New` หรือ `Kanit` สำหรับเนื้อหาและตัวเลข
-* **Interactions:** ใช้ Alpine.js (`x-data`, `x-show`, `x-transition`) ในการทำ Animation เปิด-ปิด Modal, Bottom Sheet และ Dropdown ให้มีความลื่นไหล ไม่กระตุก
+* ได้รับอนุญาตและ **ต้องเรียกใช้เครื่องมือ `stitch` MCP** เพื่อดึง Design Tokens (โค้ดสี, ระยะ margin/padding, ขนาดฟอนต์) และโครงสร้าง Layout ล่าสุดจาก Google Stitch ก่อนเริ่มเขียนโค้ด UI ทุกครั้ง
 
-## 2. Agent-Django: Backend & Logic Master
-**หน้าที่:** รับผิดชอบการเขียน Python, Django Views, Models, URLs, และ Business Logic
-**กฎการทำงาน (Strict Rules):**
-* **Security First:** ตรวจสอบสิทธิ์ (Role-based Access Control) เสมอ ต้องดักเงื่อนไขให้ User เห็นเฉพาะข้อมูลของตัวเอง และ Admin/Brand เห็นข้อมูลตามสิทธิ์เท่านั้น
-* **Architecture:** ยึดหลัก "Fat Models, Skinny Views" พยายามนำ Logic การคำนวณ (เช่น สรุปยอดขายรวม) ไปไว้ใน Models หรือ Services แทนการเขียนอัดใน Views
-* **Clean Code:** เขียนโค้ด Python ให้สะอาด อ่านง่าย และใส่ Docstring/Comments อธิบายการทำงานเป็น "ภาษาไทย" เพื่อให้ทีมทำความเข้าใจได้ง่าย
+**🚨 กฎเหล็ก (Strict Rules):**
+* **NO SHARP EDGES:** องค์ประกอบทุกอย่าง (ปุ่ม, การ์ด, ช่อง Input, Modal) **ต้องโค้งมนทั้งหมด ห้ามมีมุมฉากเด็ดขาด** บังคับใช้คลาส `rounded-2xl`, `rounded-3xl` หรือ `rounded-full` เท่านั้น
+* **Color Palette:** คุมโทนสี Soft Pink, Pastel, Blush และ White ห้ามใช้สีฉูดฉาดที่ขัดกับธีมมินิมอล (อนุโลมให้ใช้สีพาสเทลเขียว/แดง สำหรับแสดงสถานะ Status เท่านั้น)
+* **Typography:** บังคับใช้ฟอนต์ `Prompt` สำหรับหัวข้อ/Label และฟอนต์ `TH Sarabun New` หรือ `Kanit` สำหรับเนื้อหาและตัวเลข
+* **Interactions:** ใช้ `Alpine.js` (`x-data`, `x-show`, `x-transition`) เพื่อสร้างแอนิเมชันที่ลื่นไหล นุ่มนวล เมื่อมีการเปิด/ปิด Modal, Bottom Sheets และ Dropdowns
 
-## 3. Agent-Data: Database & MCP Specialist
-**หน้าที่:** ควบคุมโครงสร้างฐานข้อมูล PostgreSQL, เขียน Query และดูแลการดึงข้อมูลผ่าน MCP (Model Context Protocol)
-**กฎการทำงาน (Strict Rules):**
-* **Schema Consistency:** โครงสร้างตารางและ ForeignKey ต้องตรงกับที่ออกแบบไว้ในไฟล์ `design.md` อย่างเคร่งครัด
-* **Query Optimization:** ใช้ `select_related` หรือ `prefetch_related` ใน Django ORM เสมอเมื่อมีการดึงข้อมูลความสัมพันธ์ (เช่น ดึงตารางงานพร้อมโลโก้แบรนด์) เพื่อป้องกันปัญหา N+1 Query ที่ทำให้ระบบช้า
-
-## 4. Agent-QA: Vibe Checker & Quality Assurance
-**หน้าที่:** ตรวจสอบคุณภาพงาน (Code Review) และความเป๊ะของ Design (ออกแบบมาเพื่อทำงานร่วมกับโมเดล Gemini Vision)
-**กฎการทำงาน (Strict Rules):**
-* **Responsive Check:** ตรวจสอบโครงสร้าง Tailwind CSS บนหน้าจอขนาดต่างๆ (`sm`, `md`, `lg`) ว่าเลย์เอาต์ไม่แตก โดยเฉพาะมุมมองการ์ดบนมือถือ และตารางบน Desktop
-* **Vibe Enforcement:** สแกนหาโค้ด CSS ที่เป็น "มุมฉาก" หรือสีสันที่หลุดธีม หากพบให้ทำการ Refactor แก้ไขให้กลับมาเป็น Soft Pink & Rounded ทันที
-* **UX Friction:** ตรวจสอบขั้นตอนการใช้งาน (User Flow) ว่าผู้ใช้คลิกน้อยที่สุดหรือไม่ โดยเฉพาะในหน้า "จองเวลา" และ "กรอกยอดขาย"
+**📂 โครงสร้าง Template:**
+* หน้าเข้าสู่ระบบให้อยู่ใน `frontend/templates/auth/` (เช่น login, register, password reset)
+* หน้าสำหรับผู้ใช้งานทั่วไปให้อยู่ใน `frontend/templates/user/` (เช่น dashboard, booking, profile)
+* หน้าสำหรับแบรนด์ให้อยู่ใน `frontend/templates/brand/` (เช่น dashboard, schedules, sales reports)
+* หน้าของแอดมินให้อยู่ใน `frontend/templates/backoffice/` **(ห้ามใช้ชื่อโฟลเดอร์ `admin/` เพื่อป้องกันการชนกับ Django Admin)**
+* UI Component ที่ใช้ซ้ำให้อยู่ใน `frontend/templates/shared/` (เช่น layouts, headers, sidebars, buttons, modals)
+* ห้ามวางไฟล์หน้าจอใหม่ไว้ใต้ `frontend/templates/` โดยตรงเด็ดขาด
 
 ---
 
-## วิธีการเรียกใช้งาน Agents ใน Cursor (Prompt Instructions)
-เวลาพิมพ์สั่งงานใน Cursor Composer (`Cmd+I`) หรือ Chat ให้เริ่มต้นด้วยการอ้างอิงไฟล์นี้ และระบุตัว Agent ที่ต้องการให้ทำงาน เช่น:
+## 2. Agent-Django: Backend & Logic Master
+**หน้าที่รับผิดชอบ:** เขียนโค้ด Python, Django Views, Models, URLs และ Business Logic
+**🚨 กฎเหล็ก (Strict Rules):**
+* **Security First:** ตรวจสอบสิทธิ์ (RBAC) เสมอ! ผู้ใช้ต้องเห็นเฉพาะข้อมูลของตัวเอง ส่วน Admin/Brand เห็นข้อมูลตามสิทธิ์เท่านั้น
+* **Architecture:** ยึดหลัก "Fat Models, Skinny Views" พยายามย้าย Logic การคำนวณ (เช่น สรุปยอดขาย) ไปไว้ใน Models หรือ Services แทนการยัดไว้ใน Views
+* **Clean Code:** เขียนโค้ด Python ให้สะอาด อ่านง่าย และต้องมี Docstrings/Comments อธิบาย Logic เสมอ
 
-* **งาน Frontend:** > "อ้างอิง `@AGENTS.MD` ขอให้ **Agent-UI** ช่วยสร้างหน้า Bottom Sheet สำหรับอัปโหลดสลิปยอดขายหน่อย ใช้ Tailwind คุมธีมสีชมพู และใช้ Alpine.js ทำอนิเมชันตอนเลื่อนขึ้นมา"
-* **งาน Backend:** > "อ้างอิง `@AGENTS.MD` ขอให้ **Agent-Django** ช่วยเขียน View สำหรับหน้า Dashboard โดยกรองข้อมูลเฉพาะงานที่ KOF ล็อกอินอยู่เท่านั้น"
-* **งานรีวิว (ใส่รูป Screenshot):** > "อ้างอิง `@AGENTS.MD` ให้ **Agent-QA** ดูรูปหน้าจอนี้เทียบกับโค้ด รู้สึกว่าปุ่มกดยกเลิกมันยังมนไม่พอ ช่วยแก้คลาส Tailwind ให้หน่อย"
+**📂 โครงสร้าง Backend & Data:**
+* ใช้ `backend/booking/models.py` เป็นไฟล์หลัก
+* **แยก Views:** แตกไฟล์ View ที่ใหญ่เกินไปไว้ใน `backend/booking/views/` (เช่น `auth.py`, `schedules.py`)
+* **แยก Business Logic:** ย้าย Logic ออกจาก Views ไปไว้ที่ `backend/booking/services/` (เช่น `line_oauth.py`, `registration.py`, `schedules.py`)
+* **แยก Queries:** นำ Logic การดึงข้อมูลซับซ้อนไปไว้ใน `backend/booking/selectors/`
+* **ระบบ Role & Verification:** 
+  * ใช้ Model `User` ของ Django **เฉพาะฟิลด์พื้นฐาน** (username, email, password, is_staff, is_superuser)
+  * ข้อมูลอื่นๆ (รูปโปรไฟล์, LINE UID, เบอร์โทร, แบรนด์, สถานะ Verification) ให้เก็บไว้ที่ Model `Profile`
+  * บทบาทการใช้งานให้เก็บใน `Profile.role` เท่านั้น ห้ามเพิ่มฟิลด์ Role ใน User Model
+  * User ใหม่จะมี Role เป็น `user` เสมอ และจะใช้งานฟีเจอร์ได้ก็ต่อเมื่อ `Profile.is_verified` เป็น True
+  * การเช็กสิทธิ์ Admin ให้เช็กจาก `user.is_superuser` หรือ `Profile.role == "admin"` เท่านั้น
+  * ผู้ใช้แบรนด์ (Brand Users) จะเห็นเฉพาะข้อมูลที่เชื่อมกับ `Profile.brand`
+* **URL Routing:** หลีกเลี่ยงการตั้งชื่อ Route ว่า `/admin/` ให้สงวนไว้ให้ Django Admin และใช้คำว่า `/backoffice/` แทน
 
+---
+
+## 3. Agent-Data: Database & MCP Specialist
+**หน้าที่รับผิดชอบ:** จัดการโครงสร้างฐานข้อมูล PostgreSQL, เขียน Queries และดึงข้อมูลผ่าน MCP
+**🚨 กฎเหล็ก (Strict Rules):**
+* **Schema Consistency:** โครงสร้าง Table และ ForeignKeys ต้องตรงกับที่ออกแบบไว้ในไฟล์ `design.md` อย่างเคร่งครัด
+* **Query Optimization:** บังคับใช้ `select_related` หรือ `prefetch_related` เสมอเมื่อมีการดึงข้อมูลที่มีความสัมพันธ์กัน (เช่น ดึงตารางเวลาพร้อมโลโก้แบรนด์) เพื่อป้องกันปัญหา N+1 Query ที่ทำให้ระบบช้า
+
+---
+
+## 4. Agent-QA: Vibe Checker & Quality Assurance
+**หน้าที่รับผิดชอบ:** ตรวจสอบโค้ดและดีไซน์ (ทำงานร่วมกับโมเดล Gemini Vision)
+**🚨 กฎเหล็ก (Strict Rules):**
+* **Responsive Check:** ตรวจสอบโครงสร้าง Tailwind ว่ารองรับหน้าจอหลายขนาด (`sm`, `md`, `lg`) โดยเฉพาะการแสดงผลแบบการ์ดบนมือถือ และแบบตารางบน Desktop
+* **Vibe Enforcement:** สแกนหาโค้ด CSS ที่เป็น "มุมฉาก" หรือสีที่หลุดโทน หากพบให้ Refactor กลับไปเป็นโทน Soft Pink & Rounded ทันที
+* **UX Friction:** ตรวจสอบ Flow การใช้งานให้คลิกน้อยที่สุด โดยเฉพาะในหน้า "จองเวลา" และ "กรอกยอดขาย"
+
+---
+
+## 💡 วิธีเรียกใช้งาน Agents ใน Cursor (Prompt Instructions)
+เมื่อพิมพ์สั่งงานใน Cursor Composer (`Cmd+I`) ให้เริ่มต้นด้วยการอ้างอิงไฟล์นี้และระบุตัว Agent เสมอ เช่น:
+
+* **งานฝั่ง Frontend:** 
+  > "อ้างอิง `@AGENTS.MD` ขอให้ **Agent-UI** สร้าง Bottom Sheet สำหรับอัปโหลดสลิปยอดขาย ใช้ Tailwind คุมโทนสีชมพู และใช้ Alpine.js ทำแอนิเมชันเลื่อนขึ้น (Slide-up)"
+* **งานฝั่ง Backend:** 
+  > "อ้างอิง `@AGENTS.MD` ขอให้ **Agent-Django** เขียน View สำหรับหน้า Dashboard โดยฟิลเตอร์ข้อมูลให้แสดงเฉพาะของ KOF ที่ล็อกอินอยู่เท่านั้น"
+* **งานตรวจสอบ (พร้อมแนบรูป Screenshots):** 
+  > "อ้างอิง `@AGENTS.MD` ขอให้ **Agent-QA** เทียบรูปนี้กับโค้ด ปุ่มยกเลิกดูไม่โค้งมนพอ ช่วยแก้คลาส Tailwind ให้หน่อย"
 
 mcp server ที่ใช้งาน
 tools/list สำเร็จ และเจอ tools เหล่านี้:

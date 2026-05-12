@@ -14,6 +14,12 @@ urlpatterns = [
     path("api/backoffice/auth-check/", views.backoffice_auth_check, name="backoffice_auth_check"),
     path("api/backoffice/users/", views.backoffice_users_list, name="backoffice_users_list"),
     path("api/backoffice/users/<int:user_id>/", views.backoffice_user_update, name="backoffice_user_update"),
+    path("api/backoffice/brands/", views.backoffice_brands_list, name="backoffice_brands_list"),
+    path("api/backoffice/brands/create/", views.backoffice_brand_create, name="backoffice_brand_create"),
+    path("api/backoffice/brands/<int:brand_id>/", views.backoffice_brand_update, name="backoffice_brand_update"),
+    path("api/backoffice/channels/", views.backoffice_channels_list, name="backoffice_channels_list"),
+    path("api/backoffice/channels/create/", views.backoffice_channel_create, name="backoffice_channel_create"),
+    path("api/backoffice/channels/<int:channel_id>/", views.backoffice_channel_update, name="backoffice_channel_update"),
     path("api/schedules/", views.live_schedule_feed, name="live_schedule_feed"),
 ]
 

@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#fce4ec" />
+    <title>จัดการช่องทาง | Stitch Live Booking</title>
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Prompt:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --stitch-surface: #f9f9f9;
+        --stitch-surface-container-lowest: #ffffff;
+        --stitch-surface-container-low: #f3f3f3;
+        --stitch-surface-container: #eeeeee;
+        --stitch-surface-container-high: #e8e8e8;
+        --stitch-on-surface: #1a1c1c;
+        --stitch-on-surface-variant: #4d4447;
+        --stitch-outline-variant: #d0c3c7;
+        --stitch-primary: #6b5a60;
+        --stitch-primary-fixed: #f4dce4;
+        --stitch-primary-container: #fce4ec;
+        --stitch-on-primary-container: #76646b;
+        --stitch-secondary-container: #d3e2ed;
+        --stitch-on-secondary-container: #56656e;
+        --stitch-tertiary-container: #e0ede1;
+        --stitch-on-tertiary-container: #606c62;
+        --stitch-error-container: #ffdad6;
+        --stitch-on-error-container: #93000a;
+      }
+
+      .material-symbols-outlined {
+        font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+      }
+
+      .soft-shadow {
+        box-shadow: 0 20px 40px -15px rgba(107, 90, 96, 0.08);
+      }
+
+      .side-shadow {
+        box-shadow: 20px 0 40px -15px rgba(107, 90, 96, 0.05);
+      }
+
+      .bo-nav-mobilescroll {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+      .bo-nav-mobilescroll::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              heading: ["Prompt", "ui-sans-serif", "system-ui"],
+              body: ["Kanit", "ui-sans-serif", "system-ui"],
+            },
+            spacing: {
+              xs: "4px",
+              sm: "8px",
+              md: "16px",
+              lg: "24px",
+              xl: "32px",
+              xxl: "48px",
+              gutter: "16px",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+
+  <body class="min-h-screen bg-[color:var(--stitch-surface)] font-body text-[color:var(--stitch-on-surface)]">
+    <div x-data="channelManagement()" x-init="init()">
+      <div
+        class="pointer-events-none fixed left-1/2 top-lg z-[60] w-full max-w-md -translate-x-1/2 px-lg"
+        x-show="toast.show"
+        x-transition.opacity.duration.150ms
+        style="display: none"
+      >
+        <div
+          class="pointer-events-auto flex items-start justify-between gap-md rounded-3xl border bg-white px-md py-md soft-shadow"
+          :class="toast.tone === 'ok' ? 'border-[color:var(--stitch-tertiary-container)]' : 'border-[color:var(--stitch-error-container)]'"
+        >
+          <div class="min-w-0">
+            <p class="text-sm font-bold text-[color:var(--stitch-primary)]" x-text="toast.tone === 'ok' ? 'สำเร็จ' : 'เกิดข้อผิดพลาด'"></p>
+            <p class="mt-xs text-sm text-[color:var(--stitch-on-surface-variant)]" x-text="toast.message"></p>
+          </div>
+          <button
+            class="grid h-9 w-9 place-items-center rounded-full bg-[color:var(--stitch-surface-container-low)] transition hover:bg-[color:var(--stitch-primary-container)] active:scale-95"
+            type="button"
+            @click="toast.show = false"
+          >
+            <span class="material-symbols-outlined text-sm">close</span>
+          </button>
+        </div>
+      </div>
+
+      <aside class="fixed left-0 top-0 z-50 hidden h-screen w-64 flex-col gap-xl rounded-r-3xl bg-[color:var(--stitch-surface-container-lowest)] p-lg side-shadow lg:flex">
+        <div class="flex items-center gap-md">
+          <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-[color:var(--stitch-primary-container)]">
+            <span class="material-symbols-outlined text-[color:var(--stitch-primary)]" style="font-variation-settings: 'FILL' 1">hub</span>
+          </div>
+          <div>
+            <h1 class="font-heading text-xl font-bold text-[color:var(--stitch-primary)]">Kamrats live</h1>
+          </div>
+        </div>
+
+        <nav class="flex flex-grow flex-col gap-sm" aria-label="เมนูหลัก">
+          <a class="flex min-w-0 items-center gap-md rounded-full px-lg py-md font-heading text-[0.8125rem] font-semibold tracking-wide text-[color:var(--stitch-on-surface-variant)] transition duration-150 hover:translate-x-0.5 hover:bg-[color:var(--stitch-surface-container-high)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--stitch-primary-container)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--stitch-surface-container-lowest)]" href="/backoffice/dashboard">
+            <span class="material-symbols-outlined shrink-0">dashboard</span>
+            <span class="truncate">แดชบอร์ด</span>
+          </a>
+          <a class="flex min-w-0 items-center gap-md rounded-full px-lg py-md font-heading text-[0.8125rem] font-semibold tracking-wide text-[color:var(--stitch-on-surface-variant)] transition duration-150 hover:translate-x-0.5 hover:bg-[color:var(--stitch-surface-container-high)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--stitch-primary-container)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--stitch-surface-container-lowest)]" href="/backoffice/users">
+            <span class="material-symbols-outlined shrink-0">group</span>
+            <span class="truncate">ผู้ใช้</span>
+          </a>
+          <a class="flex min-w-0 items-center gap-md rounded-full px-lg py-md font-heading text-[0.8125rem] font-semibold tracking-wide text-[color:var(--stitch-on-surface-variant)] transition duration-150 hover:translate-x-0.5 hover:bg-[color:var(--stitch-surface-container-high)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--stitch-primary-container)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--stitch-surface-container-lowest)]" href="/backoffice/calendar">
+            <span class="material-symbols-outlined shrink-0">calendar_today</span>
+            <span class="truncate">ปฏิทิน</span>
+          </a>
+          <a class="flex min-w-0 items-center gap-md rounded-full px-lg py-md font-heading text-[0.8125rem] font-semibold tracking-wide text-[color:var(--stitch-on-surface-variant)] transition duration-150 hover:translate-x-0.5 hover:bg-[color:var(--stitch-surface-container-high)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--stitch-primary-container)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--stitch-surface-container-lowest)]" href="/backoffice/bookings">
+            <span class="material-symbols-outlined shrink-0">receipt_long</span>
+            <span class="truncate">ใบจอง</span>
+          </a>
+          <a class="flex min-w-0 items-center gap-md rounded-full px-lg py-md font-heading text-[0.8125rem] font-semibold tracking-wide text-[color:var(--stitch-on-surface-variant)] transition duration-150 hover:translate-x-0.5 hover:bg-[color:var(--stitch-surface-container-high)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--stitch-primary-container)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--stitch-surface-container-lowest)]" href="/backoffice/brands">
+            <span class="material-symbols-outlined shrink-0">stars</span>
+            <span class="truncate">แบรนด์</span>
+          </a>
+          <a class="flex min-w-0 items-center gap-md rounded-full bg-[color:var(--stitch-primary-container)] px-lg py-md font-heading text-[0.8125rem] font-semibold tracking-wide text-[color:var(--stitch-on-primary-container)] shadow-[0_10px_28px_-12px_rgba(107,90,96,0.45)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--stitch-primary)]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--stitch-surface-container-lowest)]" href="/backoffice/channels" aria-current="page">
+            <span class="material-symbols-outlined shrink-0" style="font-variation-settings: 'FILL' 1">podcasts</span>
+            <span class="truncate">ช่องทาง</span>
+          </a>
+        </nav>
+      </aside>
+
+      <main class="min-h-screen lg:ml-64">
+        <nav class="bo-nav-mobilescroll lg:hidden sticky top-0 z-[45] flex gap-xs overflow-x-auto border-b border-[color:var(--stitch-outline-variant)]/25 bg-[color:var(--stitch-surface)]/98 px-md py-sm backdrop-blur-md" aria-label="เมนูหลัก">
+          <a class="shrink-0 rounded-full bg-[color:var(--stitch-surface-container-low)] px-md py-2 font-heading text-[11px] font-semibold text-[color:var(--stitch-on-surface-variant)] transition hover:bg-[color:var(--stitch-surface-container-high)]" href="/backoffice/dashboard">แดชบอร์ด</a>
+          <a class="shrink-0 rounded-full bg-[color:var(--stitch-surface-container-low)] px-md py-2 font-heading text-[11px] font-semibold text-[color:var(--stitch-on-surface-variant)] transition hover:bg-[color:var(--stitch-surface-container-high)]" href="/backoffice/users">ผู้ใช้</a>
+          <a class="shrink-0 rounded-full bg-[color:var(--stitch-surface-container-low)] px-md py-2 font-heading text-[11px] font-semibold text-[color:var(--stitch-on-surface-variant)] transition hover:bg-[color:var(--stitch-surface-container-high)]" href="/backoffice/calendar">ปฏิทิน</a>
+          <a class="shrink-0 rounded-full bg-[color:var(--stitch-surface-container-low)] px-md py-2 font-heading text-[11px] font-semibold text-[color:var(--stitch-on-surface-variant)] transition hover:bg-[color:var(--stitch-surface-container-high)]" href="/backoffice/bookings">ใบจอง</a>
+          <a class="shrink-0 rounded-full bg-[color:var(--stitch-surface-container-low)] px-md py-2 font-heading text-[11px] font-semibold text-[color:var(--stitch-on-surface-variant)] transition hover:bg-[color:var(--stitch-surface-container-high)]" href="/backoffice/brands">แบรนด์</a>
+          <a class="shrink-0 rounded-full bg-[color:var(--stitch-primary-container)] px-md py-2 font-heading text-[11px] font-semibold text-[color:var(--stitch-on-primary-container)] shadow-sm" href="/backoffice/channels" aria-current="page">ช่องทาง</a>
+        </nav>
+        <header class="sticky top-0 z-40 flex w-full items-center justify-between gap-lg bg-[color:var(--stitch-surface)] px-lg py-md shadow-[0_20px_40px_-15px_rgba(107,90,96,0.08)]">
+          <div class="relative w-full max-w-xl">
+            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[color:var(--stitch-on-surface-variant)]">search</span>
+            <input
+              class="w-full rounded-full border-none bg-[color:var(--stitch-surface-container-low)] py-2.5 pl-12 pr-6 text-sm transition focus:ring-2 focus:ring-[color:var(--stitch-primary-container)]"
+              placeholder="ค้นหาชื่อช่องทางหรือรหัสย่อ..."
+              type="text"
+              x-model.debounce.200ms="query"
+            />
+          </div>
+        </header>
+
+        <div class="space-y-xl p-lg">
+          <section class="flex flex-col justify-between gap-md xl:flex-row xl:items-end">
+            <div>
+              <p class="mb-xs inline-flex rounded-full bg-[color:var(--stitch-primary-container)] px-md py-1 text-xs font-bold uppercase tracking-wider text-[color:var(--stitch-on-primary-container)]">
+                Channel Management
+              </p>
+              <h2 class="font-heading text-3xl font-semibold tracking-tight text-[color:var(--stitch-primary)]">จัดการช่องทาง</h2>
+              <p class="mt-sm max-w-2xl text-sm leading-relaxed text-[color:var(--stitch-on-surface-variant)]">
+                ตั้งค่า TikTok, Shopee Live และช่องทางอื่น พร้อมสีประจำตัวและไอคอน (อัปโหลดรูป)
+              </p>
+            </div>
+            <button
+              class="inline-flex items-center gap-xs rounded-full bg-[color:var(--stitch-primary)] px-md py-sm text-sm font-bold text-white shadow-lg transition hover:opacity-95 active:scale-95"
+              type="button"
+              @click="openCreate()"
+            >
+              <span class="material-symbols-outlined text-sm">add</span>
+              เพิ่มช่องทาง
+            </button>
+          </section>
+
+          <section class="grid gap-gutter sm:grid-cols-2 xl:grid-cols-4">
+            <article class="rounded-3xl bg-[color:var(--stitch-surface-container-lowest)] p-lg soft-shadow">
+              <p class="mb-xs text-xs font-bold uppercase tracking-wider text-[color:var(--stitch-on-surface-variant)]">ทั้งหมด</p>
+              <h3 class="font-heading text-3xl font-semibold text-[color:var(--stitch-primary)]" x-text="channels.length"></h3>
+            </article>
+            <article class="rounded-3xl bg-[color:var(--stitch-surface-container-lowest)] p-lg soft-shadow">
+              <p class="mb-xs text-xs font-bold uppercase tracking-wider text-[color:var(--stitch-on-surface-variant)]">เปิดใช้งาน</p>
+              <h3 class="font-heading text-3xl font-semibold text-[color:var(--stitch-on-tertiary-container)]" x-text="channels.filter((c) => c.is_active).length"></h3>
+            </article>
+            <article class="rounded-3xl bg-[color:var(--stitch-surface-container-lowest)] p-lg soft-shadow">
+              <p class="mb-xs text-xs font-bold uppercase tracking-wider text-[color:var(--stitch-on-surface-variant)]">ปิดใช้งาน</p>
+              <h3 class="font-heading text-3xl font-semibold text-[color:var(--stitch-on-error-container)]" x-text="channels.filter((c) => !c.is_active).length"></h3>
+            </article>
+            <article class="rounded-3xl bg-[color:var(--stitch-secondary-container)]/40 p-lg soft-shadow">
+              <p class="mb-xs text-xs font-bold uppercase tracking-wider text-[color:var(--stitch-on-secondary-container)]">แสดงผล</p>
+              <h3 class="font-heading text-3xl font-semibold text-[color:var(--stitch-on-secondary-container)]" x-text="filteredChannels().length"></h3>
+            </article>
+          </section>
+
+          <section class="grid gap-gutter sm:grid-cols-2 lg:grid-cols-3">
+            <template x-for="ch in filteredChannels()" :key="ch.id">
+              <article class="flex flex-col gap-md rounded-3xl bg-[color:var(--stitch-surface-container-lowest)] p-lg soft-shadow transition hover:bg-[color:var(--stitch-primary-container)]/15">
+                <div class="flex items-start justify-between gap-sm">
+                  <div class="relative grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-2xl ring-2 ring-[color:var(--stitch-outline-variant)]/40" :style="'background-color:' + (ch.color_hex || '#ececec')">
+                    <img
+                      x-show="ch.icon_url"
+                      :src="ch.icon_url"
+                      alt=""
+                      class="absolute inset-0 h-full w-full object-cover"
+                      loading="lazy"
+                      @error="$el.classList.add('hidden')"
+                    />
+                    <span class="material-symbols-outlined text-white drop-shadow-sm" x-show="!ch.icon_url">podcasts</span>
+                  </div>
+                  <span
+                    class="rounded-full px-sm py-1 text-[11px] font-bold"
+                    :class="ch.is_active ? 'bg-[color:var(--stitch-tertiary-container)] text-[color:var(--stitch-on-tertiary-container)]' : 'bg-[color:var(--stitch-surface-container-low)] text-[color:var(--stitch-on-surface-variant)]'"
+                    x-text="ch.is_active ? 'ใช้งาน' : 'ปิด'"
+                  ></span>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <h3 class="font-heading text-lg font-semibold text-[color:var(--stitch-primary)]" x-text="ch.name"></h3>
+                  <p class="mt-xs font-mono text-sm text-[color:var(--stitch-on-surface-variant)]" x-text="ch.code"></p>
+                  <div class="mt-sm flex items-center gap-sm">
+                    <span class="h-6 w-6 shrink-0 rounded-full border border-[color:var(--stitch-outline-variant)]/50" :style="'background-color:' + (ch.color_hex || '#3788d8')"></span>
+                    <span class="text-xs text-[color:var(--stitch-on-surface-variant)]" x-text="ch.color_hex"></span>
+                  </div>
+                </div>
+                <button
+                  class="w-full rounded-full bg-[color:var(--stitch-primary-container)] py-2 text-sm font-bold text-[color:var(--stitch-primary)] transition hover:opacity-90 active:scale-95"
+                  type="button"
+                  @click="openEdit(ch)"
+                >
+                  แก้ไข
+                </button>
+              </article>
+            </template>
+          </section>
+        </div>
+      </main>
+
+      <div
+        class="fixed inset-0 z-50 flex items-center justify-center bg-[#1a1c1c]/30 p-lg"
+        x-show="modalOpen"
+        x-transition.opacity.duration.150ms
+        style="display: none"
+      >
+        <div
+          class="flex w-full max-w-md max-h-[90vh] min-h-0 flex-col overflow-hidden rounded-3xl bg-white p-lg soft-shadow"
+          @click.outside="closeModal()"
+          x-transition.scale.origin.center.duration.150ms
+        >
+          <div class="flex items-center justify-between gap-md pb-md">
+            <h3 class="font-heading text-xl font-semibold text-[color:var(--stitch-primary)]" x-text="modalMode === 'create' ? 'เพิ่มช่องทาง' : 'แก้ไขช่องทาง'"></h3>
+            <button class="grid h-10 w-10 place-items-center rounded-full bg-[color:var(--stitch-surface-container-low)] transition hover:bg-[color:var(--stitch-primary-container)] active:scale-95" type="button" @click="closeModal()">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </div>
+
+          <div class="min-h-0 flex-1 space-y-md overflow-y-auto pr-1">
+            <label class="block">
+              <span class="mb-xs block text-sm font-bold text-[color:var(--stitch-primary)]">ชื่อช่องทาง</span>
+              <input
+                class="w-full rounded-full border-none bg-[color:var(--stitch-surface-container-low)] px-md py-md text-sm focus:ring-2 focus:ring-[color:var(--stitch-primary-container)]"
+                type="text"
+                maxlength="50"
+                x-model="draft.name"
+              />
+            </label>
+            <label class="block">
+              <span class="mb-xs block text-sm font-bold text-[color:var(--stitch-primary)]">รหัสย่อ</span>
+              <input
+                class="w-full rounded-full border-none bg-[color:var(--stitch-surface-container-low)] px-md py-md text-sm focus:ring-2 focus:ring-[color:var(--stitch-primary-container)]"
+                type="text"
+                maxlength="10"
+                x-model="draft.code"
+              />
+            </label>
+            <div class="flex flex-wrap items-center gap-md rounded-3xl bg-[color:var(--stitch-surface-container-low)] p-md">
+              <label class="flex cursor-pointer items-center gap-sm">
+                <span class="text-sm font-bold text-[color:var(--stitch-primary)]">สีประจำ</span>
+                <input class="h-10 w-14 cursor-pointer rounded-2xl border-0 bg-transparent" type="color" x-model="draft.color_hex" />
+              </label>
+              <input
+                class="min-w-[7rem] flex-1 rounded-full border-none bg-[color:var(--stitch-surface-container-lowest)] px-md py-md font-mono text-sm focus:ring-2 focus:ring-[color:var(--stitch-primary-container)]"
+                type="text"
+                maxlength="7"
+                x-model="draft.color_hex"
+              />
+            </div>
+            <label class="block">
+              <span class="mb-xs block text-sm font-bold text-[color:var(--stitch-primary)]">ไอคอน (รูปภาพ)</span>
+              <input
+                class="w-full rounded-full border-none bg-[color:var(--stitch-surface-container-low)] px-md py-md text-sm file:mr-4 file:rounded-full file:border-0 file:bg-[color:var(--stitch-primary-container)] file:px-4 file:py-2 file:text-sm file:font-bold file:text-[color:var(--stitch-primary)] focus:ring-2 focus:ring-[color:var(--stitch-primary-container)]"
+                type="file"
+                accept="image/*"
+                @change="onIconFile($event)"
+              />
+              <p class="mt-xs text-xs text-[color:var(--stitch-on-surface-variant)]" x-show="draft.iconFile">เลือกไฟล์: <span class="font-bold" x-text="draft.iconFile?.name || ''"></span></p>
+            </label>
+            <div class="flex justify-center">
+              <div class="relative grid h-20 w-20 place-items-center overflow-hidden rounded-3xl ring-2 ring-[color:var(--stitch-outline-variant)]/30" :style="'background-color:' + (draft.color_hex || '#ececec')">
+                <img x-show="iconPreview()" :src="iconPreview()" alt="" class="absolute inset-0 h-full w-full object-cover" />
+                <span class="material-symbols-outlined text-white/90 drop-shadow" x-show="!iconPreview()">image</span>
+              </div>
+            </div>
+            <label class="flex items-center justify-between gap-md rounded-3xl bg-[color:var(--stitch-primary-container)]/40 p-md">
+              <span>
+                <span class="block text-sm font-bold text-[color:var(--stitch-primary)]">เปิดใช้งาน</span>
+                <span class="text-xs text-[color:var(--stitch-on-surface-variant)]">ช่องที่ปิดจะไม่แสดงในตัวเลือกตารางไลฟ์</span>
+              </span>
+              <input class="h-6 w-6 rounded-full border-none text-[color:var(--stitch-primary)] focus:ring-[color:var(--stitch-primary-container)]" type="checkbox" x-model="draft.is_active" />
+            </label>
+          </div>
+
+          <div class="-mx-lg mt-md flex justify-end gap-sm border-t border-[color:var(--stitch-outline-variant)]/20 bg-white px-lg pt-md">
+            <button class="rounded-full bg-[color:var(--stitch-surface-container-low)] px-lg py-md text-sm font-bold transition hover:bg-[color:var(--stitch-surface-container)] active:scale-95" type="button" @click="closeModal()">ยกเลิก</button>
+            <button
+              class="rounded-full bg-[color:var(--stitch-primary)] px-lg py-md text-sm font-bold text-white shadow-lg transition hover:opacity-95 active:scale-95 disabled:opacity-60"
+              type="button"
+              @click="save()"
+              :disabled="saving"
+              x-text="saving ? 'กำลังบันทึก...' : 'บันทึก'"
+            ></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function channelManagement() {
+        return {
+          query: "",
+          channels: [],
+          modalOpen: false,
+          modalMode: "create",
+          editingId: null,
+          existingIconUrl: "",
+          draft: {
+            name: "",
+            code: "",
+            color_hex: "#3788d8",
+            is_active: true,
+            iconFile: null,
+            iconPreviewUrl: "",
+          },
+          saving: false,
+          toast: { show: false, tone: "ok", message: "" },
+
+          async init() {
+            await this.refresh();
+          },
+
+          async refresh() {
+            try {
+              const res = await fetch("/api/backoffice/channels/", { credentials: "include" });
+              if (!res.ok) {
+                if (res.status === 401) window.location.href = "/login";
+                return;
+              }
+              const data = await res.json();
+              this.channels = Array.isArray(data.channels) ? data.channels : [];
+            } catch (e) {
+              this.showToast("error", "โหลดข้อมูลไม่สำเร็จ");
+            }
+          },
+
+          filteredChannels() {
+            const q = this.query.trim().toLowerCase();
+            if (!q) return this.channels;
+            return this.channels.filter((c) => [c.name, c.code].join(" ").toLowerCase().includes(q));
+          },
+
+          iconPreview() {
+            if (this.draft.iconPreviewUrl) return this.draft.iconPreviewUrl;
+            if (this.modalMode === "edit" && this.existingIconUrl && !this.draft.iconFile) return this.existingIconUrl;
+            return "";
+          },
+
+          onIconFile(e) {
+            const file = e?.target?.files?.[0] || null;
+            if (this.draft.iconPreviewUrl) URL.revokeObjectURL(this.draft.iconPreviewUrl);
+            this.draft.iconFile = file;
+            this.draft.iconPreviewUrl = file ? URL.createObjectURL(file) : "";
+          },
+
+          resetDraftPreview() {
+            if (this.draft.iconPreviewUrl) URL.revokeObjectURL(this.draft.iconPreviewUrl);
+            this.draft.iconFile = null;
+            this.draft.iconPreviewUrl = "";
+          },
+
+          openCreate() {
+            this.modalMode = "create";
+            this.editingId = null;
+            this.existingIconUrl = "";
+            this.resetDraftPreview();
+            this.draft = { name: "", code: "", color_hex: "#3788d8", is_active: true, iconFile: null, iconPreviewUrl: "" };
+            this.modalOpen = true;
+          },
+
+          openEdit(ch) {
+            this.modalMode = "edit";
+            this.editingId = ch.id;
+            this.existingIconUrl = ch.icon_url || "";
+            this.resetDraftPreview();
+            this.draft = {
+              name: ch.name || "",
+              code: ch.code || "",
+              color_hex: ch.color_hex || "#3788d8",
+              is_active: Boolean(ch.is_active),
+              iconFile: null,
+              iconPreviewUrl: "",
+            };
+            this.modalOpen = true;
+          },
+
+          closeModal() {
+            this.modalOpen = false;
+            this.editingId = null;
+            this.resetDraftPreview();
+          },
+
+          normalizeHex(h) {
+            let s = String(h || "").trim();
+            if (!s) return "#3788d8";
+            if (!s.startsWith("#")) s = "#" + s;
+            if (/^#[0-9A-Fa-f]{6}$/.test(s)) return s.toLowerCase();
+            return "#3788d8";
+          },
+
+          async save() {
+            const name = String(this.draft.name || "").trim();
+            const code = String(this.draft.code || "").trim();
+            if (!name || !code) {
+              this.showToast("error", "กรุณากรอกชื่อและรหัสย่อ");
+              return;
+            }
+            const color_hex = this.normalizeHex(this.draft.color_hex);
+            this.draft.color_hex = color_hex;
+            this.saving = true;
+            try {
+              let res;
+              const hasFile = Boolean(this.draft.iconFile);
+              if (this.modalMode === "create") {
+                if (hasFile) {
+                  const fd = new FormData();
+                  fd.append("name", name);
+                  fd.append("code", code);
+                  fd.append("color_hex", color_hex);
+                  fd.append("is_active", String(Boolean(this.draft.is_active)));
+                  fd.append("icon", this.draft.iconFile);
+                  res = await fetch("/api/backoffice/channels/create/", { method: "POST", credentials: "include", body: fd });
+                } else {
+                  res = await fetch("/api/backoffice/channels/create/", {
+                    method: "POST",
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name, code, color_hex, is_active: Boolean(this.draft.is_active) }),
+                  });
+                }
+              } else {
+                if (hasFile) {
+                  const fd = new FormData();
+                  fd.append("name", name);
+                  fd.append("code", code);
+                  fd.append("color_hex", color_hex);
+                  fd.append("is_active", String(Boolean(this.draft.is_active)));
+                  fd.append("icon", this.draft.iconFile);
+                  res = await fetch(`/api/backoffice/channels/${this.editingId}/`, { method: "POST", credentials: "include", body: fd });
+                } else {
+                  res = await fetch(`/api/backoffice/channels/${this.editingId}/`, {
+                    method: "POST",
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name, code, color_hex, is_active: Boolean(this.draft.is_active) }),
+                  });
+                }
+              }
+              const raw = await res.text();
+              let parsed = {};
+              try {
+                parsed = JSON.parse(raw || "{}");
+              } catch (_) {
+                parsed = {};
+              }
+              if (!res.ok) {
+                const msg = parsed.message || raw.slice(0, 160) || `HTTP ${res.status}`;
+                this.showToast("error", msg);
+                return;
+              }
+              this.showToast("ok", "บันทึกเรียบร้อย");
+              await this.refresh();
+              this.closeModal();
+            } catch (e) {
+              this.showToast("error", "บันทึกไม่สำเร็จ");
+            } finally {
+              this.saving = false;
+            }
+          },
+
+          showToast(tone, message) {
+            this.toast = { show: true, tone, message };
+            window.clearTimeout(this._toastTimer);
+            this._toastTimer = window.setTimeout(() => (this.toast.show = false), 2500);
+          },
+        };
+      }
+    </script>
+  </body>
+</html>

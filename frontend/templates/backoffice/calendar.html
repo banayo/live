@@ -1,0 +1,507 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#fce4ec" />
+    <title>ปฏิทินจอง Live | Stitch Live Booking</title>
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Prompt:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --stitch-surface: #f9f9f9;
+        --stitch-surface-container-lowest: #ffffff;
+        --stitch-surface-container-low: #f3f3f3;
+        --stitch-surface-container: #eeeeee;
+        --stitch-surface-container-high: #e8e8e8;
+        --stitch-surface-variant: #e2e2e2;
+        --stitch-on-surface: #1a1c1c;
+        --stitch-on-surface-variant: #4d4447;
+        --stitch-outline-variant: #d0c3c7;
+        --stitch-primary: #6b5a60;
+        --stitch-primary-fixed: #f4dce4;
+        --stitch-on-primary: #ffffff;
+        --stitch-primary-container: #fce4ec;
+        --stitch-on-primary-container: #76646b;
+        --stitch-secondary-container: #d3e2ed;
+        --stitch-on-secondary-container: #56656e;
+        --stitch-tertiary-container: #e0ede1;
+        --stitch-on-tertiary-container: #606c62;
+        --stitch-error: #ba1a1a;
+        --stitch-error-container: #ffdad6;
+        --stitch-on-error-container: #93000a;
+        --stitch-tertiary: #556158;
+        --stitch-secondary-fixed: #d6e5ef;
+        --stitch-tertiary-fixed: #d9e6da;
+      }
+
+      .material-symbols-outlined {
+        font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+      }
+
+      .soft-shadow {
+        box-shadow: 0 20px 40px -15px rgba(107, 90, 96, 0.08);
+      }
+
+      .side-shadow {
+        box-shadow: 20px 0 40px -15px rgba(107, 90, 96, 0.05);
+      }
+
+      .bo-nav-mobilescroll {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+      .bo-nav-mobilescroll::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              heading: ["Prompt", "ui-sans-serif", "system-ui"],
+              body: ["Kanit", "ui-sans-serif", "system-ui"],
+            },
+            spacing: {
+              xs: "4px",
+              sm: "8px",
+              md: "16px",
+              lg: "24px",
+              xl: "32px",
+              xxl: "48px",
+              gutter: "16px",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+
+  <body class="min-h-screen bg-[color:var(--stitch-surface)] font-body text-[color:var(--stitch-on-surface)]">
+    <div x-data="adminCalendar()" x-init="init()">
+      <aside class="fixed left-0 top-0 z-50 hidden h-screen w-64 flex-col gap-xl rounded-r-3xl bg-[color:var(--stitch-surface-container-lowest)] p-lg side-shadow lg:flex">
+        <div class="flex items-center gap-md">
+          <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-[color:var(--stitch-primary-container)]">
+            <span class="material-symbols-outlined text-[color:var(--stitch-primary)]" style="font-variation-settings: 'FILL' 1">hub</span>
+          </div>
+          <div>
+            <h1 class="font-heading text-xl font-bold text-[color:var(--stitch-primary)]">Kamrats live</h1>
+          </div>
+        </div>
+
+        <nav class="flex flex-grow flex-col gap-sm" aria-label="เมนูหลัก">
+          <a class="flex min-w-0 items-center gap-md rounded-full px-lg py-md font-heading text-[0.8125rem] font-semibold tracking-wide text-[color:var(--stitch-on-surface-variant)] transition duration-150 hover:translate-x-0.5 hover:bg-[color:var(--stitch-surface-container-high)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--stitch-primary-container)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--stitch-surface-container-lowest)]" href="/backoffice/dashboard">
+            <span class="material-symbols-outlined shrink-0">dashboard</span>
+            <span class="truncate">แดชบอร์ด</span>
+          </a>
+          <a class="flex min-w-0 items-center gap-md rounded-full px-lg py-md font-heading text-[0.8125rem] font-semibold tracking-wide text-[color:var(--stitch-on-surface-variant)] transition duration-150 hover:translate-x-0.5 hover:bg-[color:var(--stitch-surface-container-high)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--stitch-primary-container)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--stitch-surface-container-lowest)]" href="/backoffice/users">
+            <span class="material-symbols-outlined shrink-0">group</span>
+            <span class="truncate">ผู้ใช้</span>
+          </a>
+          <a class="flex min-w-0 items-center gap-md rounded-full bg-[color:var(--stitch-primary-container)] px-lg py-md font-heading text-[0.8125rem] font-semibold tracking-wide text-[color:var(--stitch-on-primary-container)] shadow-[0_10px_28px_-12px_rgba(107,90,96,0.45)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--stitch-primary)]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--stitch-surface-container-lowest)]" href="/backoffice/calendar" aria-current="page">
+            <span class="material-symbols-outlined shrink-0" style="font-variation-settings: 'FILL' 1">calendar_today</span>
+            <span class="truncate">ปฏิทิน</span>
+          </a>
+          <a class="flex min-w-0 items-center gap-md rounded-full px-lg py-md font-heading text-[0.8125rem] font-semibold tracking-wide text-[color:var(--stitch-on-surface-variant)] transition duration-150 hover:translate-x-0.5 hover:bg-[color:var(--stitch-surface-container-high)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--stitch-primary-container)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--stitch-surface-container-lowest)]" href="/backoffice/bookings">
+            <span class="material-symbols-outlined shrink-0">receipt_long</span>
+            <span class="truncate">ใบจอง</span>
+          </a>
+          <a class="flex min-w-0 items-center gap-md rounded-full px-lg py-md font-heading text-[0.8125rem] font-semibold tracking-wide text-[color:var(--stitch-on-surface-variant)] transition duration-150 hover:translate-x-0.5 hover:bg-[color:var(--stitch-surface-container-high)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--stitch-primary-container)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--stitch-surface-container-lowest)]" href="/backoffice/brands">
+            <span class="material-symbols-outlined shrink-0">stars</span>
+            <span class="truncate">แบรนด์</span>
+          </a>
+          <a class="flex min-w-0 items-center gap-md rounded-full px-lg py-md font-heading text-[0.8125rem] font-semibold tracking-wide text-[color:var(--stitch-on-surface-variant)] transition duration-150 hover:translate-x-0.5 hover:bg-[color:var(--stitch-surface-container-high)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--stitch-primary-container)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--stitch-surface-container-lowest)]" href="/backoffice/channels">
+            <span class="material-symbols-outlined shrink-0">podcasts</span>
+            <span class="truncate">ช่องทาง</span>
+          </a>
+        </nav>
+      </aside>
+
+      <main class="min-h-screen lg:ml-64">
+        <nav class="bo-nav-mobilescroll lg:hidden sticky top-0 z-[45] flex gap-xs overflow-x-auto border-b border-[color:var(--stitch-outline-variant)]/25 bg-[color:var(--stitch-surface)]/98 px-md py-sm backdrop-blur-md" aria-label="เมนูหลัก">
+          <a class="shrink-0 rounded-full bg-[color:var(--stitch-surface-container-low)] px-md py-2 font-heading text-[11px] font-semibold text-[color:var(--stitch-on-surface-variant)] transition hover:bg-[color:var(--stitch-surface-container-high)]" href="/backoffice/dashboard">แดชบอร์ด</a>
+          <a class="shrink-0 rounded-full bg-[color:var(--stitch-surface-container-low)] px-md py-2 font-heading text-[11px] font-semibold text-[color:var(--stitch-on-surface-variant)] transition hover:bg-[color:var(--stitch-surface-container-high)]" href="/backoffice/users">ผู้ใช้</a>
+          <a class="shrink-0 rounded-full bg-[color:var(--stitch-primary-container)] px-md py-2 font-heading text-[11px] font-semibold text-[color:var(--stitch-on-primary-container)] shadow-sm" href="/backoffice/calendar" aria-current="page">ปฏิทิน</a>
+          <a class="shrink-0 rounded-full bg-[color:var(--stitch-surface-container-low)] px-md py-2 font-heading text-[11px] font-semibold text-[color:var(--stitch-on-surface-variant)] transition hover:bg-[color:var(--stitch-surface-container-high)]" href="/backoffice/bookings">ใบจอง</a>
+          <a class="shrink-0 rounded-full bg-[color:var(--stitch-surface-container-low)] px-md py-2 font-heading text-[11px] font-semibold text-[color:var(--stitch-on-surface-variant)] transition hover:bg-[color:var(--stitch-surface-container-high)]" href="/backoffice/brands">แบรนด์</a>
+          <a class="shrink-0 rounded-full bg-[color:var(--stitch-surface-container-low)] px-md py-2 font-heading text-[11px] font-semibold text-[color:var(--stitch-on-surface-variant)] transition hover:bg-[color:var(--stitch-surface-container-high)]" href="/backoffice/channels">ช่องทาง</a>
+        </nav>
+        <header class="sticky top-0 z-40 flex w-full flex-wrap items-center justify-between gap-lg border-b border-[color:var(--stitch-outline-variant)]/20 bg-[color:var(--stitch-surface)]/95 px-lg py-md backdrop-blur-md">
+          <div class="flex min-w-0 flex-wrap items-center gap-md">
+            <h2 class="font-heading text-xl font-semibold text-[color:var(--stitch-primary)] sm:text-2xl">จองเวลา Live</h2>
+            <span class="hidden rounded-full bg-[color:var(--stitch-primary-container)] px-md py-1 text-xs font-bold text-[color:var(--stitch-on-primary-container)] sm:inline">Admin split view</span>
+          </div>
+          <div class="flex items-center gap-sm">
+            <button type="button" class="grid h-10 w-10 place-items-center rounded-full text-[color:var(--stitch-primary)] transition hover:bg-[color:var(--stitch-primary-container)]/50 active:scale-95" aria-label="การแจ้งเตือน">
+              <span class="material-symbols-outlined">notifications</span>
+            </button>
+            <div class="grid h-10 w-10 place-items-center rounded-full border-2 border-[color:var(--stitch-primary-container)] bg-[color:var(--stitch-primary-fixed)] font-heading text-sm font-semibold text-[color:var(--stitch-primary)]">A</div>
+          </div>
+        </header>
+
+        <div class="p-lg">
+          <div class="mx-auto flex max-w-[1600px] flex-col gap-xl xl:flex-row xl:items-start">
+            <!-- Calendar column -->
+            <section class="min-w-0 flex-1 rounded-3xl bg-[color:var(--stitch-surface-container-lowest)] p-lg soft-shadow">
+              <div class="mb-lg flex flex-col gap-md sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h3 class="font-heading text-2xl font-semibold text-[color:var(--stitch-on-surface)]">ปฏิทินการจอง</h3>
+                  <p class="mt-xs text-sm text-[color:var(--stitch-on-surface-variant)]" x-text="weekTitle"></p>
+                </div>
+                <div class="flex flex-wrap items-center gap-sm">
+                  <div class="flex rounded-full bg-[color:var(--stitch-surface-container)] p-1">
+                    <button
+                      type="button"
+                      class="rounded-full px-md py-sm text-xs font-bold uppercase tracking-wider transition"
+                      :class="view === 'week' ? 'bg-[color:var(--stitch-surface-container-lowest)] text-[color:var(--stitch-primary)] shadow-sm' : 'text-[color:var(--stitch-on-surface-variant)]'"
+                      @click="view = 'week'"
+                    >
+                      รายสัปดาห์
+                    </button>
+                    <button
+                      type="button"
+                      class="rounded-full px-md py-sm text-xs font-bold uppercase tracking-wider transition"
+                      :class="view === 'month' ? 'bg-[color:var(--stitch-surface-container-lowest)] text-[color:var(--stitch-primary)] shadow-sm' : 'text-[color:var(--stitch-on-surface-variant)]'"
+                      @click="view = 'month'"
+                    >
+                      รายเดือน
+                    </button>
+                  </div>
+                  <div class="flex items-center gap-xs">
+                    <button type="button" class="grid h-10 w-10 place-items-center rounded-full bg-[color:var(--stitch-surface-container-low)] transition hover:bg-[color:var(--stitch-primary-container)] active:scale-95" @click="shiftWeek(-1)">
+                      <span class="material-symbols-outlined text-sm">chevron_left</span>
+                    </button>
+                    <button type="button" class="grid h-10 w-10 place-items-center rounded-full bg-[color:var(--stitch-surface-container-low)] transition hover:bg-[color:var(--stitch-primary-container)] active:scale-95" @click="shiftWeek(1)">
+                      <span class="material-symbols-outlined text-sm">chevron_right</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div x-show="view === 'week'" x-transition.opacity.duration.150ms class="overflow-x-auto">
+                <div class="min-w-[720px]">
+                  <div class="grid grid-cols-[52px_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] gap-xs">
+                    <div class="flex flex-col gap-0 pt-14 text-right text-[10px] font-bold uppercase tracking-wider text-[color:var(--stitch-on-surface-variant)]">
+                      <template x-for="t in timeLabels" :key="t">
+                        <div class="flex h-16 items-start justify-end pr-2 pt-0" x-text="t"></div>
+                      </template>
+                    </div>
+                    <template x-for="col in weekColumns" :key="col.id">
+                      <div class="space-y-2">
+                        <div class="pb-2 text-center">
+                          <p class="text-[10px] font-bold uppercase tracking-wider text-[color:var(--stitch-outline-variant)]" x-text="col.dow"></p>
+                          <p class="font-heading text-lg font-semibold" :class="col.weekend ? 'text-[color:var(--stitch-primary)]' : 'text-[color:var(--stitch-on-surface)]'" x-text="col.dateNum"></p>
+                        </div>
+                        <div
+                          class="relative h-[400px] overflow-hidden rounded-2xl border-2 bg-[color:var(--stitch-surface-container-low)]"
+                          :class="col.dashed ? 'border-dashed border-[color:var(--stitch-outline-variant)]/60' : 'border-transparent'"
+                        >
+                          <template x-for="slot in col.slots" :key="slot.id">
+                            <div
+                              class="absolute left-1 right-1 flex items-center gap-xs rounded-full border px-1 py-1 shadow-sm"
+                              :class="slotVariantClass(slot.variant)"
+                              :style="'top:' + slot.topPct + '%'"
+                            >
+                              <div class="h-6 w-6 shrink-0 overflow-hidden rounded-full bg-white">
+                                <img :src="slot.avatar" alt="" class="h-full w-full object-cover" loading="lazy" @error="$el.style.display='none'" />
+                              </div>
+                              <span class="truncate text-[10px] font-bold" x-text="slot.name"></span>
+                            </div>
+                          </template>
+                        </div>
+                      </div>
+                    </template>
+                  </div>
+                </div>
+              </div>
+
+              <div x-show="view === 'month'" x-transition.opacity.duration.150ms class="rounded-3xl border border-dashed border-[color:var(--stitch-outline-variant)]/50 bg-[color:var(--stitch-primary-container)]/20 p-xl text-center" style="display: none">
+                <span class="material-symbols-outlined text-4xl text-[color:var(--stitch-primary)]">calendar_month</span>
+                <p class="mt-md font-heading text-lg font-semibold text-[color:var(--stitch-primary)]">มุมมองรายเดือน</p>
+                <p class="mt-sm text-sm text-[color:var(--stitch-on-surface-variant)]">เชื่อมตารางเต็มเดือนกับ API ในขั้นถัดไป — ตอนนี้ใช้มุมมองรายสัปดาห์เป็นหลัก</p>
+              </div>
+            </section>
+
+            <!-- Booking form -->
+            <aside class="w-full shrink-0 xl:sticky xl:top-20 xl:w-[min(100%,420px)]">
+              <div class="flex flex-col gap-lg rounded-3xl border border-[color:var(--stitch-outline-variant)]/15 bg-[color:var(--stitch-surface-container-lowest)] p-lg soft-shadow">
+                <div>
+                  <h3 class="font-heading text-xl font-semibold text-[color:var(--stitch-on-surface)]">สร้างรายการจองใหม่</h3>
+                  <p class="mt-xs text-sm text-[color:var(--stitch-on-surface-variant)]">กรอกข้อมูลเพื่อสำรองช่วงเวลา Live</p>
+                </div>
+
+                <div class="grid grid-cols-1 gap-xl md:grid-cols-2 xl:grid-cols-1">
+                  <div class="space-y-md">
+                    <label class="block">
+                      <span class="mb-xs block text-sm font-bold text-[color:var(--stitch-primary)]">เลือกผู้ Live</span>
+                      <button
+                        type="button"
+                        class="flex w-full items-center gap-md rounded-full border border-transparent bg-[color:var(--stitch-surface-container-low)] px-md py-sm text-left transition hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-[color:var(--stitch-primary-container)]"
+                      >
+                        <div class="h-8 w-8 shrink-0 overflow-hidden rounded-full">
+                          <img :src="form.kofAvatar" alt="" class="h-full w-full object-cover" />
+                        </div>
+                        <span class="min-w-0 flex-1 truncate text-sm" x-text="form.kofLabel"></span>
+                        <span class="material-symbols-outlined text-[color:var(--stitch-on-surface-variant)]">expand_more</span>
+                      </button>
+                    </label>
+
+                    <div>
+                      <span class="mb-xs block text-sm font-bold text-[color:var(--stitch-primary)]">เลือกแบรนด์</span>
+                      <div class="flex flex-wrap gap-sm">
+                        <template x-for="b in brandChoices" :key="b.id">
+                          <button
+                            type="button"
+                            class="grid h-10 w-10 place-items-center rounded-full border-2 p-0.5 transition hover:scale-105 active:scale-95"
+                            :class="form.brandId === b.id ? 'border-[color:var(--stitch-primary)]' : 'border-[color:var(--stitch-outline-variant)]/50'"
+                            @click="form.brandId = b.id"
+                          >
+                            <span
+                              class="grid h-full w-full place-items-center rounded-full text-xs font-bold"
+                              :class="b.chipClass"
+                              x-text="b.initial"
+                            ></span>
+                          </button>
+                        </template>
+                        <button type="button" class="grid h-10 w-10 place-items-center rounded-full border-2 border-dashed border-[color:var(--stitch-outline-variant)] text-[color:var(--stitch-on-surface-variant)] transition hover:border-[color:var(--stitch-primary)] hover:text-[color:var(--stitch-primary)]" aria-label="เพิ่มแบรนด์">
+                          <span class="material-symbols-outlined text-sm">add</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <span class="mb-xs block text-sm font-bold text-[color:var(--stitch-primary)]">เลือกช่องทาง</span>
+                      <div class="flex flex-wrap gap-xs">
+                        <button
+                          type="button"
+                          class="inline-flex items-center gap-xs rounded-full px-md py-sm text-xs font-bold uppercase tracking-wider transition"
+                          :class="form.channel === 'tiktok' ? 'bg-[color:var(--stitch-primary)] text-white' : 'bg-[color:var(--stitch-surface-container-low)] text-[color:var(--stitch-on-surface-variant)]'"
+                          @click="form.channel = 'tiktok'"
+                        >
+                          <span class="material-symbols-outlined text-base">bolt</span>
+                          TikTok
+                        </button>
+                        <button
+                          type="button"
+                          class="inline-flex items-center gap-xs rounded-full px-md py-sm text-xs font-bold uppercase tracking-wider transition"
+                          :class="form.channel === 'shopee' ? 'bg-[#e8a598] text-white' : 'bg-[color:var(--stitch-surface-container-low)] text-[color:var(--stitch-on-surface-variant)]'"
+                          @click="form.channel = 'shopee'"
+                        >
+                          <span class="material-symbols-outlined text-base">shopping_bag</span>
+                          Shopee
+                        </button>
+                        <button
+                          type="button"
+                          class="inline-flex items-center gap-xs rounded-full px-md py-sm text-xs font-bold uppercase tracking-wider transition"
+                          :class="form.channel === 'lazada' ? 'bg-[#b8c5e0] text-[color:var(--stitch-on-surface)]' : 'bg-[color:var(--stitch-surface-container-low)] text-[color:var(--stitch-on-surface-variant)]'"
+                          @click="form.channel = 'lazada'"
+                        >
+                          <span class="material-symbols-outlined text-base">diamond</span>
+                          Lazada
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <span class="mb-xs block text-sm font-bold text-[color:var(--stitch-primary)]">วันและเวลา</span>
+                      <div class="grid grid-cols-2 gap-sm">
+                        <div class="flex items-center gap-xs rounded-2xl bg-[color:var(--stitch-surface-container-low)] px-md py-sm">
+                          <span class="material-symbols-outlined text-lg text-[color:var(--stitch-primary)]">calendar_today</span>
+                          <span class="text-sm" x-text="form.dateStr"></span>
+                        </div>
+                        <div class="flex items-center gap-xs rounded-2xl bg-[color:var(--stitch-surface-container-low)] px-md py-sm">
+                          <span class="material-symbols-outlined text-lg text-[color:var(--stitch-primary)]">schedule</span>
+                          <span class="text-sm" x-text="form.timeStr"></span>
+                        </div>
+                      </div>
+                      <p class="mt-xs flex items-start gap-xs text-xs font-medium text-[color:var(--stitch-error)]" x-show="form.conflict" x-transition>
+                        <span class="material-symbols-outlined shrink-0 text-sm">warning</span>
+                        <span>ช่วงเวลานี้มีการจองโดย KOF Sarocha อยู่แล้ว (ตัวอย่าง)</span>
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="space-y-md">
+                    <label class="block">
+                      <span class="mb-xs block text-sm font-bold text-[color:var(--stitch-primary)]">หัวข้อการไลฟ์</span>
+                      <input
+                        class="w-full rounded-full border-none bg-[color:var(--stitch-surface-container-low)] px-lg py-sm text-sm focus:ring-2 focus:ring-[color:var(--stitch-primary-container)]"
+                        type="text"
+                        placeholder="ระบุหัวข้อ..."
+                        x-model="form.title"
+                      />
+                    </label>
+                    <label class="block">
+                      <span class="mb-xs block text-sm font-bold text-[color:var(--stitch-primary)]">ยอดขายคาดการณ์</span>
+                      <div class="relative">
+                        <input
+                          class="w-full rounded-full border-none bg-[color:var(--stitch-surface-container-low)] px-lg py-md pr-16 text-lg font-bold focus:ring-2 focus:ring-[color:var(--stitch-primary-container)]"
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          placeholder="0.00"
+                          x-model="form.estimate"
+                        />
+                        <span class="pointer-events-none absolute right-lg top-1/2 -translate-y-1/2 text-xs font-bold uppercase tracking-wider text-[color:var(--stitch-on-surface-variant)]">THB</span>
+                      </div>
+                    </label>
+                    <label class="block">
+                      <span class="mb-xs block text-sm font-bold text-[color:var(--stitch-primary)]">หมายเหตุ</span>
+                      <textarea
+                        class="w-full rounded-3xl border-none bg-[color:var(--stitch-surface-container-low)] px-lg py-md text-sm focus:ring-2 focus:ring-[color:var(--stitch-primary-container)]"
+                        rows="3"
+                        placeholder="ระบุรายละเอียดเพิ่มเติม..."
+                        x-model="form.notes"
+                      ></textarea>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="flex flex-wrap justify-end gap-sm border-t border-[color:var(--stitch-outline-variant)]/20 pt-md">
+                  <button type="button" class="rounded-full border border-[color:var(--stitch-primary-fixed)] bg-[color:var(--stitch-primary-container)] px-xl py-md text-xs font-bold uppercase tracking-wider text-[color:var(--stitch-on-primary-container)] transition hover:bg-[color:var(--stitch-primary-fixed)] active:scale-95">
+                    ยกเลิก
+                  </button>
+                  <button
+                    type="button"
+                    class="rounded-full bg-[color:var(--stitch-primary)] px-xxl py-md text-sm font-bold text-white shadow-lg transition hover:opacity-95 active:scale-95"
+                    @click="submitDemo()"
+                  >
+                    ยืนยันการจอง
+                  </button>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </main>
+
+      <div
+        class="pointer-events-none fixed bottom-lg left-1/2 z-[60] w-full max-w-sm -translate-x-1/2 px-lg lg:left-[calc(50%+8rem)] lg:translate-x-0"
+        x-show="toast.show"
+        x-transition.opacity.duration.150ms
+        style="display: none"
+      >
+        <div class="pointer-events-auto rounded-3xl bg-[color:var(--stitch-tertiary-container)] px-md py-md text-center text-sm font-bold text-[color:var(--stitch-on-tertiary-container)] soft-shadow" x-text="toast.text"></div>
+      </div>
+    </div>
+
+    <script>
+      function adminCalendar() {
+        const av1 =
+          "https://lh3.googleusercontent.com/aida-public/AB6AXuBr3TO4XnL7P3V_Y27xCXML3xta17jxLndGbYiXIZGvylDsi-mEsfgFT0ancEsfUUFMKAmI5hPOaE-dPHkaQiE7sWjxGixUBByTaKxrk5ABO2TlybmUT5fW2Q-fD-EL1ODJCfs_nbRPglZXxnLgZevPjXR8YZCNmP3lglY-7yRgBzpoCTWNHyme4EMwfkvEWgh3vd0r4_enisR5jUxAz01kRssY-bF0O-rBawKrjuwxp8LfGNTS5FEslf5sk8o6buu7wJr3HCGgqJo";
+        const av2 =
+          "https://lh3.googleusercontent.com/aida-public/AB6AXuD5bf_RKH-7j7K8NILdlMQsx0BIyh2pDpGczAb4tvngVAWt_vJGI7aFDx-BaYj7rkJymJnFBJJXG0ykjV189ZgI07fF2Qt5E5FUu9EO5jvtdSYpOTaugvcV2-yFnAp0CFC7mTi8p7F14jqmbSQX7MspSVDWoxMA-zixKnxO0zYpJSvT6gWODZN4WDsZrgVk5D90t5MefrbXWmoKlEeCzeEU2dgkCJBkJnbt_uVFNiC9OL8PDYjffU58wjb2JXevZzPwc9OQdmU1ync";
+        const av3 =
+          "https://lh3.googleusercontent.com/aida-public/AB6AXuDSq9WEPomoNBtjroSuxRiNiKtPhmboFiNSfmoltBYVn5BuAmPEz9T_krR7oQL8mElKr7QWUnFXLwN0qAnolTH9wxap6AFVS_xqEtvIVb3BVjgKFO6i_GI48kTDMgHn0xGJcJpSKIVeZhuG917yWz_i6jIPcu67i8JwbwXwoZbDjbQJCJ5WviqkISdHregI3SUMKt4qH36dtulGlCaZHwqB1e8wlGIeAXqpFQGN3GHWcge7N6BArkaz7Ara6AbLc8I7mE_pajX73Lw";
+        const av4 =
+          "https://lh3.googleusercontent.com/aida-public/AB6AXuBrEo0tsHjaYEj1fCIvb6VyqbxD0xqBCPOCJwr-jpQzcGHxqw6U8fklSdWF_yiZzvZWyU0uFl7cXZ4eXqFFBtbu_s0YHArnUUSY6ATlYs8fjwjQWUqunH-7f4v-ods8SuOo-GegP0bXaevn9ah8f6Y7Q1s90oWOBLzIqNJ2AkgJThY_afCyPPoBePbqFqeVYot7CN_LJQQ4wKo6a4H3CVb6Rv38EYStQJFyG4cUMkOmFwvvOC4RMK7ZDz3YCkdncFM0ZcwTauZwQMc";
+        const kofPick =
+          "https://lh3.googleusercontent.com/aida-public/AB6AXuCX5zLeD8w7a2aCvBxjrPZBi8DW_4nlBzYtK88KQcdVRFYqoN7HV_DBz4CzjG3vut6zEGwzyNDoCI5FfhIHA1OEHsHuFmTacP5z20aXlMxunBnhlXwQIh8_FmSvhnzSoDjhclvaHhL2SFaoXYOhH3T8sMaE_eeA9ZSmsPb3vpsI6SlO3_GCMoZUJMFpG1E3m2bMBkP-xwUOVmdg9rEHW-xQZxR7WiEUNqE7zt3q1GwbbwcuKz0ZOcC1QOavYcmFNLczUJG16oX_sTk";
+
+        return {
+          view: "week",
+          weekOffset: 0,
+          timeLabels: ["09:00", "12:00", "15:00", "18:00", "21:00"],
+          weekTitle: "",
+          weekColumns: [],
+          form: {
+            kofLabel: "ค้นหา KOF...",
+            kofAvatar: kofPick,
+            brandId: "a",
+            channel: "tiktok",
+            dateStr: "15/05/2567",
+            timeStr: "10:00 - 12:00",
+            conflict: true,
+            title: "",
+            estimate: "",
+            notes: "",
+          },
+          brandChoices: [
+            { id: "a", initial: "A", chipClass: "bg-[color:var(--stitch-primary-container)] text-[color:var(--stitch-primary)]" },
+            { id: "b", initial: "B", chipClass: "bg-[color:var(--stitch-tertiary-container)] text-[color:var(--stitch-tertiary)]" },
+            { id: "c", initial: "C", chipClass: "bg-[color:var(--stitch-secondary-container)] text-[color:var(--stitch-on-secondary-container)]" },
+          ],
+          toast: { show: false, text: "" },
+
+          init() {
+            this.rebuildWeek();
+          },
+
+          slotVariantClass(v) {
+            const m = {
+              primary: "border-[color:var(--stitch-primary-fixed)] bg-[color:var(--stitch-primary-container)] text-[color:var(--stitch-on-primary-container)]",
+              secondary: "border-[color:var(--stitch-secondary-fixed)] bg-[color:var(--stitch-secondary-container)] text-[color:var(--stitch-on-secondary-container)]",
+              tertiary: "border-[color:var(--stitch-tertiary-fixed)] bg-[color:var(--stitch-tertiary-container)] text-[color:var(--stitch-on-tertiary-container)]",
+            };
+            return m[v] || m.primary;
+          },
+
+          shiftWeek(delta) {
+            this.weekOffset += delta;
+            this.rebuildWeek();
+          },
+
+          rebuildWeek() {
+            const base = new Date(2024, 4, 15);
+            base.setDate(base.getDate() + this.weekOffset * 7);
+            const thMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+            const dowTh = ["อา.", "จ.", "อ.", "พ.", "พฤ.", "ศ.", "ส."];
+
+            const monday = new Date(base);
+            monday.setDate(base.getDate() - ((base.getDay() + 6) % 7));
+            const sunday = new Date(monday);
+            sunday.setDate(monday.getDate() + 6);
+            const be = (d) => d.getFullYear() + 543;
+            this.weekTitle = `${monday.getDate()}–${sunday.getDate()} ${thMonths[monday.getMonth()]} ${be(monday)}`;
+
+            const cols = [];
+            for (let i = 0; i < 7; i++) {
+              const d = new Date(monday);
+              d.setDate(monday.getDate() + i);
+              const jsDow = d.getDay();
+              const weekend = jsDow === 0 || jsDow === 6;
+              cols.push({
+                id: d.toISOString().slice(0, 10),
+                dow: dowTh[jsDow],
+                dateNum: d.getDate(),
+                weekend,
+                dashed: weekend,
+                slots: [],
+              });
+            }
+
+            cols[0].slots = [
+              { id: "s1", topPct: 12, name: "Sarocha", variant: "primary", avatar: av1 },
+              { id: "s2", topPct: 52, name: "Tanawat", variant: "tertiary", avatar: av2 },
+            ];
+            cols[1].slots = [{ id: "s3", topPct: 32, name: "Napat", variant: "secondary", avatar: av3 }];
+            cols[3].slots = [{ id: "s4", topPct: 68, name: "Chompoo", variant: "primary", avatar: av4 }];
+
+            this.weekColumns = cols;
+          },
+
+          submitDemo() {
+            this.toast = { show: true, text: "บันทึกตัวอย่าง — เชื่อม API ในขั้นถัดไป" };
+            window.clearTimeout(this._t);
+            this._t = window.setTimeout(() => (this.toast.show = false), 2400);
+          },
+        };
+      }
+    </script>
+  </body>
+</html>

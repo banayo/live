@@ -15,7 +15,6 @@ class User(AbstractUser):
 
 class Brand(models.Model):
     name = models.CharField(max_length=100, unique=True, verbose_name="ชื่อแบรนด์")
-    logo_url = models.URLField(max_length=500, blank=True, null=True, verbose_name="โลโก้แบรนด์ (URL)")
     is_active = models.BooleanField(default=True, verbose_name="เปิดใช้งาน")
 
     class Meta:
@@ -31,7 +30,7 @@ class Brand(models.Model):
 class Channel(models.Model):
     name = models.CharField(max_length=50, unique=True, verbose_name="ชื่อช่องทาง (เช่น TikTok)")
     code = models.CharField(max_length=10, unique=True, verbose_name="ตัวย่อ (เช่น TT)")
-    icon_url = models.URLField(max_length=500, blank=True, null=True, verbose_name="ไอคอนช่องทาง (URL)")
+    icon = models.ImageField(upload_to="channels/%Y/%m/", blank=True, null=True, verbose_name="ไอคอนช่องทาง (ไฟล์)")
     color_hex = models.CharField(max_length=7, default='#3788d8', verbose_name="สีประจำช่องทาง (HEX)") 
     is_active = models.BooleanField(default=True, verbose_name="เปิดใช้งาน")
 
@@ -134,6 +133,11 @@ class LiveSchedule(models.Model):
 # ==========================================
 class LiveScheduleImage(models.Model):
     live_schedule = models.ForeignKey(LiveSchedule, on_delete=models.CASCADE, related_name='images')
-    image_url = models.URLField(max_length=500)
+    image = models.ImageField(upload_to="live_schedules/%Y/%m/", blank=True, null=True, verbose_name="รูปประกอบ (ไฟล์)")
     order = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("order", "pk")
+        verbose_name = "รูปประกอบตาราง Live"
+        verbose_name_plural = "รูปประกอบตาราง Live"
