@@ -27,9 +27,11 @@ def create_pending_user(
     phone_number: str = "",
     profile_image: Any = None,
     username_seed: str = "",
+    password: str = "",
 ) -> User:
     """
     Create a user that must be verified by admin before access.
+    When ``password`` is non-empty, it is hashed and stored so the user can log in after verification.
     """
     with transaction.atomic():
         user = User.objects.create(
@@ -37,7 +39,11 @@ def create_pending_user(
             email=email,
             first_name=name[:150],
         )
-        user.set_unusable_password()
+        raw_pw = (password or "").strip()
+        if raw_pw:
+            user.set_password(raw_pw)
+        else:
+            user.set_unusable_password()
         user.save()
 
         profile = user.profile

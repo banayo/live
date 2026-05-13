@@ -17,7 +17,7 @@
 
 **📂 โครงสร้าง Template:**
 * หน้าเข้าสู่ระบบให้อยู่ใน `frontend/templates/auth/` (เช่น login, register, password reset)
-* หน้าสำหรับผู้ใช้งานทั่วไปให้อยู่ใน `frontend/templates/user/` (เช่น dashboard, booking, profile)
+* หน้าสำหรับผู้ใช้งานทั่วไปให้อยู่ใน `frontend/templates/user/` (เช่น `user-dashboard.html`, `book-live.html`, `live-history.html`, booking, profile)
 * หน้าสำหรับแบรนด์ให้อยู่ใน `frontend/templates/brand/` (เช่น dashboard, schedules, sales reports)
 * หน้าของแอดมินให้อยู่ใน `frontend/templates/backoffice/` **(ห้ามใช้ชื่อโฟลเดอร์ `admin/` เพื่อป้องกันการชนกับ Django Admin)**
 * UI Component ที่ใช้ซ้ำให้อยู่ใน `frontend/templates/shared/` (เช่น layouts, headers, sidebars, buttons, modals)
@@ -93,7 +93,7 @@ apply_design_system
 ใช้ stitch MCP ดึงหน้า User Dashboard - Updated Job Actions
 Project ID: 7509185989942728233
 Screen ID: 6089e4a4a2a342b6a33f5301ee9aa7f4
-แล้วสร้าง/อัปเดต frontend/templates/user/dashboard.html
+แล้วสร้าง/อัปเดต `frontend/templates/user/user-dashboard.html` (`/dashboard`), `book-live.html` (`/book-live`), `live-history.html` (`/live-history`)
 
 อ้างอิง @AGENTS.MD และ @DESIGM.md
 ใช้ curl ผ่าน Stitch MCP ดึง screen:

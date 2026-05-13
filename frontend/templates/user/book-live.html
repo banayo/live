@@ -1,0 +1,584 @@
+<!doctype html>
+<!-- AGENTS.MD § Agent-UI + DESIGM.md | Stitch screen ref: 6089e4a4a2a342b6a33f5301ee9aa7f4 -->
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#fce4ec" />
+    <title>จองไลฟ์ | Stitch Live Booking</title>
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Prompt:wght@400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --stitch-surface: #f9f9f9;
+        --stitch-surface-container-lowest: #ffffff;
+        --stitch-surface-container-low: #f3f3f3;
+        --stitch-surface-container: #eeeeee;
+        --stitch-surface-container-high: #e8e8e8;
+        --stitch-surface-container-highest: #e2e2e2;
+        --stitch-surface-variant: #e2e2e2;
+        --stitch-on-surface: #1a1c1c;
+        --stitch-on-surface-variant: #4d4447;
+        --stitch-outline: #7f7478;
+        --stitch-outline-variant: #d0c3c7;
+        --stitch-primary: #6b5a60;
+        --stitch-on-primary: #ffffff;
+        --stitch-primary-container: #fce4ec;
+        --stitch-on-primary-container: #76646b;
+        --stitch-primary-fixed: #f4dce4;
+        --stitch-on-primary-fixed-variant: #524249;
+        --stitch-secondary-fixed: #d6e5ef;
+        --stitch-on-secondary-fixed-variant: #3b4951;
+        --stitch-secondary-container: #d3e2ed;
+        --stitch-on-secondary-container: #56656e;
+        --stitch-tertiary-fixed: #d9e6da;
+        --stitch-tertiary-container: #e0ede1;
+        --stitch-on-tertiary-container: #606c62;
+        --stitch-error: #ba1a1a;
+        --stitch-error-container: #ffdad6;
+        --stitch-on-error-container: #93000a;
+      }
+
+      .material-symbols-outlined {
+        font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+      }
+
+      .soft-shadow {
+        box-shadow: 0 20px 40px -15px rgba(107, 90, 96, 0.08);
+      }
+
+      [x-cloak] {
+        display: none !important;
+      }
+    </style>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              heading: ["Prompt", "ui-sans-serif", "system-ui"],
+              body: ["Kanit", "Sarabun", "ui-sans-serif", "system-ui"],
+            },
+            spacing: {
+              "container-margin": "20px",
+              gutter: "16px",
+              xs: "4px",
+              sm: "8px",
+              md: "16px",
+              lg: "24px",
+              xl: "32px",
+              xxl: "48px",
+            },
+            boxShadow: {
+              soft: "0 20px 40px -15px rgba(107, 90, 96, 0.08)",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+
+  <body class="min-h-screen bg-[color:var(--stitch-surface)] pb-28 font-body text-[color:var(--stitch-on-surface)] antialiased leading-relaxed md:pb-10">
+    <div x-data="bookLivePage()" x-init="init()" class="min-h-screen md:flex">
+      <aside
+        class="sticky top-0 z-20 hidden h-svh w-[260px] shrink-0 flex-col gap-xl border-r border-[color:var(--stitch-outline-variant)]/25 bg-[color:var(--stitch-surface-container-lowest)] p-lg shadow-[4px_0_32px_-20px_rgba(107,90,96,0.12)] md:flex lg:w-[272px] rounded-r-3xl"
+        aria-label="เมนูหลักแบบเดสก์ท็อป"
+      >
+        <div>
+          <p class="font-heading text-lg font-semibold tracking-tight text-[color:var(--stitch-primary)]">Stitch Live</p>
+          <p class="mt-xs text-xs text-[color:var(--stitch-on-surface-variant)]">จองรอบไลฟ์</p>
+          <nav class="mt-xl flex flex-col gap-sm">
+            <a
+              href="/dashboard"
+              class="flex items-center gap-md rounded-full px-lg py-md font-heading text-[0.8125rem] font-semibold text-[color:var(--stitch-on-surface-variant)] transition hover:translate-x-0.5 hover:bg-[color:var(--stitch-surface-container-high)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--stitch-primary-container)] focus-visible:ring-offset-2"
+            >
+              <span class="material-symbols-outlined text-[20px]">dashboard</span>
+              แดชบอร์ด
+            </a>
+            <a
+              href="/book-live"
+              class="flex items-center gap-md rounded-full bg-[color:var(--stitch-primary-container)] px-lg py-md font-heading text-[0.8125rem] font-semibold text-[color:var(--stitch-on-primary-container)] shadow-[0_10px_28px_-12px_rgba(107,90,96,0.35)] transition hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--stitch-primary)]/30 focus-visible:ring-offset-2"
+              aria-current="page"
+            >
+              <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1">add_circle</span>
+              จองไลฟ์
+            </a>
+            <a
+              href="/live-history"
+              class="flex items-center gap-md rounded-full px-lg py-md font-heading text-[0.8125rem] font-semibold text-[color:var(--stitch-on-surface-variant)] transition hover:translate-x-0.5 hover:bg-[color:var(--stitch-surface-container-high)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--stitch-primary-container)] focus-visible:ring-offset-2"
+            >
+              <span class="material-symbols-outlined text-[20px]">history</span>
+              ประวัติไลฟ์
+            </a>
+            <a
+              href="/dashboard"
+              class="flex items-center gap-md rounded-full px-lg py-md font-heading text-[0.8125rem] font-semibold text-[color:var(--stitch-on-surface-variant)] transition hover:translate-x-0.5 hover:bg-[color:var(--stitch-surface-container-high)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--stitch-primary-container)] focus-visible:ring-offset-2"
+            >
+              <span class="material-symbols-outlined text-[20px]">event</span>
+              ตารางงาน
+            </a>
+            <a
+              href="/dashboard"
+              class="flex items-center gap-md rounded-full px-lg py-md font-heading text-[0.8125rem] font-semibold text-[color:var(--stitch-on-surface-variant)] transition hover:translate-x-0.5 hover:bg-[color:var(--stitch-surface-container-high)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--stitch-primary-container)] focus-visible:ring-offset-2"
+            >
+              <span class="material-symbols-outlined text-[20px]">videocam</span>
+              Live
+            </a>
+          </nav>
+        </div>
+      </aside>
+
+      <div class="flex min-h-screen min-w-0 flex-1 flex-col">
+        <div class="mx-auto w-full max-w-7xl flex-1 px-container-margin pb-lg pt-md md:px-8 lg:px-10 lg:pt-xl">
+          <div class="lg:grid lg:grid-cols-12 lg:items-start lg:gap-2xl xl:gap-3xl">
+            <div class="mb-xl space-y-lg lg:col-span-5 lg:mb-0 lg:sticky lg:top-28 lg:self-start">
+              <header class="flex items-center justify-between gap-md">
+                <a
+                  href="/dashboard"
+                  class="inline-flex items-center gap-sm rounded-full bg-[color:var(--stitch-surface-container-lowest)] px-md py-sm text-sm font-semibold text-[color:var(--stitch-on-secondary-container)] shadow-sm transition hover:bg-[color:var(--stitch-primary-container)]/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--stitch-primary-container)]"
+                >
+                  <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+                  กลับแดชบอร์ด
+                </a>
+              </header>
+
+              <div
+                x-show="!verified && meLoaded"
+                x-cloak
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0 translate-y-1"
+                x-transition:enter-end="opacity-100 translate-y-0"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                class="rounded-3xl border border-[color:var(--stitch-outline-variant)]/40 bg-[color:var(--stitch-primary-fixed)]/60 px-lg py-md text-sm text-[color:var(--stitch-on-primary-fixed-variant)]"
+                role="status"
+              >
+                บัญชียังไม่ได้รับการยืนยันจากแอดมิน — สามารถดูหน้านี้ได้ แต่ยังไม่สามารถส่งคำขอจองได้
+              </div>
+            </div>
+
+            <div class="lg:col-span-7">
+              <form
+                class="space-y-lg rounded-3xl bg-[color:var(--stitch-surface-container-lowest)] p-lg soft-shadow md:p-xl lg:min-h-0"
+                @submit.prevent="submit()"
+              >
+            <div class="space-y-sm">
+              <label class="font-heading text-sm font-semibold text-[color:var(--stitch-on-surface)]" for="bl-title">หัวข้อไลฟ์</label>
+              <input
+                id="bl-title"
+                x-model="form.title"
+                type="text"
+                maxlength="200"
+                required
+                placeholder="เช่น ไลฟ์เปิดตัวคอลเลกชันใหม่"
+                class="w-full rounded-2xl border-none bg-[color:var(--stitch-surface-container-low)] px-lg py-md text-[color:var(--stitch-on-surface)] shadow-inner outline-none ring-1 ring-transparent transition placeholder:text-[color:var(--stitch-outline)] focus:ring-2 focus:ring-[color:var(--stitch-primary-container)]"
+              />
+            </div>
+
+            <div class="grid gap-gutter sm:grid-cols-2">
+              <div class="space-y-sm">
+                <label class="font-heading text-sm font-semibold text-[color:var(--stitch-on-surface)]" for="bl-start-date">เริ่ม</label>
+                <input
+                  id="bl-start-date"
+                  x-model="form.startDate"
+                  type="date"
+                  required
+                  @change="syncEndFromStart()"
+                  class="w-full rounded-2xl border-none bg-[color:var(--stitch-surface-container-low)] px-lg py-md text-[color:var(--stitch-on-surface)] outline-none ring-1 ring-transparent focus:ring-2 focus:ring-[color:var(--stitch-primary-container)]"
+                />
+                <div class="grid grid-cols-2 gap-gutter">
+                  <div class="space-y-xs">
+                    <span class="block text-xs font-medium text-[color:var(--stitch-on-surface-variant)]">เวลา (24 ชม.)</span>
+                    <select
+                      id="bl-start-hour"
+                      x-model="form.startHour"
+                      required
+                      @change="syncEndFromStart()"
+                      class="w-full rounded-2xl border-none bg-[color:var(--stitch-surface-container-low)] px-lg py-md font-body text-[color:var(--stitch-on-surface)] outline-none ring-1 ring-transparent focus:ring-2 focus:ring-[color:var(--stitch-primary-container)]"
+                    >
+                      <option value="" disabled>ชม.</option>
+                      <template x-for="h in hours24" :key="'sh-' + h">
+                        <option :value="String(h)" x-text="String(h).padStart(2, '0')"></option>
+                      </template>
+                    </select>
+                  </div>
+                  <div class="space-y-xs">
+                    <span class="block text-xs font-medium text-[color:var(--stitch-on-surface-variant)]">นาที</span>
+                    <select
+                      id="bl-start-minute"
+                      x-model="form.startMinute"
+                      required
+                      @change="syncEndFromStart()"
+                      class="w-full rounded-2xl border-none bg-[color:var(--stitch-surface-container-low)] px-lg py-md font-body text-[color:var(--stitch-on-surface)] outline-none ring-1 ring-transparent focus:ring-2 focus:ring-[color:var(--stitch-primary-container)]"
+                    >
+                      <option value="00">:00</option>
+                      <option value="30">:30</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="space-y-sm">
+                <label class="font-heading text-sm font-semibold text-[color:var(--stitch-on-surface)]" for="bl-end-date">จบ</label>
+                <input
+                  id="bl-end-date"
+                  x-model="form.endDate"
+                  type="date"
+                  required
+                  class="w-full rounded-2xl border-none bg-[color:var(--stitch-surface-container-low)] px-lg py-md text-[color:var(--stitch-on-surface)] outline-none ring-1 ring-transparent focus:ring-2 focus:ring-[color:var(--stitch-primary-container)]"
+                />
+                <div class="grid grid-cols-2 gap-gutter">
+                  <div class="space-y-xs">
+                    <span class="block text-xs font-medium text-[color:var(--stitch-on-surface-variant)]">เวลา (24 ชม.)</span>
+                    <select
+                      id="bl-end-hour"
+                      x-model="form.endHour"
+                      required
+                      class="w-full rounded-2xl border-none bg-[color:var(--stitch-surface-container-low)] px-lg py-md font-body text-[color:var(--stitch-on-surface)] outline-none ring-1 ring-transparent focus:ring-2 focus:ring-[color:var(--stitch-primary-container)]"
+                    >
+                      <option value="" disabled>ชม.</option>
+                      <template x-for="h in hours24" :key="'eh-' + h">
+                        <option :value="String(h)" x-text="String(h).padStart(2, '0')"></option>
+                      </template>
+                    </select>
+                  </div>
+                  <div class="space-y-xs">
+                    <span class="block text-xs font-medium text-[color:var(--stitch-on-surface-variant)]">นาที</span>
+                    <select
+                      id="bl-end-minute"
+                      x-model="form.endMinute"
+                      required
+                      class="w-full rounded-2xl border-none bg-[color:var(--stitch-surface-container-low)] px-lg py-md font-body text-[color:var(--stitch-on-surface)] outline-none ring-1 ring-transparent focus:ring-2 focus:ring-[color:var(--stitch-primary-container)]"
+                    >
+                      <option value="00">:00</option>
+                      <option value="30">:30</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <p class="text-xs text-[color:var(--stitch-on-surface-variant)]">เลือกเวลาเป็นช่วงครึ่งชั่วโมง (เช่น 12:00, 12:30, 13:00) แบบ 24 ชั่วโมง — เมื่อเปลี่ยนเวลาเริ่ม ระบบจะตั้งเวลาจบเป็น +30 นาที</p>
+
+            <div class="space-y-sm">
+              <label class="font-heading text-sm font-semibold text-[color:var(--stitch-on-surface)]" for="bl-brand">แบรนด์</label>
+              <select
+                id="bl-brand"
+                x-model="form.brandId"
+                :disabled="brands.length <= 1"
+                :required="brands.length > 1"
+                class="w-full rounded-2xl border-none bg-[color:var(--stitch-surface-container-low)] px-lg py-md text-[color:var(--stitch-on-surface)] outline-none ring-1 ring-transparent focus:ring-2 focus:ring-[color:var(--stitch-primary-container)] disabled:cursor-not-allowed disabled:opacity-80"
+              >
+                <option value="" disabled x-show="brands.length === 0">— ยังไม่มีแบรนด์ให้เลือก —</option>
+                <option value="" disabled x-show="brands.length > 1">— เลือกแบรนด์ —</option>
+                <template x-for="b in brands" :key="b.id">
+                  <option :value="String(b.id)" x-text="b.name"></option>
+                </template>
+              </select>
+              <p class="text-xs text-[color:var(--stitch-on-surface-variant)]" x-show="brands.length === 1">สังกัดแบรนด์เดียว — ระบบเลือกให้อัตโนมัติ</p>
+              <p class="text-xs text-[color:var(--stitch-on-surface-variant)]" x-show="brands.length === 0">เพิ่มแบรนด์ในหลังบ้านก่อน ระบบจึงจะแสดงตัวเลือกที่นี่</p>
+            </div>
+
+            <div class="space-y-sm">
+              <label class="font-heading text-sm font-semibold text-[color:var(--stitch-on-surface)]" for="bl-channel">ช่องทาง (ถ้ามี)</label>
+              <select
+                id="bl-channel"
+                x-model="form.channelId"
+                class="w-full rounded-2xl border-none bg-[color:var(--stitch-surface-container-low)] px-lg py-md text-[color:var(--stitch-on-surface)] outline-none ring-1 ring-transparent focus:ring-2 focus:ring-[color:var(--stitch-primary-container)]"
+              >
+                <option value="">— ไม่ระบุ —</option>
+                <template x-for="ch in channels" :key="ch.id">
+                  <option :value="String(ch.id)" x-text="ch.name + ' (' + ch.code + ')'"></option>
+                </template>
+              </select>
+            </div>
+
+            <div class="space-y-sm">
+              <label class="font-heading text-sm font-semibold text-[color:var(--stitch-on-surface)]" for="bl-note">หมายเหตุ</label>
+              <textarea
+                id="bl-note"
+                x-model="form.note"
+                rows="3"
+                placeholder="รายละเอียดเพิ่มเติมสำหรับทีมตรวจสอบ (ถ้ามี)"
+                class="w-full resize-y rounded-2xl border-none bg-[color:var(--stitch-surface-container-low)] px-lg py-md text-[color:var(--stitch-on-surface)] outline-none ring-1 ring-transparent focus:ring-2 focus:ring-[color:var(--stitch-primary-container)]"
+              ></textarea>
+            </div>
+
+            <div
+              x-show="error"
+              x-transition:enter="transition ease-out duration-200"
+              x-transition:enter-start="opacity-0 translate-y-1"
+              x-transition:enter-end="opacity-100 translate-y-0"
+              class="rounded-2xl bg-[color:var(--stitch-error-container)] px-lg py-md text-sm text-[color:var(--stitch-on-error-container)]"
+              x-text="error"
+            ></div>
+
+            <div
+              x-show="success"
+              x-transition:enter="transition ease-out duration-200"
+              x-transition:enter-start="opacity-0"
+              x-transition:enter-end="opacity-100"
+              class="rounded-2xl bg-[color:var(--stitch-tertiary-container)] px-lg py-md text-sm text-[color:var(--stitch-on-tertiary-container)]"
+            >
+              บันทึกคำขอแล้ว — กำลังพาไปแดชบอร์ด…
+            </div>
+
+            <div class="flex flex-col gap-sm pt-sm sm:flex-row sm:justify-end">
+              <a
+                href="/dashboard"
+                class="inline-flex flex-1 items-center justify-center rounded-full border border-[color:var(--stitch-outline-variant)]/50 bg-[color:var(--stitch-surface-container-lowest)] px-xl py-md font-heading text-sm font-semibold text-[color:var(--stitch-on-secondary-container)] transition hover:bg-[color:var(--stitch-secondary-container)] sm:flex-none"
+              >
+                ยกเลิก
+              </a>
+              <button
+                type="submit"
+                class="inline-flex flex-1 items-center justify-center rounded-full bg-[color:var(--stitch-primary)] px-xl py-md font-heading text-sm font-semibold text-[color:var(--stitch-on-primary)] shadow-[0_14px_36px_-16px_rgba(82,66,73,0.55)] transition enabled:hover:opacity-95 enabled:active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none"
+                :disabled="loading || !verified"
+              >
+                <span x-show="!loading">ส่งคำขอจอง</span>
+                <span x-show="loading">กำลังส่ง…</span>
+              </button>
+            </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <nav
+          class="fixed bottom-0 left-0 z-50 flex w-full items-center justify-around rounded-t-3xl bg-[color:var(--stitch-surface-container-lowest)] px-2 py-3 shadow-[0_-4px_20px_rgba(107,90,96,0.08)] md:hidden"
+          aria-label="เมนูหลัก"
+        >
+          <a href="/dashboard" class="flex min-w-0 flex-1 flex-col items-center justify-center rounded-2xl p-2 text-[color:var(--stitch-on-secondary-container)] transition hover:bg-[color:var(--stitch-secondary-container)]">
+            <span class="material-symbols-outlined">home</span>
+            <span class="mt-1 truncate text-[10px] font-bold uppercase tracking-wider">หน้าแรก</span>
+          </a>
+          <a
+            href="/book-live"
+            class="flex min-w-0 flex-1 flex-col items-center justify-center rounded-2xl bg-[color:var(--stitch-primary-container)] p-2 text-[color:var(--stitch-on-primary-container)]"
+            aria-current="page"
+          >
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">add_circle</span>
+            <span class="mt-1 truncate text-[10px] font-bold uppercase tracking-wider">จองไลฟ์</span>
+          </a>
+          <a href="/live-history" class="flex min-w-0 flex-1 flex-col items-center justify-center rounded-2xl p-2 text-[color:var(--stitch-on-secondary-container)] transition hover:bg-[color:var(--stitch-secondary-container)]">
+            <span class="material-symbols-outlined">history</span>
+            <span class="mt-1 truncate text-[10px] font-bold uppercase tracking-wider">ประวัติ</span>
+          </a>
+          <a href="/dashboard" class="flex min-w-0 flex-1 flex-col items-center justify-center rounded-2xl p-2 text-[color:var(--stitch-on-secondary-container)] transition hover:bg-[color:var(--stitch-secondary-container)]">
+            <span class="material-symbols-outlined">event</span>
+            <span class="mt-1 truncate text-[10px] font-bold uppercase tracking-wider">ตารางงาน</span>
+          </a>
+          <a href="/dashboard" class="flex min-w-0 flex-1 flex-col items-center justify-center rounded-2xl p-2 text-[color:var(--stitch-on-secondary-container)] transition hover:bg-[color:var(--stitch-secondary-container)]">
+            <span class="material-symbols-outlined">videocam</span>
+            <span class="mt-1 truncate text-[10px] font-bold uppercase tracking-wider">Live</span>
+          </a>
+        </nav>
+      </div>
+    </div>
+
+    <script>
+      function bookLivePage() {
+        return {
+          meLoaded: false,
+          verified: false,
+          channels: [],
+          brands: [],
+          loading: false,
+          error: "",
+          success: false,
+          form: {
+            title: "",
+            startDate: "",
+            startHour: "",
+            startMinute: "00",
+            endDate: "",
+            endHour: "",
+            endMinute: "00",
+            brandId: "",
+            channelId: "",
+            note: "",
+          },
+
+          hours24: Array.from({ length: 24 }, (_, i) => i),
+
+          async init() {
+            await this.loadMe();
+            if (!this.meLoaded) return;
+            await this.loadChannels();
+          },
+
+          async loadMe() {
+            try {
+              const res = await fetch("/api/auth/me/", {
+                credentials: "same-origin",
+                headers: { Accept: "application/json" },
+              });
+              if (res.status === 401 || res.status === 403) {
+                window.location.href = "/login";
+                return;
+              }
+              const data = await res.json();
+              if (!data.authenticated) {
+                window.location.href = "/login";
+                return;
+              }
+              this.verified = Boolean(data.profile && data.profile.is_verified);
+              this.meLoaded = true;
+            } catch (_) {
+              window.location.href = "/login";
+            }
+          },
+
+          async loadChannels() {
+            if (!this.verified) return;
+            try {
+              const res = await fetch("/api/user/book-live-options/", {
+                credentials: "same-origin",
+                headers: { Accept: "application/json" },
+              });
+              if (res.status === 401) {
+                window.location.href = "/login";
+                return;
+              }
+              if (!res.ok) {
+                this.channels = [];
+                this.brands = [];
+                return;
+              }
+              const data = await res.json();
+              this.channels = Array.isArray(data.channels) ? data.channels : [];
+              this.brands = Array.isArray(data.brands) ? data.brands : [];
+              this.applyDefaultBrand();
+            } catch (_) {
+              this.channels = [];
+              this.brands = [];
+            }
+          },
+
+          applyDefaultBrand() {
+            if (this.brands.length === 1) {
+              this.form.brandId = String(this.brands[0].id);
+            } else if (this.brands.length === 0) {
+              this.form.brandId = "";
+            }
+          },
+
+          composeLocalFromParts(dateStr, hourStr, minuteStr) {
+            if (dateStr === "" || hourStr === "" || hourStr === undefined || minuteStr === "" || minuteStr === undefined) return "";
+            const h = Number.parseInt(String(hourStr), 10);
+            if (Number.isNaN(h) || h < 0 || h > 23) return "";
+            if (minuteStr !== "00" && minuteStr !== "30") return "";
+            const pad = (n) => String(n).padStart(2, "0");
+            return `${dateStr}T${pad(h)}:${minuteStr}`;
+          },
+
+          applyDateToFormEnd(d) {
+            const pad = (n) => String(n).padStart(2, "0");
+            this.form.endDate = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+            this.form.endHour = String(d.getHours());
+            this.form.endMinute = d.getMinutes() === 30 ? "30" : "00";
+          },
+
+          toIso(localStr) {
+            if (!localStr) return "";
+            const d = new Date(localStr);
+            if (Number.isNaN(d.getTime())) return "";
+            return d.toISOString();
+          },
+
+          syncEndFromStart() {
+            const local = this.composeLocalFromParts(this.form.startDate, this.form.startHour, this.form.startMinute);
+            if (!local) return;
+            const d = new Date(local);
+            if (Number.isNaN(d.getTime())) return;
+            d.setMinutes(d.getMinutes() + 30);
+            this.applyDateToFormEnd(d);
+          },
+
+          async submit() {
+            if (this.loading || !this.verified) return;
+            this.error = "";
+            this.success = false;
+            const startLocal = this.composeLocalFromParts(this.form.startDate, this.form.startHour, this.form.startMinute);
+            const endLocal = this.composeLocalFromParts(this.form.endDate, this.form.endHour, this.form.endMinute);
+            const startIso = this.toIso(startLocal);
+            const endIso = this.toIso(endLocal);
+            if (!startIso || !endIso) {
+              this.error = "กรุณาเลือกวันและเวลาให้ครบ";
+              return;
+            }
+            if (new Date(endIso) <= new Date(startIso)) {
+              this.error = "เวลาจบต้องหลังเวลาเริ่ม";
+              return;
+            }
+            const minMs = 30 * 60 * 1000;
+            if (new Date(endIso) - new Date(startIso) < minMs) {
+              this.error = "รอบไลฟ์ต้องมีความยาวอย่างน้อย 30 นาที";
+              return;
+            }
+            if (this.brands.length > 1 && !this.form.brandId) {
+              this.error = "กรุณาเลือกแบรนด์";
+              return;
+            }
+            const body = {
+              title: this.form.title.trim(),
+              start: startIso,
+              end: endIso,
+              note: this.form.note.trim(),
+            };
+            if (this.form.channelId) body.channel_id = Number(this.form.channelId);
+            if (this.brands.length >= 1 && this.form.brandId) body.brand_id = Number(this.form.brandId);
+
+            this.loading = true;
+            try {
+              const res = await fetch("/api/user/live-schedules/", {
+                method: "POST",
+                credentials: "same-origin",
+                headers: { "Content-Type": "application/json", Accept: "application/json" },
+                body: JSON.stringify(body),
+              });
+              const data = await res.json().catch(() => ({}));
+              if (res.status === 401) {
+                window.location.href = "/login";
+                return;
+              }
+              if (!res.ok) {
+                const code = data.error ? String(data.error) : "";
+                if (code === "not_verified") this.error = "บัญชียังไม่ได้รับการยืนยัน";
+                else if (code === "invalid_title") this.error = "กรุณากรอกหัวข้อไลฟ์";
+                else if (code === "invalid_range") this.error = "ช่วงเวลาไม่ถูกต้อง";
+                else if (code === "invalid_channel") this.error = "ช่องทางที่เลือกไม่ถูกต้อง";
+                else if (code === "invalid_brand") this.error = "แบรนด์ที่เลือกไม่ถูกต้อง";
+                else if (code === "missing_brand") this.error = "กรุณาเลือกแบรนด์";
+                else this.error = data.message || "ส่งคำขอไม่สำเร็จ";
+                return;
+              }
+              this.success = true;
+              const dest = data.redirect_url || "/dashboard";
+              setTimeout(() => {
+                window.location.href = dest;
+              }, 900);
+            } catch (_) {
+              this.error = "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้";
+            } finally {
+              this.loading = false;
+            }
+          },
+        };
+      }
+    </script>
+  </body>
+</html>

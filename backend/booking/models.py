@@ -52,8 +52,6 @@ class Profile(models.Model):
         ('user', 'User'),
     ), default='user')
     
-    brand = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True, related_name='users', verbose_name="สังกัดแบรนด์")
-    
     #  ฟิลด์สำหรับเก็บรหัส LINE (ใช้ทำ LINE Login และส่งแจ้งเตือนผ่าน LINE OA ได้)
     line_uid = models.CharField(max_length=255, unique=True, blank=True, null=True, verbose_name="LINE User ID (UID)")
     

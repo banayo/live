@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- AGENTS.MD Agent-UI: auth template, soft pink + rounded-full inputs -->
 <html lang="th">
   <head>
     <meta charset="UTF-8" />
@@ -12,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Prompt:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Prompt:wght@400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
 
@@ -37,7 +38,7 @@
           extend: {
             fontFamily: {
               heading: ["Prompt", "ui-sans-serif", "system-ui"],
-              body: ["Kanit", "ui-sans-serif", "system-ui"],
+              body: ["Kanit", "Sarabun", "ui-sans-serif", "system-ui"],
             },
             boxShadow: {
               ambient: "0 30px 80px rgba(107, 90, 96, 0.12)",
@@ -78,7 +79,7 @@
 
           <div class="mt-8 grid gap-3">
             <div class="rounded-3xl px-4 py-3 text-sm" style="background: rgba(255,255,255,0.65); color: var(--stitch-on-primary-container)">
-              ใช้เพียงชื่อ เบอร์โทร อีเมล และรูปโปรไฟล์
+              ใช้ชื่อ เบอร์โทร อีเมล รหัสผ่าน และรูปโปรไฟล์ — รหัสผ่านใช้เข้าสู่ระบบหลังแอดมินอนุมัติบัญชี
             </div>
             <div class="rounded-3xl px-4 py-3 text-sm" style="background: var(--stitch-tertiary-container); color: var(--stitch-on-primary-container)">
               บัญชีใหม่จะรอแอดมินกดตรวจสอบก่อนเข้าใช้งาน
@@ -168,6 +169,38 @@
               />
             </div>
 
+            <div>
+              <label for="password" class="mb-2 block text-sm font-heading font-semibold">รหัสผ่าน</label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autocomplete="new-password"
+                required
+                minlength="8"
+                x-model="form.password"
+                class="h-14 w-full rounded-full border-none bg-[color:var(--stitch-surface)] px-5 text-sm outline-none transition focus:ring-4"
+                style="color: var(--stitch-on-surface)"
+                placeholder="อย่างน้อย 8 ตัวอักษร"
+              />
+            </div>
+
+            <div>
+              <label for="password_confirm" class="mb-2 block text-sm font-heading font-semibold">ยืนยันรหัสผ่าน</label>
+              <input
+                id="password_confirm"
+                name="password_confirm"
+                type="password"
+                autocomplete="new-password"
+                required
+                minlength="8"
+                x-model="form.password_confirm"
+                class="h-14 w-full rounded-full border-none bg-[color:var(--stitch-surface)] px-5 text-sm outline-none transition focus:ring-4"
+                style="color: var(--stitch-on-surface)"
+                placeholder="กรอกรหัสผ่านอีกครั้ง"
+              />
+            </div>
+
             <template x-if="message">
               <div
                 class="rounded-3xl px-4 py-3 text-sm"
@@ -204,6 +237,8 @@
             name: "",
             phone_number: "",
             email: "",
+            password: "",
+            password_confirm: "",
           },
 
           previewImage(event) {
@@ -218,6 +253,19 @@
             this.loading = true;
             this.message = "";
             this.status = "";
+
+            if ((this.form.password || "").length < 8) {
+              this.loading = false;
+              this.status = "error";
+              this.message = "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร";
+              return;
+            }
+            if (this.form.password !== this.form.password_confirm) {
+              this.loading = false;
+              this.status = "error";
+              this.message = "รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน";
+              return;
+            }
 
             try {
               const payload = new FormData(event.target);
@@ -238,6 +286,9 @@
               if (!res.ok) {
                 const code = data && data.error ? String(data.error) : "";
                 if (code === "missing_fields") this.message = "กรุณากรอกชื่อ เบอร์โทร และอีเมลให้ครบ";
+                else if (code === "missing_password") this.message = "กรุณาตั้งรหัสผ่าน";
+                else if (code === "password_mismatch") this.message = "รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน";
+                else if (code === "weak_password") this.message = data.message || "รหัสผ่านไม่ผ่านเกณฑ์ความปลอดภัย กรุณาใช้รหัสที่ยากขึ้น";
                 else if (code === "email_exists") this.message = "อีเมลนี้ถูกสมัครไว้แล้ว กรุณาใช้อีเมลอื่น";
                 else if (code === "invalid_image") this.message = "กรุณาเลือกรูปภาพเท่านั้น";
                 else if (code === "image_too_large") this.message = "รูปภาพต้องมีขนาดไม่เกิน 5MB";
@@ -250,6 +301,8 @@
               this.form.name = "";
               this.form.phone_number = "";
               this.form.email = "";
+              this.form.password = "";
+              this.form.password_confirm = "";
               if (this.imagePreview) URL.revokeObjectURL(this.imagePreview);
               this.imagePreview = "";
               this.status = "success";

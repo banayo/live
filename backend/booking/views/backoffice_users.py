@@ -8,7 +8,7 @@ from django.http import HttpRequest, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 
-from ..models import Brand, Profile, User
+from ..models import Profile, User
 from ..services.profile_avatar import resolve_profile_avatar_url
 from ..services.roles import is_backoffice_admin
 
@@ -47,24 +47,6 @@ def _normalize_optional_bool(value: Any) -> bool | None:
     return None
 
 
-def _normalize_optional_brand_id(value: Any) -> Any:
-    """Return int id, \"\" to clear brand, or None if key omitted / unknown."""
-    if value is None:
-        return None
-    if isinstance(value, int):
-        return value
-    if isinstance(value, float) and value.is_integer():
-        return int(value)
-    if isinstance(value, str):
-        t = value.strip()
-        if t == "":
-            return ""
-        if t.isdigit():
-            return int(t)
-        return None
-    return None
-
-
 _MAX_PROFILE_IMAGE_BYTES = 5 * 1024 * 1024
 
 
@@ -75,12 +57,8 @@ def backoffice_users_list(request: HttpRequest) -> JsonResponse:
     if not is_backoffice_admin(request.user):
         return JsonResponse({"ok": False, "message": "Forbidden"}, status=403)
 
-    brands = list(
-        Brand.objects.order_by("name").values("id", "name", "is_active")
-    )
-
     qs = (
-        User.objects.select_related("profile", "profile__brand")
+        User.objects.select_related("profile")
         .order_by("-date_joined")
         .only(
             "id",
@@ -98,15 +76,12 @@ def backoffice_users_list(request: HttpRequest) -> JsonResponse:
             "profile__bank_name",
             "profile__photo_url",
             "profile__profile_image",
-            "profile__brand__id",
-            "profile__brand__name",
         )
     )
 
     users: list[dict[str, Any]] = []
     for u in qs:
         profile = getattr(u, "profile", None)
-        brand = getattr(profile, "brand", None) if profile else None
         full_name = f"{u.first_name} {u.last_name}".strip() or u.get_username()
         line_uid_raw = getattr(profile, "line_uid", None)
         photo_url_raw = getattr(profile, "photo_url", None) or ""
@@ -126,12 +101,12 @@ def backoffice_users_list(request: HttpRequest) -> JsonResponse:
                 "role": getattr(profile, "role", "user") or "user",
                 "is_verified": bool(getattr(profile, "is_verified", False)),
                 "line_connected": bool(line_uid_raw),
-                "brand": {"id": brand.id, "name": brand.name} if brand else None,
+                "brand": None,
                 "created_at": u.date_joined.isoformat() if u.date_joined else None,
             }
         )
 
-    return JsonResponse({"ok": True, "users": users, "brands": brands}, status=200)
+    return JsonResponse({"ok": True, "users": users, "brands": []}, status=200)
 
 
 @csrf_exempt
@@ -156,11 +131,6 @@ def backoffice_user_update(request: HttpRequest, user_id: int) -> JsonResponse:
         role = str(_role_raw).strip() or None
     is_verified = _normalize_optional_bool(data.get("is_verified", None))
 
-    brand_id = _normalize_optional_brand_id(data.get("brand_id", None))
-    if brand_id is None or isinstance(brand_id, (str, int)):
-        pass
-    else:
-        return _json_error("Invalid brand_id.", status=400, code="invalid_brand_id")
     name = data.get("name", None)
     email = data.get("email", None)
     phone_number = data.get("phone_number", None)
@@ -180,15 +150,6 @@ def backoffice_user_update(request: HttpRequest, user_id: int) -> JsonResponse:
     allowed_roles = {"admin", "brand", "user"}
     if role is not None and role not in allowed_roles:
         return _json_error("Invalid role.", status=400, code="invalid_role")
-
-    if brand_id is not None and brand_id != "" and not isinstance(brand_id, int):
-        return _json_error("Invalid brand_id.", status=400, code="invalid_brand_id")
-
-    brand_obj = None
-    if isinstance(brand_id, int):
-        brand_obj = Brand.objects.filter(pk=brand_id).first()
-        if not brand_obj:
-            return _json_error("Brand not found.", status=404, code="brand_not_found")
 
     if phone_number is not None:
         phone_number = str(phone_number).strip()[:15]
@@ -259,9 +220,6 @@ def backoffice_user_update(request: HttpRequest, user_id: int) -> JsonResponse:
         if is_verified is not None:
             profile.is_verified = bool(is_verified)
             update_fields.append("is_verified")
-        if brand_id is not None:
-            profile.brand = brand_obj
-            update_fields.append("brand")
         if phone_number is not None:
             profile.phone_number = phone_number
             update_fields.append("phone_number")

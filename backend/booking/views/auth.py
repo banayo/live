@@ -4,6 +4,8 @@ import json
 from typing import Any
 
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
@@ -77,8 +79,23 @@ def auth_register(request: HttpRequest) -> JsonResponse:
     email = str(request.POST.get("email") or "").strip().lower()
     image = request.FILES.get("profile_image")
 
+    password = str(request.POST.get("password") or "")
+    password_confirm = str(request.POST.get("password_confirm") or "")
+
     if not name or not phone_number or not email:
         return _json_error("Missing required registration fields.", status=400, code="missing_fields")
+
+    if not password:
+        return _json_error("Password is required.", status=400, code="missing_password")
+
+    if password != password_confirm:
+        return _json_error("Passwords do not match.", status=400, code="password_mismatch")
+
+    try:
+        validate_password(password, user=User(email=email, username="pending"))
+    except DjangoValidationError as exc:
+        msg = " ".join(exc.messages) if exc.messages else "รหัสผ่านไม่ผ่านเกณฑ์ความปลอดภัย"
+        return _json_error(msg, status=400, code="weak_password")
 
     if User.objects.filter(email__iexact=email).exists():
         return _json_error("Email already registered.", status=409, code="email_exists")
@@ -95,6 +112,7 @@ def auth_register(request: HttpRequest) -> JsonResponse:
         email=email,
         phone_number=phone_number,
         profile_image=image,
+        password=password,
     )
 
     return JsonResponse(

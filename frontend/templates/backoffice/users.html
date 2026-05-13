@@ -223,12 +223,6 @@
               </div>
 
               <div class="flex flex-wrap gap-sm">
-                <select class="rounded-full border-none bg-[color:var(--stitch-surface-container-low)] px-md py-sm text-sm focus:ring-2 focus:ring-[color:var(--stitch-primary-container)]" x-model="brandFilter">
-                  <option value="">ทุกแบรนด์</option>
-                  <template x-for="brand in brands" :key="brand.id">
-                    <option :value="brand.id" x-text="brand.name"></option>
-                  </template>
-                </select>
                 <select class="rounded-full border-none bg-[color:var(--stitch-surface-container-low)] px-md py-sm text-sm focus:ring-2 focus:ring-[color:var(--stitch-primary-container)]" x-model="sortBy">
                   <option value="newest">ล่าสุด</option>
                   <option value="name">เรียงตามชื่อ</option>
@@ -238,13 +232,12 @@
             </div>
 
             <div class="overflow-x-auto">
-              <table class="w-full min-w-[1040px] text-left text-sm">
+              <table class="w-full min-w-[940px] text-left text-sm">
                 <thead class="text-xs font-bold uppercase tracking-wider text-[color:var(--stitch-on-surface-variant)]">
                   <tr>
                     <th class="px-lg py-md">ผู้ใช้งาน</th>
                     <th class="px-lg py-md">ติดต่อ</th>
                     <th class="px-lg py-md">Role</th>
-                    <th class="px-lg py-md">Brand</th>
                     <th class="px-lg py-md">LINE</th>
                     <th class="px-lg py-md">Status</th>
                     <th class="px-lg py-md text-right">Action</th>
@@ -282,7 +275,6 @@
                       <td class="px-lg py-md">
                         <span class="rounded-full px-sm py-1 text-xs font-bold" :class="roleClass(user.role)" x-text="roleLabel(user.role)"></span>
                       </td>
-                      <td class="px-lg py-md" x-text="user.brandName || '-'"></td>
                       <td class="px-lg py-md">
                         <span class="rounded-full px-sm py-1 text-xs font-bold" :class="user.lineConnected ? 'bg-[color:var(--stitch-tertiary-container)] text-[color:var(--stitch-on-tertiary-container)]' : 'bg-[color:var(--stitch-surface-container-low)] text-[color:var(--stitch-on-surface-variant)]'" x-text="user.lineConnected ? 'Connected' : 'Not linked'"></span>
                       </td>
@@ -455,16 +447,6 @@
               </select>
             </label>
 
-            <label class="block">
-              <span class="mb-xs block text-sm font-bold text-[color:var(--stitch-primary)]">Brand</span>
-              <select class="w-full rounded-full border-none bg-[color:var(--stitch-surface-container-low)] px-md py-md focus:ring-2 focus:ring-[color:var(--stitch-primary-container)]" x-model="draft.brandId" :disabled="modalMode === 'preview'">
-                <option value="">ไม่ผูกแบรนด์</option>
-                <template x-for="brand in brands" :key="brand.id">
-                  <option :value="brand.id" x-text="brand.name"></option>
-                </template>
-              </select>
-            </label>
-
             <label class="flex items-center justify-between gap-md rounded-3xl bg-[color:var(--stitch-primary-container)]/50 p-md">
               <span>
                 <span class="block text-sm font-bold text-[color:var(--stitch-primary)]">Verified</span>
@@ -487,14 +469,12 @@
         return {
           query: "",
           activeFilter: "all",
-          brandFilter: "",
           sortBy: "newest",
           modalOpen: false,
           modalMode: "edit",
           selectedUser: null,
           draft: {
             role: "user",
-            brandId: "",
             verified: false,
             name: "",
             email: "",
@@ -507,7 +487,6 @@
             profileImagePreviewUrl: "",
           },
           filters: ["all", "pending", "verified", "admin", "brand", "user"],
-          brands: [],
           users: [],
           /** userId -> true when avatar <img> fired error (404, blocked CDN, etc.) */
           brokenAvatarByUserId: {},
@@ -529,7 +508,6 @@
                 return;
               }
               const data = await res.json();
-              this.brands = Array.isArray(data.brands) ? data.brands.filter((b) => b && b.is_active).map((b) => ({ id: b.id, name: b.name })) : [];
               this.brokenAvatarByUserId = {};
               this.users = Array.isArray(data.users) ? data.users.map((u) => this.normalizeUser(u)) : [];
             } catch (e) {
@@ -558,8 +536,6 @@
               photoUrl: String(u?.photo_url || ""),
               avatarUrl: avatarRaw || photoRaw || null,
               role: String(u?.role || "user"),
-              brandId: u?.brand?.id ?? null,
-              brandName: u?.brand?.name ?? "",
               lineConnected: Boolean(u?.line_connected),
               verified: Boolean(u?.is_verified),
               createdAt: String(u?.created_at || ""),
@@ -641,7 +617,6 @@
           hydrateDraft(user) {
             return {
               role: user.role,
-              brandId: user.brandId === null || user.brandId === undefined ? "" : String(user.brandId),
               verified: Boolean(user.verified),
               name: user.name ?? "",
               email: user.email ?? "",
@@ -668,13 +643,6 @@
             this.draft.profileImagePreviewUrl = URL.createObjectURL(file);
           },
 
-          brandPayloadId() {
-            const v = this.draft?.brandId;
-            if (v === "" || v === null || v === undefined) return "";
-            const n = Number(v);
-            return Number.isFinite(n) ? n : "";
-          },
-
           metrics() {
             return [
               { label: "Total Users", value: this.users.length, icon: "group", hint: "All", bg: "bg-[color:var(--stitch-primary-container)]", color: "text-[color:var(--stitch-primary)]" },
@@ -689,17 +657,16 @@
             let rows = this.users.filter((user) => {
               const matchesQuery =
                 !q ||
-                [user.name, user.username, user.email, user.phone, user.brandName, user.kof, user.bankAccount, user.bankName]
+                [user.name, user.username, user.email, user.phone, user.kof, user.bankAccount, user.bankName]
                   .join(" ")
                   .toLowerCase()
                   .includes(q);
-              const matchesBrand = !this.brandFilter || String(user.brandId || "") === String(this.brandFilter);
               const matchesFilter =
                 this.activeFilter === "all" ||
                 (this.activeFilter === "pending" && !user.verified) ||
                 (this.activeFilter === "verified" && user.verified) ||
                 user.role === this.activeFilter;
-              return matchesQuery && matchesBrand && matchesFilter;
+              return matchesQuery && matchesFilter;
             });
 
             if (this.sortBy === "name") rows = rows.sort((a, b) => a.name.localeCompare(b.name, "th"));
@@ -735,7 +702,6 @@
             this.selectedUser = { name: "ผู้ใช้ใหม่", initial: "?" };
             this.draft = {
               role: "user",
-              brandId: "",
               verified: false,
               phone: "",
               kof: "",
@@ -778,8 +744,6 @@
                 const fd = new FormData();
                 fd.append("role", String(this.draft.role || ""));
                 fd.append("is_verified", String(Boolean(this.draft.verified)));
-                const brandId = this.brandPayloadId();
-                fd.append("brand_id", brandId === "" ? "" : String(brandId));
                 fd.append("name", String(this.draft.name ?? "").trim());
                 fd.append("email", String(this.draft.email ?? "").trim());
                 fd.append("phone_number", String(this.draft.phone ?? ""));
@@ -797,7 +761,6 @@
                 const payload = {
                   role: this.draft.role,
                   is_verified: Boolean(this.draft.verified),
-                  brand_id: this.brandPayloadId(),
                   name: String(this.draft.name ?? "").trim(),
                   email: String(this.draft.email ?? "").trim(),
                   phone_number: this.draft.phone ?? "",

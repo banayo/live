@@ -24,7 +24,6 @@ class ProfileInline(admin.StackedInline):
 
     fields = (
         "role",
-        "brand",
         "profile_image",
         "line_uid",
         "photo_url",
@@ -82,10 +81,10 @@ class UserAdmin(DjangoUserAdmin):
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
     ordering = ("user__username",)
-    list_display = ("user", "role", "phone_number", "line_uid", "is_verified", "brand")
+    list_display = ("user", "role", "phone_number", "line_uid", "is_verified")
     list_filter = ("is_verified", "role")
     search_fields = ("user__username", "user__email", "phone_number", "line_uid", "kof")
-    autocomplete_fields = ("user", "brand")
+    autocomplete_fields = ("user",)
     list_editable = ("is_verified",)
 
 

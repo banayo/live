@@ -21,5 +21,7 @@ urlpatterns = [
     path("api/backoffice/channels/create/", views.backoffice_channel_create, name="backoffice_channel_create"),
     path("api/backoffice/channels/<int:channel_id>/", views.backoffice_channel_update, name="backoffice_channel_update"),
     path("api/schedules/", views.live_schedule_feed, name="live_schedule_feed"),
+    path("api/user/book-live-options/", views.user_book_live_options, name="user_book_live_options"),
+    path("api/user/live-schedules/", views.user_live_schedule_create, name="user_live_schedule_create"),
 ]
 

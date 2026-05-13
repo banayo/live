@@ -39,11 +39,12 @@ This document defines the roles, personas, and scopes of work for AI Agents with
 * **Split Queries:** Put complex read/query logic in `backend/booking/selectors/`.
 * **Role & Verification System:**
   * Use Django `User` only for authentication fields (username, email, password, `is_staff`, `is_superuser`).
-  * Store profile-specific data (profile image, LINE UID, phone number, brand, verification status) in `Profile`.
+  * Store profile-specific person data (profile image, LINE UID, phone number, verification status) in `Profile`.
+  * Do not store brand membership on `Profile`; keep brand assignment on business records such as `LiveSchedule.brand` and validate client-selected brands in services.
   * Keep application roles in `Profile.role` only. Do not add role fields to `User`.
   * New user accounts default to role `user` and must not access protected features until `Profile.is_verified` is true.
   * Check admin access with `user.is_superuser` or `Profile.role == "admin"` only.
-  * Scope brand users by `Profile.brand`; regular users must only see their own data.
+
 * **URL Routing:** Avoid naming custom internal admin pages/routes as `/admin/`; reserve `/admin/` for Django Admin and use `/backoffice/` instead.
 
 ---
@@ -51,7 +52,7 @@ This document defines the roles, personas, and scopes of work for AI Agents with
 ## 3. Agent-Data: Database & MCP Specialist
 **Role:** Manage the PostgreSQL database structure, write Queries, and handle data retrieval via MCP.
 **🚨 Strict Rules:**
-* **Schema Consistency:** Table structures and ForeignKeys must strictly match the design outlined in the `design.md` file.
+* **Schema Consistency:** Table structures and ForeignKeys must strictly match the design outlined in the `DESIGM.md` file.
 * **Query Optimization:** Always use `select_related` or `prefetch_related` in the Django ORM when fetching relational data (e.g., fetching schedules along with brand logos) to prevent N+1 Query issues.
 
 ---

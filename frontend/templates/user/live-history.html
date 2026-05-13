@@ -1,0 +1,438 @@
+<!doctype html>
+<!-- AGENTS.MD Agent-UI + DESIGM.md (Serene Commerce) | ประวัติรอบไลฟ์ — responsive mobile + desktop -->
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#fce4ec" />
+    <title>ประวัติไลฟ์ | Stitch Live Booking</title>
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Prompt:wght@400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --stitch-surface: #f9f9f9;
+        --stitch-surface-container-lowest: #ffffff;
+        --stitch-surface-container-low: #f3f3f3;
+        --stitch-surface-container: #eeeeee;
+        --stitch-surface-container-high: #e8e8e8;
+        --stitch-surface-container-highest: #e2e2e2;
+        --stitch-surface-variant: #e2e2e2;
+        --stitch-on-surface: #1a1c1c;
+        --stitch-on-surface-variant: #4d4447;
+        --stitch-outline: #7f7478;
+        --stitch-outline-variant: #d0c3c7;
+        --stitch-primary: #6b5a60;
+        --stitch-on-primary: #ffffff;
+        --stitch-primary-container: #fce4ec;
+        --stitch-on-primary-container: #76646b;
+        --stitch-primary-fixed: #f4dce4;
+        --stitch-on-primary-fixed-variant: #524249;
+        --stitch-secondary-container: #d3e2ed;
+        --stitch-on-secondary-container: #56656e;
+        --stitch-tertiary-container: #e0ede1;
+        --stitch-on-tertiary-container: #606c62;
+        --stitch-error: #ba1a1a;
+        --stitch-error-container: #ffdad6;
+        --stitch-on-error-container: #93000a;
+      }
+
+      .material-symbols-outlined {
+        font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+      }
+
+      .soft-shadow {
+        box-shadow: 0 20px 40px -15px rgba(107, 90, 96, 0.08);
+      }
+
+      .pink-gradient {
+        background: linear-gradient(135deg, #fce4ec 0%, #f4dce4 100%);
+      }
+
+      [x-cloak] {
+        display: none !important;
+      }
+    </style>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              heading: ["Prompt", "ui-sans-serif", "system-ui"],
+              body: ["Kanit", "Sarabun", "ui-sans-serif", "system-ui"],
+            },
+            spacing: {
+              "container-margin": "20px",
+              gutter: "16px",
+              xs: "4px",
+              sm: "8px",
+              md: "16px",
+              lg: "24px",
+              xl: "32px",
+              xxl: "48px",
+            },
+            boxShadow: {
+              soft: "0 20px 40px -15px rgba(107, 90, 96, 0.08)",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+
+  <body class="min-h-screen bg-[color:var(--stitch-surface)] pb-28 font-body text-[color:var(--stitch-on-surface)] antialiased leading-relaxed md:pb-12">
+    <div x-data="liveHistoryPage()" x-init="init()" class="min-h-screen md:flex" x-cloak>
+      <aside
+        class="sticky top-0 z-20 hidden h-svh w-[260px] shrink-0 flex-col gap-xl border-r border-[color:var(--stitch-outline-variant)]/25 bg-[color:var(--stitch-surface-container-lowest)] p-lg shadow-[4px_0_32px_-20px_rgba(107,90,96,0.12)] md:flex lg:w-[272px] rounded-r-3xl"
+        aria-label="เมนูหลักแบบเดสก์ท็อป"
+      >
+        <div>
+          <p class="font-heading text-lg font-semibold tracking-tight text-[color:var(--stitch-primary)]">Stitch Live</p>
+          <p class="mt-xs text-xs text-[color:var(--stitch-on-surface-variant)]">ประวัติรอบไลฟ์</p>
+          <nav class="mt-xl flex flex-col gap-sm">
+            <a
+              href="/dashboard"
+              class="flex items-center gap-md rounded-full px-lg py-md font-heading text-[0.8125rem] font-semibold text-[color:var(--stitch-on-surface-variant)] transition hover:translate-x-0.5 hover:bg-[color:var(--stitch-surface-container-high)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--stitch-primary-container)] focus-visible:ring-offset-2"
+            >
+              <span class="material-symbols-outlined text-[20px]">dashboard</span>
+              แดชบอร์ด
+            </a>
+            <a
+              href="/book-live"
+              class="flex items-center gap-md rounded-full px-lg py-md font-heading text-[0.8125rem] font-semibold text-[color:var(--stitch-on-surface-variant)] transition hover:translate-x-0.5 hover:bg-[color:var(--stitch-surface-container-high)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--stitch-primary-container)] focus-visible:ring-offset-2"
+            >
+              <span class="material-symbols-outlined text-[20px]">add_circle</span>
+              จองไลฟ์
+            </a>
+            <a
+              href="/live-history"
+              class="flex items-center gap-md rounded-full bg-[color:var(--stitch-primary-container)] px-lg py-md font-heading text-[0.8125rem] font-semibold text-[color:var(--stitch-on-primary-container)] shadow-[0_10px_28px_-12px_rgba(107,90,96,0.35)] transition hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--stitch-primary)]/30 focus-visible:ring-offset-2"
+              aria-current="page"
+            >
+              <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1">history</span>
+              ประวัติไลฟ์
+            </a>
+            <a
+              href="/dashboard"
+              class="flex items-center gap-md rounded-full px-lg py-md font-heading text-[0.8125rem] font-semibold text-[color:var(--stitch-on-surface-variant)] transition hover:translate-x-0.5 hover:bg-[color:var(--stitch-surface-container-high)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--stitch-primary-container)] focus-visible:ring-offset-2"
+            >
+              <span class="material-symbols-outlined text-[20px]">event</span>
+              ตารางงาน
+            </a>
+            <a
+              href="/dashboard"
+              class="flex items-center gap-md rounded-full px-lg py-md font-heading text-[0.8125rem] font-semibold text-[color:var(--stitch-on-surface-variant)] transition hover:translate-x-0.5 hover:bg-[color:var(--stitch-surface-container-high)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--stitch-primary-container)] focus-visible:ring-offset-2"
+            >
+              <span class="material-symbols-outlined text-[20px]">videocam</span>
+              Live
+            </a>
+          </nav>
+        </div>
+      </aside>
+
+      <div class="flex min-h-screen min-w-0 flex-1 flex-col">
+        <div class="mx-auto w-full max-w-7xl flex-1">
+          <header
+            class="sticky top-0 z-30 flex w-full flex-wrap items-center justify-between gap-md bg-[color:var(--stitch-surface)]/95 px-container-margin py-md shadow-[0_12px_32px_-18px_rgba(107,90,96,0.12)] backdrop-blur-md md:rounded-b-3xl md:px-8 md:py-lg lg:px-10"
+          >
+            <div class="flex min-w-0 items-center gap-md">
+              <a
+                href="/dashboard"
+                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[color:var(--stitch-surface-container-lowest)] text-[color:var(--stitch-primary)] shadow-sm transition hover:bg-[color:var(--stitch-primary-container)]"
+                aria-label="กลับแดชบอร์ด"
+              >
+                <span class="material-symbols-outlined">arrow_back</span>
+              </a>
+              <div class="min-w-0">
+                <h1 class="font-heading text-xl font-semibold tracking-tight text-[color:var(--stitch-primary)] md:text-2xl">ประวัติไลฟ์</h1>
+                <p class="text-xs text-[color:var(--stitch-on-surface-variant)] md:text-sm">รายการรอบไลฟ์ของคุณเรียงจากล่าสุด</p>
+              </div>
+            </div>
+            <a
+              href="/book-live"
+              class="hidden shrink-0 items-center gap-xs rounded-full bg-[color:var(--stitch-primary)] px-lg py-md font-heading text-sm font-semibold text-[color:var(--stitch-on-primary)] shadow-[0_12px_28px_-14px_rgba(82,66,73,0.45)] transition hover:opacity-95 sm:inline-flex"
+            >
+              <span class="material-symbols-outlined text-[20px]">add</span>
+              จองใหม่
+            </a>
+          </header>
+
+          <main class="mt-lg space-y-lg px-container-margin pb-lg md:space-y-xl md:px-8 lg:px-10">
+            <section class="pink-gradient rounded-3xl p-lg soft-shadow md:flex md:items-center md:justify-between md:gap-xl md:p-xl">
+              <div>
+                <p class="text-xs font-bold uppercase tracking-wider text-[color:var(--stitch-on-primary-container)]">สรุปในช่วงที่โหลด</p>
+                <p class="mt-sm font-heading text-2xl font-semibold text-[color:var(--stitch-primary)] md:text-3xl" x-text="sessions.length + ' รายการ'"></p>
+              </div>
+              <div class="mt-md flex flex-wrap gap-sm md:mt-0">
+                <template x-for="opt in filterOptions" :key="opt.id">
+                  <button
+                    type="button"
+                    class="rounded-full px-lg py-sm font-heading text-xs font-semibold transition md:text-sm"
+                    :class="filter === opt.id ? 'bg-[color:var(--stitch-surface-container-lowest)] text-[color:var(--stitch-primary)] shadow-sm' : 'bg-white/40 text-[color:var(--stitch-on-primary-container)] hover:bg-white/70'"
+                    @click="filter = opt.id"
+                    x-text="opt.label"
+                  ></button>
+                </template>
+              </div>
+            </section>
+
+            <template x-if="error">
+              <div class="rounded-3xl bg-[color:var(--stitch-error-container)] px-lg py-md text-sm text-[color:var(--stitch-on-error-container)]" x-text="error"></div>
+            </template>
+
+            <p x-show="loading && !error" class="text-sm text-[color:var(--stitch-on-surface-variant)]">กำลังโหลดรายการ…</p>
+
+            <!-- Mobile cards -->
+            <div class="space-y-md md:hidden" x-show="!loading && !error">
+              <template x-for="row in filteredSessions()" :key="row.id">
+                <article class="rounded-3xl bg-[color:var(--stitch-surface-container-lowest)] p-lg soft-shadow">
+                  <div class="flex items-start justify-between gap-md">
+                    <div class="min-w-0 flex-1">
+                      <p class="font-heading text-base font-semibold text-[color:var(--stitch-primary)]" x-text="row.title"></p>
+                      <p class="mt-xs text-sm text-[color:var(--stitch-on-surface-variant)]" x-text="row.dateLine"></p>
+                      <p class="mt-xs text-sm text-[color:var(--stitch-outline)]" x-text="row.timeLine"></p>
+                    </div>
+                    <span class="shrink-0 rounded-full px-3 py-1 text-[10px] font-bold uppercase" :class="statusClass(row)" x-text="row.statusLabel"></span>
+                  </div>
+                  <div class="mt-md flex flex-wrap items-center justify-between gap-sm border-t border-[color:var(--stitch-outline-variant)]/25 pt-md">
+                    <div>
+                      <p class="text-[11px] font-bold uppercase tracking-wider text-[color:var(--stitch-on-primary-container)]">ยอดที่กรอก</p>
+                      <p class="font-heading text-lg font-semibold text-[color:var(--stitch-primary)]" x-text="formatMoney(row.totalRaw)"></p>
+                    </div>
+                    <a
+                      :href="'/enter-sales?session=' + encodeURIComponent(row.id)"
+                      class="inline-flex items-center gap-xs rounded-full bg-[color:var(--stitch-secondary-container)] px-md py-sm text-xs font-semibold text-[color:var(--stitch-on-secondary-container)] transition hover:opacity-95"
+                    >
+                      <span class="material-symbols-outlined text-[18px]">payments</span>
+                      กรอกยอด
+                    </a>
+                  </div>
+                </article>
+              </template>
+              <template x-if="!loading && filteredSessions().length === 0">
+                <div class="rounded-3xl bg-[color:var(--stitch-surface-container-lowest)] px-lg py-xl text-center soft-shadow">
+                  <p class="font-heading font-semibold text-[color:var(--stitch-on-surface)]">ยังไม่มีรายการในตัวกรองนี้</p>
+                  <p class="mt-sm text-sm text-[color:var(--stitch-on-surface-variant)]">ลองเปลี่ยนตัวกรอง หรือจองรอบใหม่</p>
+                  <a href="/book-live" class="mt-md inline-flex rounded-full bg-[color:var(--stitch-primary)] px-xl py-md font-heading text-sm font-semibold text-[color:var(--stitch-on-primary)]">จองไลฟ์</a>
+                </div>
+              </template>
+            </div>
+
+            <!-- Desktop table -->
+            <div class="hidden overflow-hidden rounded-3xl bg-[color:var(--stitch-surface-container-lowest)] soft-shadow md:block" x-show="!loading && !error">
+              <div class="overflow-x-auto">
+                <table class="w-full min-w-[640px] border-collapse text-left text-sm">
+                  <thead>
+                    <tr class="border-b border-[color:var(--stitch-outline-variant)]/25 bg-[color:var(--stitch-surface-container-low)]">
+                      <th class="px-lg py-md font-heading text-xs font-bold uppercase tracking-wider text-[color:var(--stitch-on-surface-variant)]">หัวข้อ</th>
+                      <th class="px-lg py-md font-heading text-xs font-bold uppercase tracking-wider text-[color:var(--stitch-on-surface-variant)]">วันที่</th>
+                      <th class="px-lg py-md font-heading text-xs font-bold uppercase tracking-wider text-[color:var(--stitch-on-surface-variant)]">เวลา</th>
+                      <th class="px-lg py-md font-heading text-xs font-bold uppercase tracking-wider text-[color:var(--stitch-on-surface-variant)]">สถานะ</th>
+                      <th class="px-lg py-md font-heading text-xs font-bold uppercase tracking-wider text-[color:var(--stitch-on-surface-variant)]">ยอดกรอก</th>
+                      <th class="px-lg py-md font-heading text-xs font-bold uppercase tracking-wider text-[color:var(--stitch-on-surface-variant)]"></th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-[color:var(--stitch-outline-variant)]/20">
+                    <template x-for="row in filteredSessions()" :key="'t-' + row.id">
+                      <tr class="transition hover:bg-[color:var(--stitch-primary-container)]/25">
+                        <td class="px-lg py-md font-medium text-[color:var(--stitch-on-surface)]" x-text="row.title"></td>
+                        <td class="px-lg py-md text-[color:var(--stitch-on-surface-variant)]" x-text="row.dateLine"></td>
+                        <td class="px-lg py-md text-[color:var(--stitch-on-surface-variant)]" x-text="row.timeLine"></td>
+                        <td class="px-lg py-md">
+                          <span class="inline-flex rounded-full px-3 py-1 text-[10px] font-bold uppercase" :class="statusClass(row)" x-text="row.statusLabel"></span>
+                        </td>
+                        <td class="px-lg py-md font-heading font-semibold text-[color:var(--stitch-primary)]" x-text="formatMoney(row.totalRaw)"></td>
+                        <td class="px-lg py-md text-right">
+                          <a
+                            :href="'/enter-sales?session=' + encodeURIComponent(row.id)"
+                            class="inline-flex items-center gap-xs rounded-full bg-[color:var(--stitch-secondary-container)] px-md py-sm text-xs font-semibold text-[color:var(--stitch-on-secondary-container)] transition hover:opacity-95"
+                          >
+                            กรอกยอด
+                          </a>
+                        </td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </div>
+              <template x-if="!loading && filteredSessions().length === 0">
+                <div class="px-lg py-xl text-center">
+                  <p class="font-heading font-semibold">ยังไม่มีรายการในตัวกรองนี้</p>
+                  <a href="/book-live" class="mt-md inline-flex rounded-full bg-[color:var(--stitch-primary)] px-xl py-md font-heading text-sm font-semibold text-[color:var(--stitch-on-primary)]">จองไลฟ์</a>
+                </div>
+              </template>
+            </div>
+          </main>
+        </div>
+
+        <a
+          href="/book-live"
+          class="fixed bottom-28 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-[color:var(--stitch-primary)] text-white shadow-xl transition hover:scale-105 active:scale-95 md:bottom-10 md:right-10 md:h-16 md:w-auto md:rounded-full md:px-6"
+          aria-label="จองไลฟ์"
+        >
+          <span class="material-symbols-outlined text-[26px] md:mr-1">add</span>
+          <span class="hidden font-heading text-sm font-semibold md:inline">จองใหม่</span>
+        </a>
+
+        <nav
+          class="fixed bottom-0 left-0 z-50 flex w-full items-center justify-around rounded-t-3xl bg-[color:var(--stitch-surface-container-lowest)] px-2 py-3 shadow-[0_-4px_20px_rgba(107,90,96,0.08)] md:hidden"
+          aria-label="เมนูหลัก"
+        >
+          <a href="/dashboard" class="flex min-w-0 flex-1 flex-col items-center justify-center rounded-2xl p-2 text-[color:var(--stitch-on-secondary-container)] transition hover:bg-[color:var(--stitch-secondary-container)]">
+            <span class="material-symbols-outlined">home</span>
+            <span class="mt-1 truncate text-[10px] font-bold uppercase tracking-wider">หน้าแรก</span>
+          </a>
+          <a href="/book-live" class="flex min-w-0 flex-1 flex-col items-center justify-center rounded-2xl p-2 text-[color:var(--stitch-on-secondary-container)] transition hover:bg-[color:var(--stitch-secondary-container)]">
+            <span class="material-symbols-outlined">add_circle</span>
+            <span class="mt-1 truncate text-[10px] font-bold uppercase tracking-wider">จองไลฟ์</span>
+          </a>
+          <a href="/live-history" class="flex min-w-0 flex-1 flex-col items-center justify-center rounded-2xl bg-[color:var(--stitch-primary-container)] p-2 text-[color:var(--stitch-on-primary-container)]" aria-current="page">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">history</span>
+            <span class="mt-1 truncate text-[10px] font-bold uppercase tracking-wider">ประวัติ</span>
+          </a>
+          <a href="/dashboard" class="flex min-w-0 flex-1 flex-col items-center justify-center rounded-2xl p-2 text-[color:var(--stitch-on-secondary-container)] transition hover:bg-[color:var(--stitch-secondary-container)]">
+            <span class="material-symbols-outlined">videocam</span>
+            <span class="mt-1 truncate text-[10px] font-bold uppercase tracking-wider">Live</span>
+          </a>
+        </nav>
+      </div>
+    </div>
+
+    <script>
+      function liveHistoryPage() {
+        return {
+          loading: true,
+          error: "",
+          sessions: [],
+          filter: "all",
+          filterOptions: [
+            { id: "all", label: "ทั้งหมด" },
+            { id: "upcoming", label: "กำลังจะถึง" },
+            { id: "past", label: "ย้อนหลัง" },
+            { id: "pending", label: "รอยืนยัน" },
+          ],
+
+          async init() {
+            await this.loadSchedules();
+          },
+
+          async loadSchedules() {
+            this.loading = true;
+            this.error = "";
+            try {
+              const now = new Date();
+              const start = new Date(now);
+              start.setDate(now.getDate() - 180);
+              const end = new Date(now);
+              end.setDate(now.getDate() + 120);
+              const params = new URLSearchParams({
+                start: start.toISOString(),
+                end: end.toISOString(),
+              });
+              const res = await fetch(`/api/schedules/?${params.toString()}`, {
+                credentials: "same-origin",
+                headers: { Accept: "application/json" },
+              });
+              if (res.status === 401 || res.status === 403) {
+                window.location.href = "/login";
+                return;
+              }
+              if (!res.ok) throw new Error("load_failed");
+              const rows = await res.json();
+              const list = Array.isArray(rows) ? rows.map((r) => this.mapRow(r)) : [];
+              list.sort((a, b) => (b.start && a.start ? b.start - a.start : 0));
+              this.sessions = list;
+            } catch (_) {
+              this.error = "โหลดประวัติไม่สำเร็จ กรุณาลองใหม่";
+              this.sessions = [];
+            } finally {
+              this.loading = false;
+            }
+          },
+
+          mapRow(row) {
+            const start = row.start ? new Date(row.start) : null;
+            const end = row.end ? new Date(row.end) : null;
+            const ext = row.extendedProps || {};
+            const isCancelled = Boolean(ext.isCancelled);
+            const isVerified = Boolean(ext.isVerified);
+            let totalRaw = 0;
+            try {
+              totalRaw = ext.totalRaw != null ? Number(ext.totalRaw) : 0;
+            } catch (_) {
+              totalRaw = 0;
+            }
+            if (Number.isNaN(totalRaw)) totalRaw = 0;
+            return {
+              id: row.id,
+              title: row.title || "Live Session",
+              start,
+              end,
+              isCancelled,
+              isVerified,
+              totalRaw,
+              statusLabel: isCancelled ? "ยกเลิก" : isVerified ? "ยืนยันแล้ว" : "รอยืนยัน",
+              dateLine: this.formatDate(start),
+              timeLine: this.formatTimeRange(start, end),
+            };
+          },
+
+          filteredSessions() {
+            const now = new Date();
+            return this.sessions.filter((s) => {
+              if (this.filter === "all") return true;
+              if (!s.start) return false;
+              if (this.filter === "pending") return !s.isVerified && !s.isCancelled;
+              if (this.filter === "upcoming") return s.start >= now && !s.isCancelled;
+              if (this.filter === "past") return s.start < now;
+              return true;
+            });
+          },
+
+          formatDate(d) {
+            if (!d) return "—";
+            return new Intl.DateTimeFormat("th-TH", {
+              weekday: "short",
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            }).format(d);
+          },
+
+          formatTimeRange(start, end) {
+            if (!start) return "—";
+            const fmt = new Intl.DateTimeFormat("th-TH", { hour: "2-digit", minute: "2-digit" });
+            return end ? `${fmt.format(start)} – ${fmt.format(end)}` : fmt.format(start);
+          },
+
+          formatMoney(amount) {
+            return new Intl.NumberFormat("th-TH", {
+              style: "currency",
+              currency: "THB",
+              maximumFractionDigits: 0,
+            }).format(Number(amount) || 0);
+          },
+
+          statusClass(row) {
+            if (row.isCancelled) return "bg-[color:var(--stitch-error-container)] text-[color:var(--stitch-on-error-container)]";
+            if (row.isVerified) return "bg-[color:var(--stitch-tertiary-container)] text-[color:var(--stitch-on-tertiary-container)]";
+            return "bg-[color:var(--stitch-primary-fixed)] text-[color:var(--stitch-on-primary-fixed-variant)]";
+          },
+        };
+      }
+    </script>
+  </body>
+</html>

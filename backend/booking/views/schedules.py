@@ -45,9 +45,6 @@ def live_schedule_feed(request):
 
     if is_admin:
         pass
-    elif profile_role == "brand":
-        brand_id = getattr(profile, "brand_id", None)
-        qs = qs.filter(brand_id=brand_id) if brand_id else qs.none()
     else:
         qs = qs.filter(user_id=user.id)
 
@@ -66,6 +63,8 @@ def live_schedule_feed(request):
         "end_time",
         "is_cancelled",
         "is_verified",
+        "total_raw",
+        "total_amount",
         "user_id",
         "user__id",
         "user__username",
@@ -86,7 +85,7 @@ def live_schedule_feed(request):
 
         is_editable = bool(
             is_admin
-            or (profile_role != "brand" and host.id == user.id)
+            or host.id == user.id
         )
 
         events.append(
@@ -104,6 +103,8 @@ def live_schedule_feed(request):
                     "icon": icon_url,
                     "isVerified": s.is_verified,
                     "isCancelled": s.is_cancelled,
+                    "totalRaw": str(s.total_raw),
+                    "totalAmount": str(s.total_amount),
                 },
             }
         )
