@@ -100,7 +100,7 @@
       >
         <div>
           <p class="font-heading text-lg font-semibold tracking-tight text-[color:var(--stitch-primary)]">Stitch Live</p>
-          <p class="mt-xs text-xs text-[color:var(--stitch-on-surface-variant)]">จองรอบไลฟ์</p>
+          <p class="mt-xs text-xs text-[color:var(--stitch-on-surface-variant)]" x-text="editScheduleId ? 'แก้ไขคำขอจอง' : 'จองรอบไลฟ์'"></p>
           <nav class="mt-xl flex flex-col gap-sm">
             <a
               href="/dashboard"
@@ -144,39 +144,37 @@
 
       <div class="flex min-h-screen min-w-0 flex-1 flex-col">
         <div class="mx-auto w-full max-w-7xl flex-1 px-container-margin pb-lg pt-md md:px-8 lg:px-10 lg:pt-xl">
-          <div class="lg:grid lg:grid-cols-12 lg:items-start lg:gap-2xl xl:gap-3xl">
-            <div class="mb-xl space-y-lg lg:col-span-5 lg:mb-0 lg:sticky lg:top-28 lg:self-start">
-              <header class="flex items-center justify-between gap-md">
-                <a
-                  href="/dashboard"
-                  class="inline-flex items-center gap-sm rounded-full bg-[color:var(--stitch-surface-container-lowest)] px-md py-sm text-sm font-semibold text-[color:var(--stitch-on-secondary-container)] shadow-sm transition hover:bg-[color:var(--stitch-primary-container)]/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--stitch-primary-container)]"
-                >
-                  <span class="material-symbols-outlined text-[20px]">arrow_back</span>
-                  กลับแดชบอร์ด
-                </a>
-              </header>
-
-              <div
-                x-show="!verified && meLoaded"
-                x-cloak
-                x-transition:enter="transition ease-out duration-200"
-                x-transition:enter-start="opacity-0 translate-y-1"
-                x-transition:enter-end="opacity-100 translate-y-0"
-                x-transition:leave="transition ease-in duration-150"
-                x-transition:leave-start="opacity-100"
-                x-transition:leave-end="opacity-0"
-                class="rounded-3xl border border-[color:var(--stitch-outline-variant)]/40 bg-[color:var(--stitch-primary-fixed)]/60 px-lg py-md text-sm text-[color:var(--stitch-on-primary-fixed-variant)]"
-                role="status"
-              >
-                บัญชียังไม่ได้รับการยืนยันจากแอดมิน — สามารถดูหน้านี้ได้ แต่ยังไม่สามารถส่งคำขอจองได้
-              </div>
+          <div class="mx-auto w-full max-w-2xl space-y-lg lg:max-w-3xl">
+            <div
+              x-show="!verified && meLoaded"
+              x-cloak
+              x-transition:enter="transition ease-out duration-200"
+              x-transition:enter-start="opacity-0 translate-y-1"
+              x-transition:enter-end="opacity-100 translate-y-0"
+              x-transition:leave="transition ease-in duration-150"
+              x-transition:leave-start="opacity-100"
+              x-transition:leave-end="opacity-0"
+              class="rounded-3xl border border-[color:var(--stitch-outline-variant)]/40 bg-[color:var(--stitch-primary-fixed)]/60 px-lg py-md text-sm text-[color:var(--stitch-on-primary-fixed-variant)]"
+              role="status"
+            >
+              บัญชียังไม่ได้รับการยืนยันจากแอดมิน — สามารถดูหน้านี้ได้ แต่ยังไม่สามารถส่งคำขอจองได้
             </div>
 
-            <div class="lg:col-span-7">
-              <form
-                class="space-y-lg rounded-3xl bg-[color:var(--stitch-surface-container-lowest)] p-lg soft-shadow md:p-xl lg:min-h-0"
-                @submit.prevent="submit()"
-              >
+            <div
+              x-show="editLoadError && meLoaded"
+              x-cloak
+              x-transition:enter="transition ease-out duration-200"
+              x-transition:enter-start="opacity-0 translate-y-1"
+              x-transition:enter-end="opacity-100 translate-y-0"
+              class="rounded-3xl border border-[color:var(--stitch-outline-variant)]/40 bg-[color:var(--stitch-error-container)]/50 px-lg py-md text-sm text-[color:var(--stitch-on-error-container)]"
+              role="alert"
+              x-text="editLoadError"
+            ></div>
+
+            <form
+              class="space-y-lg rounded-3xl bg-[color:var(--stitch-surface-container-lowest)] p-lg soft-shadow md:p-xl"
+              @submit.prevent="submit()"
+            >
             <div class="space-y-sm">
               <label class="font-heading text-sm font-semibold text-[color:var(--stitch-on-surface)]" for="bl-title">หัวข้อไลฟ์</label>
               <input
@@ -333,12 +331,13 @@
               x-transition:enter-end="opacity-100"
               class="rounded-2xl bg-[color:var(--stitch-tertiary-container)] px-lg py-md text-sm text-[color:var(--stitch-on-tertiary-container)]"
             >
-              บันทึกคำขอแล้ว — กำลังพาไปแดชบอร์ด…
+              <span x-show="!editScheduleId">บันทึกคำขอแล้ว — กำลังพาไปแดชบอร์ด…</span>
+              <span x-show="editScheduleId">บันทึกการแก้ไขแล้ว — กำลังพาไปประวัติไลฟ์…</span>
             </div>
 
             <div class="flex flex-col gap-sm pt-sm sm:flex-row sm:justify-end">
               <a
-                href="/dashboard"
+                :href="editScheduleId ? '/live-history' : '/dashboard'"
                 class="inline-flex flex-1 items-center justify-center rounded-full border border-[color:var(--stitch-outline-variant)]/50 bg-[color:var(--stitch-surface-container-lowest)] px-xl py-md font-heading text-sm font-semibold text-[color:var(--stitch-on-secondary-container)] transition hover:bg-[color:var(--stitch-secondary-container)] sm:flex-none"
               >
                 ยกเลิก
@@ -346,14 +345,15 @@
               <button
                 type="submit"
                 class="inline-flex flex-1 items-center justify-center rounded-full bg-[color:var(--stitch-primary)] px-xl py-md font-heading text-sm font-semibold text-[color:var(--stitch-on-primary)] shadow-[0_14px_36px_-16px_rgba(82,66,73,0.55)] transition enabled:hover:opacity-95 enabled:active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none"
-                :disabled="loading || !verified"
+                :disabled="loading || !verified || (editScheduleId && editLoadError)"
               >
-                <span x-show="!loading">ส่งคำขอจอง</span>
-                <span x-show="loading">กำลังส่ง…</span>
+                <span x-show="!loading && !editScheduleId">ส่งคำขอจอง</span>
+                <span x-show="!loading && editScheduleId">บันทึกการแก้ไข</span>
+                <span x-show="loading && !editScheduleId">กำลังส่ง…</span>
+                <span x-show="loading && editScheduleId">กำลังบันทึก…</span>
               </button>
             </div>
               </form>
-            </div>
           </div>
         </div>
 
@@ -399,6 +399,8 @@
           loading: false,
           error: "",
           success: false,
+          editScheduleId: null,
+          editLoadError: "",
           form: {
             title: "",
             startDate: "",
@@ -415,9 +417,15 @@
           hours24: Array.from({ length: 24 }, (_, i) => i),
 
           async init() {
+            const params = new URLSearchParams(window.location.search);
+            const eid = params.get("edit");
+            if (eid && /^\d+$/.test(String(eid).trim())) {
+              this.editScheduleId = String(eid).trim();
+            }
             await this.loadMe();
             if (!this.meLoaded) return;
             await this.loadChannels();
+            if (this.editScheduleId) await this.loadEditSchedule();
           },
 
           async loadMe() {
@@ -468,8 +476,76 @@
             }
           },
 
+          applyScheduleToForm(data) {
+            this.form.title = data.title || "";
+            this.form.note = data.note || "";
+            if (data.brand_id != null && data.brand_id !== "") {
+              this.form.brandId = String(data.brand_id);
+            }
+            if (data.channel_id != null && data.channel_id !== "") {
+              this.form.channelId = String(data.channel_id);
+            } else {
+              this.form.channelId = "";
+            }
+            const toParts = (iso) => {
+              const d = new Date(iso);
+              if (Number.isNaN(d.getTime())) return null;
+              const pad = (n) => String(n).padStart(2, "0");
+              return {
+                date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`,
+                hour: String(d.getHours()),
+                minute: d.getMinutes() >= 30 ? "30" : "00",
+              };
+            };
+            const s = data.start ? toParts(data.start) : null;
+            const e = data.end ? toParts(data.end) : null;
+            if (s) {
+              this.form.startDate = s.date;
+              this.form.startHour = s.hour;
+              this.form.startMinute = s.minute;
+            }
+            if (e) {
+              this.form.endDate = e.date;
+              this.form.endHour = e.hour;
+              this.form.endMinute = e.minute;
+            }
+          },
+
+          async loadEditSchedule() {
+            this.editLoadError = "";
+            if (!this.verified) {
+              this.editLoadError = "ต้องยืนยันบัญชีก่อนจึงจะแก้ไขคำขอได้";
+              return;
+            }
+            try {
+              const res = await fetch(`/api/user/live-schedules/${this.editScheduleId}/`, {
+                credentials: "same-origin",
+                headers: { Accept: "application/json" },
+              });
+              const data = await res.json().catch(() => ({}));
+              if (res.status === 401) {
+                window.location.href = "/login";
+                return;
+              }
+              if (!res.ok) {
+                const code = data.error ? String(data.error) : "";
+                if (code === "not_editable") {
+                  this.editLoadError = "รายการนี้ยืนยันแล้วหรือยกเลิกแล้ว ไม่สามารถแก้ไขได้";
+                } else if (code === "not_found") {
+                  this.editLoadError = "ไม่พบรายการที่ต้องการแก้ไข";
+                } else {
+                  this.editLoadError = data.message || "โหลดรายการสำหรับแก้ไขไม่สำเร็จ";
+                }
+                return;
+              }
+              this.applyScheduleToForm(data);
+            } catch (_) {
+              this.editLoadError = "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้";
+            }
+          },
+
           applyDefaultBrand() {
-            if (this.brands.length === 1) {
+            if (this.brands.length === 1 && !this.editScheduleId) {
               this.form.brandId = String(this.brands[0].id);
             } else if (this.brands.length === 0) {
               this.form.brandId = "";
@@ -510,6 +586,7 @@
 
           async submit() {
             if (this.loading || !this.verified) return;
+            if (this.editScheduleId && this.editLoadError) return;
             this.error = "";
             this.success = false;
             const startLocal = this.composeLocalFromParts(this.form.startDate, this.form.startHour, this.form.startMinute);
@@ -544,8 +621,12 @@
 
             this.loading = true;
             try {
-              const res = await fetch("/api/user/live-schedules/", {
-                method: "POST",
+              const url = this.editScheduleId
+                ? `/api/user/live-schedules/${this.editScheduleId}/`
+                : "/api/user/live-schedules/";
+              const method = this.editScheduleId ? "PATCH" : "POST";
+              const res = await fetch(url, {
+                method,
                 credentials: "same-origin",
                 headers: { "Content-Type": "application/json", Accept: "application/json" },
                 body: JSON.stringify(body),
@@ -563,11 +644,13 @@
                 else if (code === "invalid_channel") this.error = "ช่องทางที่เลือกไม่ถูกต้อง";
                 else if (code === "invalid_brand") this.error = "แบรนด์ที่เลือกไม่ถูกต้อง";
                 else if (code === "missing_brand") this.error = "กรุณาเลือกแบรนด์";
+                else if (code === "not_editable") this.error = "แก้ไขไม่ได้ — รายการยืนยันหรือยกเลิกแล้ว";
+                else if (code === "not_found") this.error = "ไม่พบรายการที่ต้องการแก้ไข";
                 else this.error = data.message || "ส่งคำขอไม่สำเร็จ";
                 return;
               }
               this.success = true;
-              const dest = data.redirect_url || "/dashboard";
+              const dest = data.redirect_url || (this.editScheduleId ? "/live-history" : "/dashboard");
               setTimeout(() => {
                 window.location.href = dest;
               }, 900);

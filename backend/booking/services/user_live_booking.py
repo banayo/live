@@ -114,3 +114,94 @@ def create_user_live_schedule(
         )
 
     return schedule, None
+
+
+def get_user_live_schedule_for_edit(*, user: User, schedule_id: int) -> tuple[LiveSchedule | None, str | None]:
+    """Return the user's schedule row if it may still be edited (pending, not cancelled)."""
+    profile = getattr(user, "profile", None)
+    if not profile:
+        return None, "no_profile"
+    if not profile.is_verified:
+        return None, "not_verified"
+    if is_backoffice_admin(user):
+        return None, "use_backoffice"
+
+    schedule = LiveSchedule.objects.filter(pk=schedule_id, user_id=user.id).first()
+    if not schedule:
+        return None, "not_found"
+    if schedule.is_cancelled or schedule.is_verified:
+        return None, "not_editable"
+    return schedule, None
+
+
+def update_user_live_schedule(
+    *,
+    schedule_id: int,
+    user: User,
+    title: str,
+    start_time: datetime,
+    end_time: datetime,
+    note: str = "",
+    channel_id: int | None = None,
+    brand_id: int | None = None,
+) -> tuple[LiveSchedule | None, str | None]:
+    """Update a pending LiveSchedule owned by the user."""
+    profile = getattr(user, "profile", None)
+    if not profile:
+        return None, "no_profile"
+    if not profile.is_verified:
+        return None, "not_verified"
+    if is_backoffice_admin(user):
+        return None, "use_backoffice"
+
+    clean_title = (title or "").strip()
+    if not clean_title or len(clean_title) > 200:
+        return None, "invalid_title"
+
+    if start_time >= end_time:
+        return None, "invalid_range"
+    if (end_time - start_time) < timedelta(minutes=30):
+        return None, "invalid_range"
+
+    brand, brand_err = _resolve_brand_for_live_schedule(profile, brand_id)
+    if brand_err:
+        return None, brand_err
+
+    channel = None
+    if channel_id is not None:
+        channel = Channel.objects.filter(pk=int(channel_id), is_active=True).first()
+        if not channel:
+            return None, "invalid_channel"
+
+    with transaction.atomic():
+        schedule = (
+            LiveSchedule.objects.select_for_update()
+            .filter(pk=schedule_id, user_id=user.id)
+            .first()
+        )
+        if not schedule:
+            return None, "not_found"
+        if schedule.is_cancelled or schedule.is_verified:
+            return None, "not_editable"
+
+        schedule.title = clean_title
+        schedule.brand = brand
+        schedule.channel = channel
+        schedule.start_time = start_time
+        schedule.end_time = end_time
+        schedule.note = (note or "").strip() or ""
+        schedule.edited_by = user
+        schedule.save(
+            update_fields=[
+                "title",
+                "brand",
+                "channel",
+                "start_time",
+                "end_time",
+                "note",
+                "edited_by",
+                "updated_at",
+            ]
+        )
+
+    return schedule, None

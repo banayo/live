@@ -4,7 +4,7 @@ from .backoffice_channels import backoffice_channel_create, backoffice_channel_u
 from .backoffice_users import backoffice_user_update, backoffice_users_list
 from .line_auth import line_authorize, line_callback
 from .schedules import live_schedule_feed
-from .user_live import user_book_live_options, user_live_schedule_create
+from .user_live import user_book_live_options, user_live_schedule_create, user_live_schedule_detail
 
 __all__ = [
     "auth_login",
@@ -25,4 +25,5 @@ __all__ = [
     "live_schedule_feed",
     "user_book_live_options",
     "user_live_schedule_create",
+    "user_live_schedule_detail",
 ]

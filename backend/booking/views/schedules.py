@@ -84,8 +84,10 @@ def live_schedule_feed(request):
         icon_url = resolve_profile_avatar_url(request, host_profile)
 
         is_editable = bool(
-            is_admin
-            or host.id == user.id
+            not is_admin
+            and host.id == user.id
+            and not s.is_cancelled
+            and not s.is_verified
         )
 
         events.append(

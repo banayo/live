@@ -212,13 +212,23 @@
                       <p class="text-[11px] font-bold uppercase tracking-wider text-[color:var(--stitch-on-primary-container)]">ยอดที่กรอก</p>
                       <p class="font-heading text-lg font-semibold text-[color:var(--stitch-primary)]" x-text="formatMoney(row.totalRaw)"></p>
                     </div>
-                    <a
-                      :href="'/enter-sales?session=' + encodeURIComponent(row.id)"
-                      class="inline-flex items-center gap-xs rounded-full bg-[color:var(--stitch-secondary-container)] px-md py-sm text-xs font-semibold text-[color:var(--stitch-on-secondary-container)] transition hover:opacity-95"
-                    >
-                      <span class="material-symbols-outlined text-[18px]">payments</span>
-                      กรอกยอด
-                    </a>
+                    <div class="flex flex-wrap items-center justify-end gap-sm">
+                      <a
+                        x-show="row.editable"
+                        :href="'/book-live?edit=' + encodeURIComponent(row.id)"
+                        class="inline-flex items-center gap-xs rounded-full border border-[color:var(--stitch-outline-variant)]/50 bg-[color:var(--stitch-surface-container-lowest)] px-md py-sm text-xs font-semibold text-[color:var(--stitch-on-surface)] transition hover:bg-[color:var(--stitch-surface-container-high)]"
+                      >
+                        <span class="material-symbols-outlined text-[18px]">edit</span>
+                        แก้ไข
+                      </a>
+                      <a
+                        :href="'/enter-sales?session=' + encodeURIComponent(row.id)"
+                        class="inline-flex items-center gap-xs rounded-full bg-[color:var(--stitch-secondary-container)] px-md py-sm text-xs font-semibold text-[color:var(--stitch-on-secondary-container)] transition hover:opacity-95"
+                      >
+                        <span class="material-symbols-outlined text-[18px]">payments</span>
+                        กรอกยอด
+                      </a>
+                    </div>
                   </div>
                 </article>
               </template>
@@ -234,7 +244,7 @@
             <!-- Desktop table -->
             <div class="hidden overflow-hidden rounded-3xl bg-[color:var(--stitch-surface-container-lowest)] soft-shadow md:block" x-show="!loading && !error">
               <div class="overflow-x-auto">
-                <table class="w-full min-w-[640px] border-collapse text-left text-sm">
+                <table class="w-full min-w-[720px] border-collapse text-left text-sm">
                   <thead>
                     <tr class="border-b border-[color:var(--stitch-outline-variant)]/25 bg-[color:var(--stitch-surface-container-low)]">
                       <th class="px-lg py-md font-heading text-xs font-bold uppercase tracking-wider text-[color:var(--stitch-on-surface-variant)]">หัวข้อ</th>
@@ -242,7 +252,7 @@
                       <th class="px-lg py-md font-heading text-xs font-bold uppercase tracking-wider text-[color:var(--stitch-on-surface-variant)]">เวลา</th>
                       <th class="px-lg py-md font-heading text-xs font-bold uppercase tracking-wider text-[color:var(--stitch-on-surface-variant)]">สถานะ</th>
                       <th class="px-lg py-md font-heading text-xs font-bold uppercase tracking-wider text-[color:var(--stitch-on-surface-variant)]">ยอดกรอก</th>
-                      <th class="px-lg py-md font-heading text-xs font-bold uppercase tracking-wider text-[color:var(--stitch-on-surface-variant)]"></th>
+                      <th class="px-lg py-md font-heading text-xs font-bold uppercase tracking-wider text-[color:var(--stitch-on-surface-variant)]">การกระทำ</th>
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-[color:var(--stitch-outline-variant)]/20">
@@ -256,12 +266,22 @@
                         </td>
                         <td class="px-lg py-md font-heading font-semibold text-[color:var(--stitch-primary)]" x-text="formatMoney(row.totalRaw)"></td>
                         <td class="px-lg py-md text-right">
-                          <a
-                            :href="'/enter-sales?session=' + encodeURIComponent(row.id)"
-                            class="inline-flex items-center gap-xs rounded-full bg-[color:var(--stitch-secondary-container)] px-md py-sm text-xs font-semibold text-[color:var(--stitch-on-secondary-container)] transition hover:opacity-95"
-                          >
-                            กรอกยอด
-                          </a>
+                          <div class="flex flex-wrap items-center justify-end gap-sm">
+                            <a
+                              x-show="row.editable"
+                              :href="'/book-live?edit=' + encodeURIComponent(row.id)"
+                              class="inline-flex items-center gap-xs rounded-full border border-[color:var(--stitch-outline-variant)]/50 bg-[color:var(--stitch-surface-container-lowest)] px-md py-sm text-xs font-semibold text-[color:var(--stitch-on-surface)] transition hover:bg-[color:var(--stitch-surface-container-high)]"
+                            >
+                              <span class="material-symbols-outlined text-[16px]">edit</span>
+                              แก้ไข
+                            </a>
+                            <a
+                              :href="'/enter-sales?session=' + encodeURIComponent(row.id)"
+                              class="inline-flex items-center gap-xs rounded-full bg-[color:var(--stitch-secondary-container)] px-md py-sm text-xs font-semibold text-[color:var(--stitch-on-secondary-container)] transition hover:opacity-95"
+                            >
+                              กรอกยอด
+                            </a>
+                          </div>
                         </td>
                       </tr>
                     </template>
@@ -384,6 +404,7 @@
               isCancelled,
               isVerified,
               totalRaw,
+              editable: Boolean(row.editable),
               statusLabel: isCancelled ? "ยกเลิก" : isVerified ? "ยืนยันแล้ว" : "รอยืนยัน",
               dateLine: this.formatDate(start),
               timeLine: this.formatTimeRange(start, end),

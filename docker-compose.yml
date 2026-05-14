@@ -8,6 +8,8 @@ services:
       DJANGO_SETTINGS_MODULE: core.settings
       PYTHONUNBUFFERED: "1"
     volumes:
+      # Live Python code from the repo (otherwise only the image built at `docker compose build` runs — new API routes 404 until rebuild).
+      - ./backend:/app
       - static_volume:/app/staticfiles
       # Bind mount so uploads are visible on the host and nginx serves the same files (avoids "orphan" named volumes).
       - ./media:/app/media

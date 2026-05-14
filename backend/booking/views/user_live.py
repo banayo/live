@@ -8,11 +8,16 @@ from django.http import HttpRequest, JsonResponse
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_GET, require_POST
+from django.views.decorators.http import require_GET, require_http_methods, require_POST
 
 from ..models import Channel
 from ..services.roles import is_backoffice_admin
-from ..services.user_live_booking import book_live_brand_options_list, create_user_live_schedule
+from ..services.user_live_booking import (
+    book_live_brand_options_list,
+    create_user_live_schedule,
+    get_user_live_schedule_for_edit,
+    update_user_live_schedule,
+)
 
 
 def _json_error(message: str, *, status: int, code: str | None = None) -> JsonResponse:
@@ -131,4 +136,109 @@ def user_live_schedule_create(request: HttpRequest) -> JsonResponse:
             "redirect_url": "/dashboard",
         },
         status=201,
+    )
+
+
+def _serialize_schedule_for_user(schedule) -> dict[str, Any]:
+    return {
+        "id": schedule.id,
+        "title": schedule.title,
+        "start": schedule.start_time.isoformat(),
+        "end": schedule.end_time.isoformat(),
+        "note": schedule.note or "",
+        "brand_id": schedule.brand_id,
+        "channel_id": schedule.channel_id,
+        "is_verified": schedule.is_verified,
+        "is_cancelled": schedule.is_cancelled,
+    }
+
+
+@csrf_exempt
+@require_http_methods(["GET", "PATCH", "OPTIONS"])
+def user_live_schedule_detail(request: HttpRequest, schedule_id: int) -> JsonResponse:
+    """Read or update one Live schedule (owner, pending only for mutation)."""
+    if request.method == "OPTIONS":
+        return JsonResponse({})
+
+    if not request.user.is_authenticated:
+        return _json_error("Unauthorized", status=401, code="unauthorized")
+
+    if request.method == "GET":
+        schedule, err = get_user_live_schedule_for_edit(user=request.user, schedule_id=schedule_id)
+        if err == "no_profile":
+            return _json_error("No profile", status=400, code=err)
+        if err == "not_found":
+            return _json_error("Not found", status=404, code=err)
+        if err == "not_editable":
+            return _json_error("Cannot edit this schedule", status=403, code=err)
+        if err == "not_verified":
+            return _json_error("Not verified", status=403, code=err)
+        if err == "use_backoffice":
+            return _json_error("Use backoffice", status=403, code=err)
+        if err or schedule is None:
+            return _json_error("Cannot load schedule", status=400, code=err or "load_failed")
+        return JsonResponse(_serialize_schedule_for_user(schedule))
+
+    # PATCH
+    body = _parse_json(request)
+    if body is None:
+        return _json_error("Invalid JSON", status=400, code="invalid_json")
+
+    title = str(body.get("title") or "")
+    start = _to_aware_dt(str(body.get("start") or "").strip() or None)
+    end = _to_aware_dt(str(body.get("end") or "").strip() or None)
+    note = str(body.get("note") or "")
+
+    raw_ch = body.get("channel_id")
+    channel_id: int | None = None
+    if raw_ch is not None and str(raw_ch).strip() != "":
+        try:
+            channel_id = int(raw_ch)
+        except (TypeError, ValueError):
+            return _json_error("Invalid channel", status=400, code="invalid_channel")
+
+    raw_brand = body.get("brand_id")
+    brand_id: int | None = None
+    if raw_brand is not None and str(raw_brand).strip() != "":
+        try:
+            brand_id = int(raw_brand)
+        except (TypeError, ValueError):
+            return _json_error("Invalid brand", status=400, code="invalid_brand")
+
+    if not start or not end:
+        return _json_error("Missing start or end", status=400, code="missing_times")
+
+    schedule, err = update_user_live_schedule(
+        schedule_id=schedule_id,
+        user=request.user,
+        title=title,
+        start_time=start,
+        end_time=end,
+        note=note,
+        channel_id=channel_id,
+        brand_id=brand_id,
+    )
+    if err:
+        status_map = {
+            "not_verified": 403,
+            "use_backoffice": 403,
+            "no_profile": 400,
+            "invalid_title": 400,
+            "invalid_range": 400,
+            "invalid_channel": 400,
+            "invalid_brand": 400,
+            "missing_brand": 400,
+            "not_found": 404,
+            "not_editable": 403,
+        }
+        status = status_map.get(err, 400)
+        return _json_error("Cannot update schedule", status=status, code=err)
+
+    return JsonResponse(
+        {
+            "ok": True,
+            "id": schedule.id,
+            "redirect_url": "/live-history",
+        },
+        status=200,
     )

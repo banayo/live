@@ -209,71 +209,117 @@
             </section>
 
             <div class="space-y-xl lg:grid lg:grid-cols-12 lg:items-start lg:gap-xl lg:space-y-0">
-              <!-- Weekly Schedule -->
-              <section class="space-y-md lg:col-span-5">
-          <div class="flex items-center justify-between">
-            <h3 class="font-heading text-xl font-medium text-[color:var(--stitch-on-surface)] lg:text-2xl">Weekly Schedule</h3>
-            <button
-              type="button"
-              class="flex items-center gap-xs rounded-full bg-[color:var(--stitch-surface-container)] px-md py-sm text-sm font-medium text-[color:var(--stitch-on-secondary-container)] transition hover:bg-[color:var(--stitch-secondary-container)]"
-            >
-              <span>This Week</span>
-              <span class="material-symbols-outlined text-[18px]">expand_more</span>
-            </button>
-          </div>
-
-          <div class="rounded-3xl bg-[color:var(--stitch-surface-container-lowest)] p-lg soft-shadow">
-            <div class="mb-lg grid grid-cols-7 gap-xs">
-              <template x-for="day in weekDays" :key="day.key">
-                <div class="flex flex-col items-center gap-sm">
-                  <span class="text-center text-[11px] font-medium leading-tight" :class="day.active ? 'font-bold text-[color:var(--stitch-primary)]' : 'text-[color:var(--stitch-outline)]'" x-text="day.label"></span>
-                  <div
-                    class="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold transition"
-                    :class="day.active ? 'bg-[color:var(--stitch-primary)] text-[color:var(--stitch-on-primary)] shadow-[0_8px_20px_-8px_rgba(107,90,96,0.45)]' : 'text-[color:var(--stitch-on-surface-variant)]'"
-                    x-text="day.dateNum"
-                  ></div>
+              <!-- Monthly Schedule -->
+              <section class="space-y-md lg:col-span-6">
+                <div class="flex items-center justify-between">
+                  <h3 class="font-heading text-xl font-medium text-[color:var(--stitch-on-surface)] lg:text-2xl">Monthly Schedule</h3>
+                  <div class="flex items-center gap-xs">
+                    <button
+                      type="button"
+                      class="flex h-9 w-9 items-center justify-center rounded-full bg-[color:var(--stitch-surface-container)] text-[color:var(--stitch-on-secondary-container)] transition hover:bg-[color:var(--stitch-secondary-container)] active:scale-95"
+                      @click="prevMonth()"
+                    >
+                      <span class="material-symbols-outlined text-[20px]">chevron_left</span>
+                    </button>
+                    <div class="rounded-full bg-[color:var(--stitch-surface-container)] px-4 py-1.5 text-xs font-bold text-[color:var(--stitch-on-secondary-container)]">
+                      <span x-text="currentMonthLabel"></span>
+                    </div>
+                    <button
+                      type="button"
+                      class="flex h-9 w-9 items-center justify-center rounded-full bg-[color:var(--stitch-surface-container)] text-[color:var(--stitch-on-secondary-container)] transition hover:bg-[color:var(--stitch-secondary-container)] active:scale-95"
+                      @click="nextMonth()"
+                    >
+                      <span class="material-symbols-outlined text-[20px]">chevron_right</span>
+                    </button>
+                  </div>
                 </div>
-              </template>
-            </div>
 
-            <div
-              x-show="error"
-              x-transition:enter="transition ease-out duration-200"
-              x-transition:enter-start="opacity-0 translate-y-1"
-              x-transition:enter-end="opacity-100 translate-y-0"
-              x-transition:leave="transition ease-in duration-150"
-              x-transition:leave-start="opacity-100"
-              x-transition:leave-end="opacity-0"
-              class="rounded-3xl bg-[color:var(--stitch-error-container)] px-lg py-md text-sm text-[color:var(--stitch-on-error-container)]"
-              x-text="error"
-            ></div>
+                <div class="rounded-3xl bg-[color:var(--stitch-surface-container-lowest)] p-lg soft-shadow">
+                  <div class="mb-lg grid grid-cols-7 gap-y-2 text-center text-[10px] font-bold uppercase tracking-tighter text-[color:var(--stitch-outline)]">
+                    <div>Mon</div>
+                    <div>Tue</div>
+                    <div>Wed</div>
+                    <div>Thu</div>
+                    <div>Fri</div>
+                    <div>Sat</div>
+                    <div>Sun</div>
+                  </div>
 
-            <div class="space-y-sm" x-show="!error">
-              <template x-for="session in todaySessions()" :key="session.id">
-                <div
-                  class="flex items-center justify-between rounded-2xl border border-[color:var(--stitch-outline-variant)]/25 px-lg py-md transition"
-                  :class="
-                    session.isCancelled
-                      ? 'bg-[color:var(--stitch-error-container)]/80 text-[color:var(--stitch-on-error-container)]'
-                      : 'bg-[color:var(--stitch-surface-container-low)] text-[color:var(--stitch-on-surface)]'
-                  "
-                >
-                  <span class="font-medium" x-text="session.title"></span>
-                  <span class="text-xs text-[color:var(--stitch-on-surface-variant)]" x-text="session.time"></span>
+                  <div class="grid grid-cols-7 gap-1">
+                    <template x-for="day in monthDays" :key="day.key + Math.random()">
+                      <button
+                        type="button"
+                        class="relative flex aspect-square flex-col items-center justify-center rounded-2xl transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--stitch-primary)]/30 disabled:cursor-default"
+                        :disabled="day.isPadding"
+                        @click="selectDay(day.key)"
+                        :class="
+                          day.isPadding 
+                            ? 'opacity-0' 
+                            : (isSelected(day.key) 
+                                ? 'bg-[color:var(--stitch-primary)] text-[color:var(--stitch-on-primary)] shadow-md' 
+                                : (day.isToday 
+                                    ? 'bg-[color:var(--stitch-primary-container)] text-[color:var(--stitch-on-primary-container)]' 
+                                    : 'hover:bg-[color:var(--stitch-surface-container-high)] text-[color:var(--stitch-on-surface-variant)]'))
+                        "
+                      >
+                        <span class="text-sm font-bold" x-text="day.dateNum"></span>
+                        
+                        <!-- Event Indicator Dot -->
+                        <template x-if="!day.isPadding && hasSession(day.key)">
+                          <div 
+                            class="absolute bottom-1.5 h-1 w-1 rounded-full"
+                            :class="isSelected(day.key) ? 'bg-[color:var(--stitch-on-primary)]' : 'bg-[color:var(--stitch-primary)]'"
+                          ></div>
+                        </template>
+                      </button>
+                    </template>
+                  </div>
+
+                  <div class="mt-xl space-y-sm">
+                    <div class="flex items-center gap-2 px-2 pb-2">
+                      <span class="material-symbols-outlined text-[18px] text-[color:var(--stitch-primary)]">event_available</span>
+                      <h4 class="font-heading text-sm font-semibold">Sessions on <span x-text="dateLabel(new Date(selectedDateKey))"></span></h4>
+                    </div>
+
+                    <div
+                      x-show="error"
+                      class="rounded-3xl bg-[color:var(--stitch-error-container)] px-lg py-md text-sm text-[color:var(--stitch-on-error-container)]"
+                      x-text="error"
+                    ></div>
+
+                    <div class="space-y-sm" x-show="!error">
+                      <template x-for="session in selectedDaySessions()" :key="session.id">
+                        <div
+                          class="flex items-center justify-between rounded-2xl border border-[color:var(--stitch-outline-variant)]/25 px-lg py-md transition hover:shadow-sm"
+                          :class="
+                            session.isCancelled
+                              ? 'bg-[color:var(--stitch-error-container)]/80 text-[color:var(--stitch-on-error-container)]'
+                              : 'bg-[color:var(--stitch-surface-container-low)] text-[color:var(--stitch-on-surface)]'
+                          "
+                        >
+                          <div class="flex items-center gap-3 min-w-0">
+                            <span class="material-symbols-outlined text-[20px] shrink-0" :class="session.isCancelled ? 'text-[color:var(--stitch-on-error-container)]/60' : 'text-[color:var(--stitch-primary)]/60'">
+                              <span x-text="session.icon"></span>
+                            </span>
+                            <span class="font-medium truncate" x-text="session.title"></span>
+                          </div>
+                          <span class="text-[11px] font-bold text-[color:var(--stitch-on-surface-variant)] whitespace-nowrap ml-2" x-text="session.time"></span>
+                        </div>
+                      </template>
+
+                      <template x-if="selectedDaySessions().length === 0">
+                        <div class="rounded-3xl bg-[color:var(--stitch-surface-container-low)] px-lg py-xl text-center text-sm text-[color:var(--stitch-on-surface-variant)] border border-dashed border-[color:var(--stitch-outline-variant)]/40">
+                          <span class="material-symbols-outlined mb-2 block text-2xl opacity-30">event_busy</span>
+                          ยังไม่มีตารางไลฟ์ในวันที่เลือก
+                        </div>
+                      </template>
+                    </div>
+                  </div>
                 </div>
-              </template>
-
-              <template x-if="todaySessions().length === 0">
-                <div class="rounded-2xl bg-[color:var(--stitch-surface-container-low)] px-lg py-md text-center text-sm text-[color:var(--stitch-on-surface-variant)]">
-                  ยังไม่มีตารางไลฟ์ในวันนี้
-                </div>
-              </template>
-            </div>
-          </div>
               </section>
 
               <!-- Upcoming Sessions -->
-              <section class="space-y-md lg:col-span-7">
+              <section class="space-y-md lg:col-span-6">
                 <h3 class="font-heading text-xl font-medium text-[color:var(--stitch-on-surface)] lg:text-2xl">Upcoming Sessions</h3>
                 <div class="space-y-md lg:max-h-[min(70vh,720px)] lg:overflow-y-auto lg:pr-sm lg:[scrollbar-width:thin] xl:grid xl:grid-cols-2 xl:gap-md xl:space-y-0">
             <template x-for="session in upcomingSessions()" :key="session.id">
@@ -355,34 +401,98 @@
             profileImage: "",
           },
           sessions: [],
-          weekDays: [],
+          monthDays: [],
+          selectedDateKey: "",
+          viewingMonth: 0,
+          viewingYear: 0,
+          currentMonthLabel: "",
 
           async init() {
-            this.refreshWeekDays();
+            const now = new Date();
+            this.viewingMonth = now.getMonth();
+            this.viewingYear = now.getFullYear();
+            this.selectedDateKey = this.formatDateKey(now);
+            
+            this.refreshMonthDays();
             await Promise.all([this.loadMe(), this.loadSchedules()]);
-            this.refreshWeekDays();
+            this.refreshMonthDays();
           },
 
-          refreshWeekDays() {
-            const today = new Date();
-            const dow = today.getDay();
-            const offsetToMonday = dow === 0 ? -6 : 1 - dow;
-            const monday = new Date(today);
-            monday.setHours(0, 0, 0, 0);
-            monday.setDate(today.getDate() + offsetToMonday);
-            const labelFmt = new Intl.DateTimeFormat("th-TH", { weekday: "short" });
+          formatDateKey(date) {
+            if (!date) return "";
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, "0");
+            const day = String(date.getDate()).padStart(2, "0");
+            return `${year}-${month}-${day}`;
+          },
+
+          selectDay(key) {
+            if (!key) return;
+            this.selectedDateKey = key;
+          },
+
+          isSelected(key) {
+            return this.selectedDateKey === key;
+          },
+
+          prevMonth() {
+            if (this.viewingMonth === 0) {
+              this.viewingMonth = 11;
+              this.viewingYear--;
+            } else {
+              this.viewingMonth--;
+            }
+            this.updateCalendar();
+          },
+
+          nextMonth() {
+            if (this.viewingMonth === 11) {
+              this.viewingMonth = 0;
+              this.viewingYear++;
+            } else {
+              this.viewingMonth++;
+            }
+            this.updateCalendar();
+          },
+
+          async updateCalendar() {
+            this.refreshMonthDays();
+            await this.loadSchedules();
+            this.refreshMonthDays();
+          },
+
+          refreshMonthDays() {
+            const firstDate = new Date(this.viewingYear, this.viewingMonth, 1);
+            const monthLabel = new Intl.DateTimeFormat("th-TH", { month: "long" }).format(firstDate);
+            this.currentMonthLabel = `${monthLabel} ${this.viewingYear + 543}`;
+
+            const todayKey = this.formatDateKey(new Date());
+            
+            // Calculate padding (assuming Monday as first day of week)
+            let firstDay = firstDate.getDay(); 
+            let padding = firstDay === 0 ? 6 : firstDay - 1;
+            
             const days = [];
-            for (let i = 0; i < 7; i++) {
-              const d = new Date(monday);
-              d.setDate(monday.getDate() + i);
+            // Padding from previous month
+            for (let i = 0; i < padding; i++) {
+              days.push({ key: "", dateNum: "", isPadding: true });
+            }
+            
+            // Actual days
+            const lastDate = new Date(this.viewingYear, this.viewingMonth + 1, 0);
+            const numDays = lastDate.getDate();
+            
+            for (let i = 1; i <= numDays; i++) {
+              const d = new Date(this.viewingYear, this.viewingMonth, i);
+              const key = this.formatDateKey(d);
               days.push({
-                key: d.toISOString().slice(0, 10),
-                label: labelFmt.format(d).replace(/\.$/, ""),
-                dateNum: String(d.getDate()),
-                active: this.sameDay(d, today),
+                key: key,
+                dateNum: String(i),
+                isToday: key === todayKey,
+                isPadding: false,
               });
             }
-            this.weekDays = days;
+            this.monthDays = days;
           },
 
           async loadMe() {
@@ -413,11 +523,11 @@
             this.loading = true;
             this.error = "";
             try {
-              const now = new Date();
-              const start = new Date(now);
-              start.setDate(now.getDate() - 3);
-              const end = new Date(now);
-              end.setDate(now.getDate() + 14);
+              // Load full month + 7 days padding
+              const start = new Date(this.viewingYear, this.viewingMonth, 1);
+              start.setDate(start.getDate() - 7);
+              const end = new Date(this.viewingYear, this.viewingMonth + 1, 7);
+              
               const params = new URLSearchParams({
                 start: start.toISOString(),
                 end: end.toISOString(),
@@ -452,6 +562,7 @@
               title: row.title || "Live Session",
               start,
               end,
+              dateKey: this.formatDateKey(start),
               time: this.timeRange(start, end),
               meta: `${this.dateLabel(start)} • ${this.timeRange(start, end)}`,
               isCancelled,
@@ -469,10 +580,16 @@
             return this.sessions.filter((s) => !s.isVerified && !s.isCancelled).length;
           },
 
-          todaySessions() {
-            const today = new Date();
+          selectedDaySessions() {
             return this.sessions
-              .filter((s) => s.start && this.sameDay(s.start, today))
+              .filter((s) => s.dateKey === this.selectedDateKey)
+              .sort((a, b) => (a.start || 0) - (b.start || 0));
+          },
+
+          todaySessions() {
+            const todayKey = this.formatDateKey(new Date());
+            return this.sessions
+              .filter((s) => s.dateKey === todayKey)
               .slice(0, 2);
           },
 

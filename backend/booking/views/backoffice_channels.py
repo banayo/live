@@ -14,6 +14,19 @@ from ..services.roles import is_backoffice_admin
 
 _HEX_RE = re.compile(r"^#[0-9A-Fa-f]{6}$")
 _MAX_ICON_BYTES = 5 * 1024 * 1024
+_ICON_EXT = (".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".heic", ".heif", ".avif", ".svg")
+
+
+def _is_allowed_icon_upload(icon_file) -> bool:
+    """
+    Some browsers send application/octet-stream or an empty MIME for valid images.
+    Accept image/* or a known image extension on the uploaded filename.
+    """
+    ct = str(getattr(icon_file, "content_type", "") or "").strip().lower()
+    if ct.startswith("image/"):
+        return True
+    name = str(getattr(icon_file, "name", "") or "").strip().lower()
+    return bool(name) and name.endswith(_ICON_EXT)
 
 
 def _json_error(message: str, *, status: int, code: str | None = None) -> JsonResponse:
@@ -91,29 +104,32 @@ def backoffice_channel_create(request: HttpRequest) -> JsonResponse:
     if not is_backoffice_admin(request.user):
         return _json_error("Forbidden", status=403, code="forbidden")
 
-    is_multipart = (request.content_type or "").startswith("multipart/form-data")
+    ct_header = (request.content_type or "").split(";")[0].strip().lower()
+    is_multipart = ct_header == "multipart/form-data"
     if is_multipart:
-        data: dict[str, Any] = dict(request.POST.items())
+        name = str(request.POST.get("name") or "").strip()[:50]
+        code = str(request.POST.get("code") or "").strip()[:10]
+        color_hex = _normalize_hex(request.POST.get("color_hex"))
+        is_active = _normalize_optional_bool(request.POST.get("is_active"))
         icon_file = request.FILES.get("icon")
     else:
         data = _get_request_json(request)
         if data is None:
             return _json_error("Invalid JSON body.", status=400, code="invalid_json")
         icon_file = None
+        name = str(data.get("name") or "").strip()[:50]
+        code = str(data.get("code") or "").strip()[:10]
+        color_hex = _normalize_hex(data.get("color_hex"))
+        is_active = _normalize_optional_bool(data.get("is_active"))
 
-    name = str(data.get("name") or "").strip()[:50]
-    code = str(data.get("code") or "").strip()[:10]
     if not name or not code:
         return _json_error("ชื่อและรหัสย่อจำเป็น", status=400, code="missing_fields")
 
-    color_hex = _normalize_hex(data.get("color_hex"))
-    is_active = _normalize_optional_bool(data.get("is_active"))
     if is_active is None:
         is_active = True
 
     if icon_file is not None:
-        ct = str(getattr(icon_file, "content_type", "") or "")
-        if not ct.startswith("image/"):
+        if not _is_allowed_icon_upload(icon_file):
             return _json_error("ไอคอนต้องเป็นไฟล์ภาพ", status=400, code="invalid_image")
         if icon_file.size > _MAX_ICON_BYTES:
             return _json_error("ไฟล์ใหญ่เกินไป (สูงสุด 5MB)", status=400, code="image_too_large")
@@ -140,19 +156,20 @@ def backoffice_channel_update(request: HttpRequest, channel_id: int) -> JsonResp
     if not is_backoffice_admin(request.user):
         return _json_error("Forbidden", status=403, code="forbidden")
 
-    is_multipart = (request.content_type or "").startswith("multipart/form-data")
+    ct_header = (request.content_type or "").split(";")[0].strip().lower()
+    is_multipart = ct_header == "multipart/form-data"
     if is_multipart:
-        data = dict(request.POST.items())
         icon_file = request.FILES.get("icon")
+        post = request.POST
     else:
         data = _get_request_json(request)
         if data is None:
             return _json_error("Invalid JSON body.", status=400, code="invalid_json")
         icon_file = None
+        post = None
 
     if icon_file is not None:
-        ct = str(getattr(icon_file, "content_type", "") or "")
-        if not ct.startswith("image/"):
+        if not _is_allowed_icon_upload(icon_file):
             return _json_error("ไอคอนต้องเป็นไฟล์ภาพ", status=400, code="invalid_image")
         if icon_file.size > _MAX_ICON_BYTES:
             return _json_error("ไฟล์ใหญ่เกินไป (สูงสุด 5MB)", status=400, code="image_too_large")
@@ -163,26 +180,48 @@ def backoffice_channel_update(request: HttpRequest, channel_id: int) -> JsonResp
             return _json_error("ไม่พบช่องทาง", status=404, code="not_found")
 
         update_fields: list[str] = []
-        if "name" in data:
-            n = str(data.get("name") or "").strip()[:50]
-            if not n:
-                return _json_error("ชื่อต้องไม่ว่าง", status=400, code="invalid_name")
-            ch.name = n
-            update_fields.append("name")
-        if "code" in data:
-            c = str(data.get("code") or "").strip()[:10]
-            if not c:
-                return _json_error("รหัสย่อต้องไม่ว่าง", status=400, code="invalid_code")
-            ch.code = c
-            update_fields.append("code")
-        if "color_hex" in data:
-            ch.color_hex = _normalize_hex(data.get("color_hex"))
-            update_fields.append("color_hex")
-        if "is_active" in data:
-            b = _normalize_optional_bool(data.get("is_active"))
-            if b is not None:
-                ch.is_active = b
-                update_fields.append("is_active")
+        if is_multipart:
+            if "name" in post:
+                n = str(post.get("name") or "").strip()[:50]
+                if not n:
+                    return _json_error("ชื่อต้องไม่ว่าง", status=400, code="invalid_name")
+                ch.name = n
+                update_fields.append("name")
+            if "code" in post:
+                c = str(post.get("code") or "").strip()[:10]
+                if not c:
+                    return _json_error("รหัสย่อต้องไม่ว่าง", status=400, code="invalid_code")
+                ch.code = c
+                update_fields.append("code")
+            if "color_hex" in post:
+                ch.color_hex = _normalize_hex(post.get("color_hex"))
+                update_fields.append("color_hex")
+            if "is_active" in post:
+                b = _normalize_optional_bool(post.get("is_active"))
+                if b is not None:
+                    ch.is_active = b
+                    update_fields.append("is_active")
+        else:
+            if "name" in data:
+                n = str(data.get("name") or "").strip()[:50]
+                if not n:
+                    return _json_error("ชื่อต้องไม่ว่าง", status=400, code="invalid_name")
+                ch.name = n
+                update_fields.append("name")
+            if "code" in data:
+                c = str(data.get("code") or "").strip()[:10]
+                if not c:
+                    return _json_error("รหัสย่อต้องไม่ว่าง", status=400, code="invalid_code")
+                ch.code = c
+                update_fields.append("code")
+            if "color_hex" in data:
+                ch.color_hex = _normalize_hex(data.get("color_hex"))
+                update_fields.append("color_hex")
+            if "is_active" in data:
+                b = _normalize_optional_bool(data.get("is_active"))
+                if b is not None:
+                    ch.is_active = b
+                    update_fields.append("is_active")
         if icon_file is not None:
             ch.icon = icon_file
             update_fields.append("icon")

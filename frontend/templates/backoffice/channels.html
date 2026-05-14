@@ -499,7 +499,12 @@
                 parsed = {};
               }
               if (!res.ok) {
-                const msg = parsed.message || raw.slice(0, 160) || `HTTP ${res.status}`;
+                const msg =
+                  parsed.message ||
+                  parsed.detail ||
+                  (parsed.error ? String(parsed.error) : "") ||
+                  raw.slice(0, 160) ||
+                  `HTTP ${res.status}`;
                 this.showToast("error", msg);
                 return;
               }
