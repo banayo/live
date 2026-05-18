@@ -100,7 +100,7 @@
       >
         <div>
           <p class="font-heading text-lg font-semibold tracking-tight text-[color:var(--stitch-primary)]">Stitch Live</p>
-          <p class="mt-xs text-xs text-[color:var(--stitch-on-surface-variant)]" x-text="editScheduleId ? 'แก้ไขคำขอจอง' : 'จองรอบไลฟ์'"></p>
+          <p class="mt-xs text-xs text-[color:var(--stitch-on-surface-variant)]" x-text="pageSubtitle()"></p>
           <nav class="mt-xl flex flex-col gap-sm">
             <a
               href="/dashboard"
@@ -171,10 +171,20 @@
               x-text="editLoadError"
             ></div>
 
+            <div
+              x-show="viewOnly && meLoaded && !editLoadError"
+              x-cloak
+              class="rounded-3xl border border-[color:var(--stitch-outline-variant)]/40 bg-[color:var(--stitch-tertiary-container)]/60 px-lg py-md text-sm text-[color:var(--stitch-on-tertiary-container)]"
+              role="status"
+            >
+              <span x-text="scheduleCancelled ? 'รายการยกเลิกแล้ว — ดูได้อย่างเดียว' : 'รายการยืนยันแล้ว — ดูรายละเอียดได้อย่างเดียว ไม่สามารถแก้ไขได้'"></span>
+            </div>
+
             <form
               class="space-y-lg rounded-3xl bg-[color:var(--stitch-surface-container-lowest)] p-lg soft-shadow md:p-xl"
               @submit.prevent="submit()"
             >
+            <fieldset class="contents min-w-0 border-0 p-0 m-0" :disabled="viewOnly">
             <div class="space-y-sm">
               <label class="font-heading text-sm font-semibold text-[color:var(--stitch-on-surface)]" for="bl-title">หัวข้อไลฟ์</label>
               <input
@@ -314,6 +324,7 @@
                 class="w-full resize-y rounded-2xl border-none bg-[color:var(--stitch-surface-container-low)] px-lg py-md text-[color:var(--stitch-on-surface)] outline-none ring-1 ring-transparent focus:ring-2 focus:ring-[color:var(--stitch-primary-container)]"
               ></textarea>
             </div>
+            </fieldset>
 
             <div
               x-show="error"
@@ -337,13 +348,13 @@
 
             <div class="flex flex-col gap-sm pt-sm sm:flex-row sm:justify-end">
               <a
-                :href="editScheduleId ? '/live-history' : '/dashboard'"
+                :href="editScheduleId || viewOnly ? '/live-history' : '/dashboard'"
                 class="inline-flex flex-1 items-center justify-center rounded-full border border-[color:var(--stitch-outline-variant)]/50 bg-[color:var(--stitch-surface-container-lowest)] px-xl py-md font-heading text-sm font-semibold text-[color:var(--stitch-on-secondary-container)] transition hover:bg-[color:var(--stitch-secondary-container)] sm:flex-none"
-              >
-                ยกเลิก
-              </a>
+                x-text="viewOnly ? 'กลับประวัติไลฟ์' : 'ยกเลิก'"
+              ></a>
               <button
                 type="submit"
+                x-show="!viewOnly"
                 class="inline-flex flex-1 items-center justify-center rounded-full bg-[color:var(--stitch-primary)] px-xl py-md font-heading text-sm font-semibold text-[color:var(--stitch-on-primary)] shadow-[0_14px_36px_-16px_rgba(82,66,73,0.55)] transition enabled:hover:opacity-95 enabled:active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none"
                 :disabled="loading || !verified || (editScheduleId && editLoadError)"
               >
@@ -400,6 +411,8 @@
           error: "",
           success: false,
           editScheduleId: null,
+          viewOnly: false,
+          scheduleCancelled: false,
           editLoadError: "",
           form: {
             title: "",
@@ -415,6 +428,12 @@
           },
 
           hours24: Array.from({ length: 24 }, (_, i) => i),
+
+          pageSubtitle() {
+            if (this.viewOnly) return "ดูรายละเอียดการจอง";
+            if (this.editScheduleId) return "แก้ไขคำขอจอง";
+            return "จองรอบไลฟ์";
+          },
 
           async init() {
             const params = new URLSearchParams(window.location.search);
@@ -513,6 +532,8 @@
 
           async loadEditSchedule() {
             this.editLoadError = "";
+            this.viewOnly = false;
+            this.scheduleCancelled = false;
             if (!this.verified) {
               this.editLoadError = "ต้องยืนยันบัญชีก่อนจึงจะแก้ไขคำขอได้";
               return;
@@ -529,15 +550,15 @@
               }
               if (!res.ok) {
                 const code = data.error ? String(data.error) : "";
-                if (code === "not_editable") {
-                  this.editLoadError = "รายการนี้ยืนยันแล้วหรือยกเลิกแล้ว ไม่สามารถแก้ไขได้";
-                } else if (code === "not_found") {
+                if (code === "not_found") {
                   this.editLoadError = "ไม่พบรายการที่ต้องการแก้ไข";
                 } else {
-                  this.editLoadError = data.message || "โหลดรายการสำหรับแก้ไขไม่สำเร็จ";
+                  this.editLoadError = data.message || "โหลดรายการไม่สำเร็จ";
                 }
                 return;
               }
+              this.scheduleCancelled = Boolean(data.is_cancelled);
+              this.viewOnly = Boolean(data.is_verified || data.is_cancelled);
               this.applyScheduleToForm(data);
             } catch (_) {
               this.editLoadError = "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้";
@@ -585,7 +606,7 @@
           },
 
           async submit() {
-            if (this.loading || !this.verified) return;
+            if (this.loading || !this.verified || this.viewOnly) return;
             if (this.editScheduleId && this.editLoadError) return;
             this.error = "";
             this.success = false;

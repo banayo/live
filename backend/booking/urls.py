@@ -23,6 +23,16 @@ urlpatterns = [
     path("api/schedules/", views.live_schedule_feed, name="live_schedule_feed"),
     path("api/user/book-live-options/", views.user_book_live_options, name="user_book_live_options"),
     path(
+        "api/user/live-schedules/<int:schedule_id>/sales/",
+        views.user_live_schedule_sales_get,
+        name="user_live_schedule_sales_get",
+    ),
+    path(
+        "api/user/live-schedules/<int:schedule_id>/sales/submit/",
+        views.user_live_schedule_sales_submit,
+        name="user_live_schedule_sales_submit",
+    ),
+    path(
         "api/user/live-schedules/<int:schedule_id>/",
         views.user_live_schedule_detail,
         name="user_live_schedule_detail",

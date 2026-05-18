@@ -5,6 +5,7 @@ from .backoffice_users import backoffice_user_update, backoffice_users_list
 from .line_auth import line_authorize, line_callback
 from .schedules import live_schedule_feed
 from .user_live import user_book_live_options, user_live_schedule_create, user_live_schedule_detail
+from .user_live_sales import user_live_schedule_sales_get, user_live_schedule_sales_submit
 
 __all__ = [
     "auth_login",
@@ -26,4 +27,6 @@ __all__ = [
     "user_book_live_options",
     "user_live_schedule_create",
     "user_live_schedule_detail",
+    "user_live_schedule_sales_get",
+    "user_live_schedule_sales_submit",
 ]

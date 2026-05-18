@@ -116,6 +116,22 @@ def create_user_live_schedule(
     return schedule, None
 
 
+def get_user_live_schedule_for_view(*, user: User, schedule_id: int) -> tuple[LiveSchedule | None, str | None]:
+    """Return the user's schedule for read-only display (book-live view mode)."""
+    profile = getattr(user, "profile", None)
+    if not profile:
+        return None, "no_profile"
+    if not profile.is_verified:
+        return None, "not_verified"
+    if is_backoffice_admin(user):
+        return None, "use_backoffice"
+
+    schedule = LiveSchedule.objects.filter(pk=schedule_id, user_id=user.id).first()
+    if not schedule:
+        return None, "not_found"
+    return schedule, None
+
+
 def get_user_live_schedule_for_edit(*, user: User, schedule_id: int) -> tuple[LiveSchedule | None, str | None]:
     """Return the user's schedule row if it may still be edited (pending, not cancelled)."""
     profile = getattr(user, "profile", None)
@@ -191,6 +207,7 @@ def update_user_live_schedule(
         schedule.end_time = end_time
         schedule.note = (note or "").strip() or ""
         schedule.edited_by = user
+
         schedule.save(
             update_fields=[
                 "title",

@@ -1,0 +1,658 @@
+<!doctype html>
+<!-- AGENTS.MD Agent-UI + DESIGM.md (Serene Commerce) | กรอดยอดขาย — responsive mobile + desktop -->
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#fce4ec" />
+    <title>กรอดยอดขาย | Stitch Live Booking</title>
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Prompt:wght@400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --stitch-surface: #f9f9f9;
+        --stitch-surface-container-lowest: #ffffff;
+        --stitch-surface-container-low: #f3f3f3;
+        --stitch-surface-container: #eeeeee;
+        --stitch-surface-container-high: #e8e8e8;
+        --stitch-surface-container-highest: #e2e2e2;
+        --stitch-surface-variant: #e2e2e2;
+        --stitch-on-surface: #1a1c1c;
+        --stitch-on-surface-variant: #4d4447;
+        --stitch-outline: #7f7478;
+        --stitch-outline-variant: #d0c3c7;
+        --stitch-primary: #6b5a60;
+        --stitch-on-primary: #ffffff;
+        --stitch-primary-container: #fce4ec;
+        --stitch-on-primary-container: #76646b;
+        --stitch-primary-fixed: #f4dce4;
+        --stitch-on-primary-fixed-variant: #524249;
+        --stitch-secondary-container: #d3e2ed;
+        --stitch-on-secondary-container: #56656e;
+        --stitch-tertiary-container: #e0ede1;
+        --stitch-on-tertiary-container: #606c62;
+        --stitch-error: #ba1a1a;
+        --stitch-error-container: #ffdad6;
+        --stitch-on-error-container: #93000a;
+      }
+
+      .material-symbols-outlined {
+        font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+      }
+
+      .soft-shadow {
+        box-shadow: 0 20px 40px -15px rgba(107, 90, 96, 0.08);
+      }
+
+      .pink-gradient {
+        background: linear-gradient(135deg, #fce4ec 0%, #f4dce4 100%);
+      }
+
+      [x-cloak] {
+        display: none !important;
+      }
+    </style>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              heading: ["Prompt", "ui-sans-serif", "system-ui"],
+              body: ["Kanit", "Sarabun", "ui-sans-serif", "system-ui"],
+            },
+            spacing: {
+              "container-margin": "20px",
+              gutter: "16px",
+              xs: "4px",
+              sm: "8px",
+              md: "16px",
+              lg: "24px",
+              xl: "32px",
+              xxl: "48px",
+            },
+            boxShadow: {
+              soft: "0 20px 40px -15px rgba(107, 90, 96, 0.08)",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+
+  <body class="min-h-screen bg-[color:var(--stitch-surface)] pb-28 font-body text-[color:var(--stitch-on-surface)] antialiased leading-relaxed md:pb-12">
+    <div x-data="enterSalesPage()" x-init="init()" class="min-h-screen md:flex" x-cloak>
+      <!-- Desktop Sidebar -->
+      <aside
+        class="sticky top-0 z-20 hidden h-svh w-[260px] shrink-0 flex-col gap-xl border-r border-[color:var(--stitch-outline-variant)]/25 bg-[color:var(--stitch-surface-container-lowest)] p-lg shadow-[4px_0_32px_-20px_rgba(107,90,96,0.12)] md:flex lg:w-[272px] rounded-r-3xl"
+        aria-label="เมนูหลักแบบเดสก์ท็อป"
+      >
+        <div>
+          <p class="font-heading text-lg font-semibold tracking-tight text-[color:var(--stitch-primary)]">Stitch Live</p>
+          <p class="mt-xs text-xs text-[color:var(--stitch-on-surface-variant)]">กรอดยอดขาย</p>
+          <nav class="mt-xl flex flex-col gap-sm">
+            <a
+              href="/dashboard"
+              class="flex items-center gap-md rounded-full px-lg py-md font-heading text-[0.8125rem] font-semibold text-[color:var(--stitch-on-surface-variant)] transition hover:translate-x-0.5 hover:bg-[color:var(--stitch-surface-container-high)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--stitch-primary-container)] focus-visible:ring-offset-2"
+            >
+              <span class="material-symbols-outlined text-[20px]">dashboard</span>
+              แดชบอร์ด
+            </a>
+            <a
+              href="/book-live"
+              class="flex items-center gap-md rounded-full px-lg py-md font-heading text-[0.8125rem] font-semibold text-[color:var(--stitch-on-surface-variant)] transition hover:translate-x-0.5 hover:bg-[color:var(--stitch-surface-container-high)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--stitch-primary-container)] focus-visible:ring-offset-2"
+            >
+              <span class="material-symbols-outlined text-[20px]">add_circle</span>
+              จองไลฟ์
+            </a>
+            <a
+              href="/live-history"
+              class="flex items-center gap-md rounded-full bg-[color:var(--stitch-primary-container)] px-lg py-md font-heading text-[0.8125rem] font-semibold text-[color:var(--stitch-on-primary-container)] shadow-[0_10px_28px_-12px_rgba(107,90,96,0.35)] transition hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--stitch-primary)]/30 focus-visible:ring-offset-2"
+            >
+              <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1">history</span>
+              ประวัติไลฟ์
+            </a>
+            <a
+              href="/dashboard"
+              class="flex items-center gap-md rounded-full px-lg py-md font-heading text-[0.8125rem] font-semibold text-[color:var(--stitch-on-surface-variant)] transition hover:translate-x-0.5 hover:bg-[color:var(--stitch-surface-container-high)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--stitch-primary-container)] focus-visible:ring-offset-2"
+            >
+              <span class="material-symbols-outlined text-[20px]">event</span>
+              ตารางงาน
+            </a>
+            <a
+              href="/dashboard"
+              class="flex items-center gap-md rounded-full px-lg py-md font-heading text-[0.8125rem] font-semibold text-[color:var(--stitch-on-surface-variant)] transition hover:translate-x-0.5 hover:bg-[color:var(--stitch-surface-container-high)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--stitch-primary-container)] focus-visible:ring-offset-2"
+            >
+              <span class="material-symbols-outlined text-[20px]">videocam</span>
+              Live
+            </a>
+          </nav>
+        </div>
+      </aside>
+
+      <div class="flex min-h-screen min-w-0 flex-1 flex-col">
+        <div class="mx-auto w-full max-w-2xl flex-1">
+          <!-- Header / AppBar -->
+          <header
+            class="sticky top-0 z-30 flex w-full items-center gap-md bg-[color:var(--stitch-surface)]/95 px-container-margin py-md shadow-[0_12px_32px_-18px_rgba(107,90,96,0.12)] backdrop-blur-md md:rounded-b-3xl md:px-8 md:py-lg lg:px-10"
+          >
+            <a
+              href="/live-history"
+              class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[color:var(--stitch-surface-container-lowest)] text-[color:var(--stitch-primary)] shadow-sm transition hover:bg-[color:var(--stitch-primary-container)]"
+              aria-label="กลับประวัติไลฟ์"
+            >
+              <span class="material-symbols-outlined">arrow_back</span>
+            </a>
+            <div class="min-w-0">
+              <h1 class="font-heading text-xl font-semibold tracking-tight text-[color:var(--stitch-primary)] md:text-2xl" x-text="viewOnly ? 'ดูยอดขาย' : 'กรอบยอดขาย'"></h1>
+              <p class="text-xs text-[color:var(--stitch-on-surface-variant)] md:text-sm" x-text="viewOnly ? 'ข้อมูลยอดขายที่บันทึกแล้ว (อ่านอย่างเดียว)' : 'ระบุข้อมูลผลประกอบการของรอบไลฟ์'"></p>
+            </div>
+          </header>
+
+          <main class="mt-lg space-y-lg px-container-margin pb-lg md:space-y-xl md:px-8 lg:px-10">
+            <!-- Loading State -->
+            <template x-if="loading">
+              <div class="flex flex-col items-center justify-center py-xxl text-[color:var(--stitch-on-surface-variant)]">
+                <span class="material-symbols-outlined animate-spin text-4xl">sync</span>
+                <p class="mt-md font-heading font-medium">กำลังดึงข้อมูลรอบไลฟ์…</p>
+              </div>
+            </template>
+
+            <!-- Main Form Content -->
+            <template x-if="!loading && session">
+              <div class="space-y-lg">
+                <!-- Session Info Card -->
+                <section class="pink-gradient rounded-3xl p-lg soft-shadow">
+                  <div class="flex items-start justify-between">
+                    <div>
+                      <h2 class="font-heading text-lg font-semibold text-[color:var(--stitch-primary)]" x-text="session.title"></h2>
+                      <div class="mt-sm flex flex-col gap-1">
+                        <p class="flex items-center gap-xs text-xs text-[color:var(--stitch-on-primary-container)]">
+                          <span class="material-symbols-outlined text-[16px]">calendar_today</span>
+                          <span x-text="formatDate(session.start)"></span>
+                        </p>
+                        <p class="flex items-center gap-xs text-xs text-[color:var(--stitch-on-primary-container)]">
+                          <span class="material-symbols-outlined text-[16px]">schedule</span>
+                          <span x-text="formatTimeRange(session.start, session.end)"></span>
+                        </p>
+                      </div>
+                    </div>
+                    <span
+                      class="rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider"
+                      :class="session.is_verified ? 'bg-[color:var(--stitch-tertiary-container)] text-[color:var(--stitch-on-tertiary-container)]' : 'bg-white/60 text-[color:var(--stitch-primary)]'"
+                      x-text="session.is_verified ? 'ยืนยันแล้ว' : 'รอยืนยัน'"
+                    ></span>
+                  </div>
+                </section>
+
+                <div
+                  x-show="viewOnly"
+                  class="rounded-3xl border border-[color:var(--stitch-outline-variant)]/40 bg-[color:var(--stitch-tertiary-container)]/60 px-lg py-md text-sm text-[color:var(--stitch-on-tertiary-container)]"
+                  role="status"
+                >
+                  บันทึกยอดขายแล้ว — ดูข้อมูลได้อย่างเดียว ไม่สามารถแก้ไขได้
+                </div>
+
+                <form @submit.prevent="submitForm" class="space-y-lg">
+                  <fieldset class="contents min-w-0 border-0 p-0 m-0" :disabled="viewOnly">
+                  <div class="rounded-3xl bg-[color:var(--stitch-surface-container-lowest)] p-lg soft-shadow space-y-md">
+                    <!-- Sales Amount -->
+                    <div class="space-y-2">
+                      <label for="total_raw" class="block font-heading text-sm font-semibold text-[color:var(--stitch-on-surface-variant)]">
+                        ยอดขายรวม (ที่กรอกในระบบ)
+                      </label>
+                      <div class="relative">
+                        <span class="absolute left-md top-1/2 -translate-y-1/2 material-symbols-outlined text-[color:var(--stitch-outline)]">payments</span>
+                        <input
+                          type="number"
+                          id="total_raw"
+                          x-model="form.total_raw"
+                          class="w-full rounded-2xl border-none bg-[color:var(--stitch-surface-container-low)] py-4 pl-12 pr-md font-heading text-lg focus:ring-2 focus:ring-[color:var(--stitch-primary)]/20"
+                          placeholder="0.00"
+                          step="0.01"
+                          required
+                        />
+                      </div>
+                      <p class="text-[10px] text-[color:var(--stitch-on-surface-variant)]">ระบุยอดรวมที่สรุปได้จากระบบไลฟ์</p>
+                    </div>
+
+                    <!-- View Count -->
+                    <div class="space-y-2">
+                      <label for="view_count" class="block font-heading text-sm font-semibold text-[color:var(--stitch-on-surface-variant)]">
+                        จำนวนผู้เข้าชมสูงสุด (Peak View)
+                      </label>
+                      <div class="relative">
+                        <span class="absolute left-md top-1/2 -translate-y-1/2 material-symbols-outlined text-[color:var(--stitch-outline)]">visibility</span>
+                        <input
+                          type="number"
+                          id="view_count"
+                          x-model="form.view_count"
+                          class="w-full rounded-2xl border-none bg-[color:var(--stitch-surface-container-low)] py-4 pl-12 pr-md font-heading text-lg focus:ring-2 focus:ring-[color:var(--stitch-primary)]/20"
+                          placeholder="0"
+                          step="1"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <!-- Images Upload -->
+                    <div class="space-y-sm border-t border-[color:var(--stitch-outline-variant)]/25 pt-md">
+                      <div class="flex items-center justify-between gap-md">
+                        <label class="font-heading text-sm font-semibold text-[color:var(--stitch-on-surface-variant)]">
+                          แนบสลิป / หลักฐานยอดขาย
+                        </label>
+                        <span class="text-xs font-bold text-[color:var(--stitch-primary)]" x-text="imageSlotLabel()"></span>
+                      </div>
+                      <p class="text-[10px] text-[color:var(--stitch-on-surface-variant)]" x-text="viewOnly ? 'รูปหลักฐานที่แนบไว้' : 'อัปโหลดได้สูงสุด 3 ภาพ (เฉพาะรอบที่รอยืนยัน)'"></p>
+
+                      <div class="grid grid-cols-3 gap-sm pt-2">
+                        <!-- Existing Images -->
+                        <template x-for="img in existingImages.filter((i) => !removedImageIds.includes(i.id))" :key="'ex-' + img.id">
+                          <div class="group relative aspect-square overflow-hidden rounded-2xl bg-[color:var(--stitch-surface-container-low)] ring-1 ring-[color:var(--stitch-outline-variant)]/30">
+                            <img :src="img.url" alt="" class="h-full w-full object-cover transition duration-300 group-hover:scale-110" />
+                            <button
+                              type="button"
+                              x-show="!viewOnly"
+                              class="absolute right-1 top-1 flex h-8 w-8 items-center justify-center rounded-full bg-[color:var(--stitch-error-container)] text-[color:var(--stitch-on-error-container)] opacity-0 shadow-sm transition group-hover:opacity-100"
+                              @click="removeExistingImage(img.id)"
+                              aria-label="ลบรูป"
+                            >
+                              <span class="material-symbols-outlined text-[18px]">close</span>
+                            </button>
+                            <!-- Mobile Always Show Close -->
+                            <button
+                              type="button"
+                              x-show="!viewOnly"
+                              class="absolute right-1 top-1 flex h-8 w-8 items-center justify-center rounded-full bg-[color:var(--stitch-error-container)] text-[color:var(--stitch-on-error-container)] shadow-sm md:hidden"
+                              @click="removeExistingImage(img.id)"
+                            >
+                              <span class="material-symbols-outlined text-[18px]">close</span>
+                            </button>
+                          </div>
+                        </template>
+
+                        <!-- New Selected Previews -->
+                        <template x-for="(preview, idx) in newPreviews" :key="'new-' + idx">
+                          <div class="group relative aspect-square overflow-hidden rounded-2xl bg-[color:var(--stitch-surface-container-low)] ring-2 ring-[color:var(--stitch-primary-container)]">
+                            <img :src="preview" alt="" class="h-full w-full object-cover transition duration-300 group-hover:scale-110" />
+                            <button
+                              type="button"
+                              class="absolute right-1 top-1 flex h-8 w-8 items-center justify-center rounded-full bg-[color:var(--stitch-error-container)] text-[color:var(--stitch-on-error-container)] shadow-sm transition hover:opacity-90"
+                              @click="removeNewImage(idx)"
+                              aria-label="ลบรูป"
+                            >
+                              <span class="material-symbols-outlined text-[18px]">close</span>
+                            </button>
+                          </div>
+                        </template>
+
+                        <!-- Add Button Slot -->
+                        <label
+                          x-show="!viewOnly && canAddMoreImages()"
+                          class="flex aspect-square cursor-pointer flex-col items-center justify-center gap-xs rounded-2xl border-2 border-dashed border-[color:var(--stitch-outline-variant)]/50 bg-[color:var(--stitch-surface-container-low)]/80 text-[color:var(--stitch-on-surface-variant)] transition hover:border-[color:var(--stitch-primary)]/40 hover:bg-[color:var(--stitch-primary-container)]/30"
+                        >
+                          <span class="material-symbols-outlined text-3xl text-[color:var(--stitch-primary)]">add_photo_alternate</span>
+                          <span class="font-heading text-[10px] font-semibold">เพิ่มรูป</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            class="sr-only"
+                            @change="onFilesSelected($event)"
+                          />
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                  </fieldset>
+
+                  <!-- Feedback Messages -->
+                  <template x-if="error">
+                    <div class="flex items-center gap-md rounded-2xl bg-[color:var(--stitch-error-container)] p-md text-sm text-[color:var(--stitch-on-error-container)]">
+                      <span class="material-symbols-outlined">error</span>
+                      <span x-text="error"></span>
+                    </div>
+                  </template>
+
+                  <!-- Action Button -->
+                  <div class="flex flex-col gap-sm pt-md" x-show="!viewOnly">
+                    <button
+                      type="submit"
+                      :disabled="submitting"
+                      class="w-full rounded-full bg-[color:var(--stitch-primary)] py-4 font-heading font-semibold text-white shadow-[0_12px_32px_-12px_rgba(107,90,96,0.5)] transition hover:opacity-95 active:scale-[0.98] disabled:opacity-50"
+                    >
+                      <span x-show="!submitting">บันทึกข้อมูลยอดขาย</span>
+                      <span x-show="submitting" class="flex items-center justify-center gap-sm">
+                        <span class="material-symbols-outlined animate-spin">sync</span>
+                        กำลังบันทึก…
+                      </span>
+                    </button>
+                  </div>
+                  <div class="pt-md" x-show="viewOnly">
+                    <a
+                      href="/live-history"
+                      class="flex w-full items-center justify-center rounded-full border border-[color:var(--stitch-outline-variant)]/50 bg-[color:var(--stitch-surface-container-lowest)] py-4 font-heading font-semibold text-[color:var(--stitch-on-surface)] transition hover:bg-[color:var(--stitch-surface-container-high)]"
+                    >
+                      กลับประวัติไลฟ์
+                    </a>
+                  </div>
+                </form>
+              </div>
+            </template>
+
+            <!-- Error State (Not Found or Not Editable) -->
+            <template x-if="!loading && error && !session">
+              <div class="rounded-3xl bg-[color:var(--stitch-surface-container-lowest)] px-lg py-xl text-center soft-shadow">
+                <div class="mx-auto mb-md flex h-16 w-16 items-center justify-center rounded-full bg-[color:var(--stitch-error-container)] text-[color:var(--stitch-on-error-container)]">
+                  <span class="material-symbols-outlined text-3xl">error_outline</span>
+                </div>
+                <h3 class="font-heading text-lg font-semibold text-[color:var(--stitch-on-surface)]">ไม่สามารถดำเนินการได้</h3>
+                <p class="mt-xs text-sm text-[color:var(--stitch-on-surface-variant)]" x-text="error"></p>
+                <div class="mt-lg">
+                  <a href="/live-history" class="inline-flex rounded-full bg-[color:var(--stitch-primary)] px-xl py-md font-heading text-sm font-semibold text-[color:var(--stitch-on-primary)] transition hover:opacity-90 active:scale-95">
+                    กลับไปดูประวัติ
+                  </a>
+                </div>
+              </div>
+            </template>
+
+            <!-- Empty State -->
+            <template x-if="!loading && !session && !error">
+              <div class="rounded-3xl bg-[color:var(--stitch-surface-container-lowest)] px-lg py-xl text-center soft-shadow">
+                <div class="mx-auto mb-md flex h-16 w-16 items-center justify-center rounded-full bg-[color:var(--stitch-surface-container-low)] text-[color:var(--stitch-outline)]">
+                  <span class="material-symbols-outlined text-3xl">event_busy</span>
+                </div>
+                <p class="font-heading font-semibold">ไม่พบข้อมูลรอบไลฟ์</p>
+                <div class="mt-lg">
+                  <a href="/live-history" class="inline-flex rounded-full bg-[color:var(--stitch-primary)] px-xl py-md font-heading text-sm font-semibold text-[color:var(--stitch-on-primary)] transition hover:opacity-90 active:scale-95">
+                    กลับไปดูประวัติ
+                  </a>
+                </div>
+              </div>
+            </template>
+          </main>
+        </div>
+      </div>
+
+      <!-- Mobile Bottom NavBar -->
+      <nav
+        class="fixed bottom-0 left-0 z-50 flex w-full items-center justify-around rounded-t-3xl bg-[color:var(--stitch-surface-container-lowest)] px-2 py-3 shadow-[0_-4px_20px_rgba(107,90,96,0.08)] md:hidden"
+        aria-label="เมนูหลัก"
+      >
+        <a href="/dashboard" class="flex min-w-0 flex-1 flex-col items-center justify-center rounded-2xl p-2 text-[color:var(--stitch-on-secondary-container)] transition hover:bg-[color:var(--stitch-secondary-container)]">
+          <span class="material-symbols-outlined">home</span>
+          <span class="mt-1 truncate text-[10px] font-bold uppercase tracking-wider">หน้าแรก</span>
+        </a>
+        <a href="/book-live" class="flex min-w-0 flex-1 flex-col items-center justify-center rounded-2xl p-2 text-[color:var(--stitch-on-secondary-container)] transition hover:bg-[color:var(--stitch-secondary-container)]">
+          <span class="material-symbols-outlined">add_circle</span>
+          <span class="mt-1 truncate text-[10px] font-bold uppercase tracking-wider">จองไลฟ์</span>
+        </a>
+        <a href="/live-history" class="flex min-w-0 flex-1 flex-col items-center justify-center rounded-2xl bg-[color:var(--stitch-primary-container)] p-2 text-[color:var(--stitch-on-primary-container)]" aria-current="page">
+          <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">history</span>
+          <span class="mt-1 truncate text-[10px] font-bold uppercase tracking-wider">ประวัติ</span>
+        </a>
+        <a href="/dashboard" class="flex min-w-0 flex-1 flex-col items-center justify-center rounded-2xl p-2 text-[color:var(--stitch-on-secondary-container)] transition hover:bg-[color:var(--stitch-secondary-container)]">
+          <span class="material-symbols-outlined">videocam</span>
+          <span class="mt-1 truncate text-[10px] font-bold uppercase tracking-wider">Live</span>
+        </a>
+      </nav>
+    </div>
+
+    <script>
+      function enterSalesPage() {
+        return {
+          loading: true,
+          submitting: false,
+          viewOnly: false,
+          error: "",
+          session: null,
+          maxImages: 3,
+          existingImages: [],
+          removedImageIds: [],
+          newFiles: [],
+          newPreviews: [],
+          form: {
+            total_raw: "",
+            view_count: "",
+          },
+
+          async init() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const sessionId = urlParams.get("session");
+            if (!sessionId) {
+              window.location.href = "/live-history";
+              return;
+            }
+            await this.loadSession(sessionId);
+          },
+
+          async loadSession(id) {
+            this.loading = true;
+            this.error = "";
+            try {
+              const res = await fetch(`/api/user/live-schedules/${id}/sales/`, {
+                credentials: "same-origin",
+                headers: { Accept: "application/json" },
+              });
+              
+              if (res.status === 401) {
+                window.location.href = "/login";
+                return;
+              }
+              
+              const data = await res.json().catch(() => ({}));
+              
+              if (res.status === 403) {
+                const msgs = {
+                  not_editable: "รายการยืนยันหรือยกเลิกแล้ว — กรอกยอดได้เฉพาะรอบที่รอยืนยัน",
+                  not_verified: "บัญชียังไม่ได้รับการยืนยัน ไม่สามารถกรอกยอดได้",
+                  use_backoffice: "บัญชีผู้ดูแล กรุณาใช้ระบบ backoffice",
+                };
+                this.error = msgs[data.error] || data.message || "ไม่สามารถเปิดหน้ากรอกยอดได้";
+                this.session = null;
+                return;
+              }
+              if (res.status === 404) {
+                this.error = "ไม่พบรอบไลฟ์นี้ หรือคุณไม่มีสิทธิ์เข้าถึง";
+                this.session = null;
+                return;
+              }
+              if (res.status >= 500) {
+                this.error = "ระบบโหลดข้อมูลไม่สำเร็จ กรุณารีเฟรชหรือลองใหม่ภายหลัง";
+                this.session = null;
+                return;
+              }
+              if (!res.ok) {
+                this.error = data.message || "โหลดข้อมูลไม่สำเร็จ กรุณาลองใหม่";
+                this.session = null;
+                return;
+              }
+              
+              this.session = data;
+              this.viewOnly = Boolean(data.read_only || data.is_verified || data.is_cancelled);
+              if (this.viewOnly) {
+                this.form.total_raw = data.total_raw != null ? String(data.total_raw) : "0";
+                this.form.view_count = data.view_count != null ? String(data.view_count) : "0";
+              } else {
+                this.form.total_raw = data.total_raw && Number(data.total_raw) !== 0 ? data.total_raw : "";
+                this.form.view_count = data.view_count != null && data.view_count !== "" && data.view_count !== 0 ? String(data.view_count) : "";
+              }
+              
+              this.existingImages = (Array.isArray(data.images) ? data.images : []).map((img) => ({
+                id: Number(img.id),
+                url: img.url,
+                order: img.order ?? 0,
+              }));
+              this.removedImageIds = [];
+              this.clearNewImages();
+            } catch (_) {
+              this.error = "โหลดข้อมูลไม่สำเร็จ กรุณาลองใหม่";
+              this.session = null;
+            } finally {
+              this.loading = false;
+            }
+          },
+
+          imageCount() {
+            const kept = this.existingImages.filter((img) => !this.removedImageIds.includes(img.id)).length;
+            return kept + this.newFiles.length;
+          },
+
+          imageSlotLabel() {
+            return `${this.imageCount()} / ${this.maxImages}`;
+          },
+
+          canAddMoreImages() {
+            return this.imageCount() < this.maxImages;
+          },
+
+          onFilesSelected(event) {
+            const input = event.target;
+            const picked = Array.from(input.files || []);
+            input.value = "";
+            if (!picked.length) return;
+
+            const slotsLeft = this.maxImages - this.imageCount();
+            if (slotsLeft <= 0) {
+              this.error = "อัปโหลดรูปได้สูงสุด 3 ภาพ";
+              return;
+            }
+
+            const toAdd = picked.slice(0, slotsLeft);
+            if (picked.length > slotsLeft) {
+              this.error = "เลือกได้อีกไม่เกิน " + slotsLeft + " ภาพ (รวมสูงสุด 3 ภาพ)";
+            } else {
+              this.error = "";
+            }
+
+            for (const file of toAdd) {
+              if (!file.type.startsWith("image/")) {
+                this.error = "กรุณาเลือกไฟล์รูปภาพเท่านั้น";
+                continue;
+              }
+              if (file.size > 5 * 1024 * 1024) {
+                this.error = "ไฟล์รูปต้องไม่เกิน 5 MB";
+                continue;
+              }
+              this.newFiles.push(file);
+              this.newPreviews.push(URL.createObjectURL(file));
+            }
+          },
+
+          removeExistingImage(id) {
+            if (!this.removedImageIds.includes(id)) {
+              this.removedImageIds.push(id);
+            }
+            this.error = "";
+          },
+
+          removeNewImage(idx) {
+            if (this.newPreviews[idx]) {
+              URL.revokeObjectURL(this.newPreviews[idx]);
+            }
+            this.newFiles.splice(idx, 1);
+            this.newPreviews.splice(idx, 1);
+            this.error = "";
+          },
+
+          clearNewImages() {
+            this.newPreviews.forEach((url) => URL.revokeObjectURL(url));
+            this.newFiles = [];
+            this.newPreviews = [];
+          },
+
+          async submitForm() {
+            if (this.submitting || !this.session || this.viewOnly) return;
+            this.submitting = true;
+            this.error = "";
+            try {
+              const fd = new FormData();
+              fd.append("total_raw", String(this.form.total_raw || "0"));
+              fd.append("view_count", String(this.form.view_count || "0"));
+              this.removedImageIds.forEach((id) => fd.append("remove_image_ids", String(id)));
+              this.newFiles.forEach((file) => fd.append("images", file));
+
+              const res = await fetch(`/api/user/live-schedules/${this.session.id}/sales/submit/`, {
+                method: "POST",
+                credentials: "same-origin",
+                headers: {
+                  "X-CSRFToken": this.getCookie("csrftoken"),
+                },
+                body: fd,
+              });
+
+              const result = await res.json().catch(() => ({}));
+              if (!res.ok) {
+                const code = result.error ? String(result.error) : "";
+                const submitMsgs = {
+                  not_editable: "รายการยืนยันหรือยกเลิกแล้ว — กรอกยอดได้เฉพาะรอบที่รอยืนยัน",
+                  too_many_images: "อัปโหลดรูปได้สูงสุด 3 ภาพ",
+                  invalid_image: "ไฟล์รูปไม่ถูกต้องหรือใหญ่เกิน 5 MB",
+                  invalid_values: "ยอดขายหรือจำนวนผู้ชมไม่ถูกต้อง",
+                  invalid_image_id: "รูปที่เลือกลบไม่ถูกต้อง",
+                };
+                throw new Error(submitMsgs[code] || result.message || "บันทึกข้อมูลไม่สำเร็จ");
+              }
+
+              window.location.href = result.redirect_url || "/live-history";
+            } catch (e) {
+              this.error = e.message;
+            } finally {
+              this.submitting = false;
+            }
+          },
+
+          formatDate(dateStr) {
+            if (!dateStr) return "—";
+            const date = new Date(dateStr);
+            return new Intl.DateTimeFormat("th-TH", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            }).format(date);
+          },
+
+          formatTimeRange(startStr, endStr) {
+            if (!startStr) return "—";
+            const start = new Date(startStr);
+            const end = endStr ? new Date(endStr) : null;
+            const tf = new Intl.DateTimeFormat("th-TH", {
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: false
+            });
+            return end ? `${tf.format(start)} – ${tf.format(end)}` : tf.format(start);
+          },
+
+          getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== "") {
+              const cookies = document.cookie.split(";");
+              for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === name + "=") {
+                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                  break;
+                }
+              }
+            }
+            return cookieValue;
+          },
+        };
+      }
+    </script>
+  </body>
+</html>

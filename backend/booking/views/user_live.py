@@ -16,6 +16,7 @@ from ..services.user_live_booking import (
     book_live_brand_options_list,
     create_user_live_schedule,
     get_user_live_schedule_for_edit,
+    get_user_live_schedule_for_view,
     update_user_live_schedule,
 )
 
@@ -164,13 +165,13 @@ def user_live_schedule_detail(request: HttpRequest, schedule_id: int) -> JsonRes
         return _json_error("Unauthorized", status=401, code="unauthorized")
 
     if request.method == "GET":
-        schedule, err = get_user_live_schedule_for_edit(user=request.user, schedule_id=schedule_id)
+        schedule, err = get_user_live_schedule_for_view(
+            user=request.user, schedule_id=schedule_id
+        )
         if err == "no_profile":
             return _json_error("No profile", status=400, code=err)
         if err == "not_found":
             return _json_error("Not found", status=404, code=err)
-        if err == "not_editable":
-            return _json_error("Cannot edit this schedule", status=403, code=err)
         if err == "not_verified":
             return _json_error("Not verified", status=403, code=err)
         if err == "use_backoffice":
@@ -184,26 +185,40 @@ def user_live_schedule_detail(request: HttpRequest, schedule_id: int) -> JsonRes
     if body is None:
         return _json_error("Invalid JSON", status=400, code="invalid_json")
 
-    title = str(body.get("title") or "")
-    start = _to_aware_dt(str(body.get("start") or "").strip() or None)
-    end = _to_aware_dt(str(body.get("end") or "").strip() or None)
-    note = str(body.get("note") or "")
+    # For sales entry, we might not send title/start/end. 
+    # But the service requires them currently. 
+    # Let's load the current values if they are missing from body.
+    schedule, err = get_user_live_schedule_for_edit(user=request.user, schedule_id=schedule_id)
+    if err:
+        status_map = {"not_found": 404, "not_editable": 403, "not_verified": 403}
+        return _json_error("Cannot load schedule", status=status_map.get(err, 400), code=err)
 
-    raw_ch = body.get("channel_id")
-    channel_id: int | None = None
-    if raw_ch is not None and str(raw_ch).strip() != "":
-        try:
-            channel_id = int(raw_ch)
-        except (TypeError, ValueError):
-            return _json_error("Invalid channel", status=400, code="invalid_channel")
+    title = str(body.get("title") if "title" in body else schedule.title)
+    start = _to_aware_dt(str(body.get("start"))) if "start" in body else schedule.start_time
+    end = _to_aware_dt(str(body.get("end"))) if "end" in body else schedule.end_time
+    note = str(body.get("note") if "note" in body else (schedule.note or ""))
 
-    raw_brand = body.get("brand_id")
-    brand_id: int | None = None
-    if raw_brand is not None and str(raw_brand).strip() != "":
-        try:
-            brand_id = int(raw_brand)
-        except (TypeError, ValueError):
-            return _json_error("Invalid brand", status=400, code="invalid_brand")
+    channel_id = schedule.channel_id
+    if "channel_id" in body:
+        raw_ch = body.get("channel_id")
+        if raw_ch is not None and str(raw_ch).strip() != "":
+            try:
+                channel_id = int(raw_ch)
+            except (TypeError, ValueError):
+                return _json_error("Invalid channel", status=400, code="invalid_channel")
+        else:
+            channel_id = None
+
+    brand_id = schedule.brand_id
+    if "brand_id" in body:
+        raw_brand = body.get("brand_id")
+        if raw_brand is not None and str(raw_brand).strip() != "":
+            try:
+                brand_id = int(raw_brand)
+            except (TypeError, ValueError):
+                return _json_error("Invalid brand", status=400, code="invalid_brand")
+        else:
+            brand_id = None
 
     if not start or not end:
         return _json_error("Missing start or end", status=400, code="missing_times")
